@@ -1,0 +1,7 @@
+
+{
+  "name": "TutorFlow",
+  "description": "A React application for teachers to track student remunerations, incorporating gamification features to enhance engagement. Manage students, log payments, view financial summaries, and earn points and achievements.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
