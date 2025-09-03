@@ -14,9 +14,10 @@ import { DashboardPage, StudentsPage, TransactionsPage, SettingsPage, Achievemen
 import { Theme } from './types'; // Theme enum
 
 /**
- * `AppLayout` component defines the main structure of the application,
- * including a responsive sidebar and the main content area where pages are rendered.
- * @returns {React.ReactElement} The main layout of the application.
+ * Defines the main visual structure of the application, including a responsive sidebar
+ * for navigation and a main content area where different pages are rendered.
+ * It also handles mobile-specific layout adjustments, such as a collapsible sidebar.
+ * @returns {React.ReactElement} A JSX element representing the complete application layout.
  */
 const AppLayout: React.FC = () => {
   // Access data and functions from the global context
@@ -28,8 +29,10 @@ const AppLayout: React.FC = () => {
   const achievedCount = achievements.filter(a => a.achieved).length;
 
   /**
-   * Handles clicks on navigation links.
-   * Closes the mobile sidebar if it's open.
+   * Handles clicks on navigation links, closing the mobile sidebar if it's open.
+   * This ensures that after navigating to a new page on a mobile device,
+   * the sidebar menu automatically hides.
+   * @returns {void}
    */
   const handleNavLinkClick = () => {
     if (isMobileSidebarOpen) {
@@ -147,10 +150,11 @@ const AppLayout: React.FC = () => {
 };
 
 /**
- * The root `App` component.
- * It wraps the entire application with `DataProvider` to provide global state
- * and `HashRouter` for client-side routing.
- * @returns {React.ReactElement} The main application component.
+ * The root component of the TutorFlow application.
+ * This component is responsible for setting up the core context providers and routing.
+ * It wraps the `AppLayout` with `DataProvider` to supply global state
+ * and `HashRouter` to enable client-side navigation.
+ * @returns {React.ReactElement} The root JSX element of the application.
  */
 const App: React.FC = () => {
   return (
