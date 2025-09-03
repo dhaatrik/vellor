@@ -277,7 +277,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   /**
-   * Updates an existing student's details in the application state.
+   * Updates an existing student's details in the application state. It correctly merges nested objects
+   * to prevent data loss during partial updates.
    *
    * @param {string} studentId - The ID of the student to update.
    * @param {Partial<StudentFormData>} studentData - An object containing the student fields to update.
@@ -286,36 +287,50 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const updateStudent = (studentId: string, studentData: Partial<StudentFormData>): Student | undefined => {
     let updatedStudent: Student | undefined;
 
-    // Sanitize fields if they are present in studentData
-    const sanitizedStudentData: Partial<StudentFormData> = { ...studentData };
-    if (studentData.firstName !== undefined) sanitizedStudentData.firstName = sanitizeString(studentData.firstName);
-    if (studentData.lastName !== undefined) sanitizedStudentData.lastName = sanitizeString(studentData.lastName);
-    if (studentData.parent?.name !== undefined) {
-      sanitizedStudentData.parent = { ...studentData.parent, name: sanitizeString(studentData.parent.name) };
-    } else if (studentData.parent && studentData.parent.name === undefined && 'name' in studentData.parent) {
-      // handles case where parent object exists but name is explicitly set to undefined (though unlikely for sanitize)
-      sanitizedStudentData.parent = { ...studentData.parent, name: '' };
-    }
-
-    if (studentData.contact) {
-      sanitizedStudentData.contact = { ...studentData.contact };
-      if (studentData.contact.email !== undefined) sanitizedStudentData.contact.email = sanitizeString(studentData.contact.email);
-      if (studentData.contact.studentPhone !== undefined) sanitizedStudentData.contact.studentPhone = sanitizeString(studentData.contact.studentPhone);
-      if (studentData.contact.parentPhone1 !== undefined) sanitizedStudentData.contact.parentPhone1 = sanitizeString(studentData.contact.parentPhone1);
-      if (studentData.contact.parentPhone2 !== undefined) sanitizedStudentData.contact.parentPhone2 = sanitizeString(studentData.contact.parentPhone2);
-    }
-    if (studentData.notes !== undefined) sanitizedStudentData.notes = sanitizeString(studentData.notes);
-    if (studentData.tuition?.subjects !== undefined) {
-      sanitizedStudentData.tuition = {
-        ...studentData.tuition,
-        subjects: studentData.tuition.subjects.map(subject => sanitizeString(subject))
-      };
-    }
-
     setStudents(prev =>
       prev.map(s => {
         if (s.id === studentId) {
-          updatedStudent = { ...s, ...sanitizedStudentData };
+          // Start with a copy of the existing student
+          const studentToUpdate = { ...s };
+
+          // --- Sanitize and Apply Updates ---
+
+          // Direct properties
+          if (studentData.firstName !== undefined) studentToUpdate.firstName = sanitizeString(studentData.firstName);
+          if (studentData.lastName !== undefined) studentToUpdate.lastName = sanitizeString(studentData.lastName);
+          if (studentData.notes !== undefined) studentToUpdate.notes = sanitizeString(studentData.notes);
+
+          // Nested 'parent' object: merge and sanitize
+          if (studentData.parent) {
+            const existingParent = studentToUpdate.parent || { name: '', relationship: '' };
+            const updatedParentData = { ...existingParent, ...studentData.parent };
+            if (studentData.parent.name !== undefined) {
+              updatedParentData.name = sanitizeString(studentData.parent.name);
+            }
+            // To stick to the original's behavior, we don't sanitize 'relationship'.
+            studentToUpdate.parent = updatedParentData;
+          }
+
+          // Nested 'contact' object: merge and sanitize
+          if (studentData.contact) {
+            const updatedContactData = { ...studentToUpdate.contact, ...studentData.contact };
+            if (studentData.contact.email !== undefined) updatedContactData.email = sanitizeString(studentData.contact.email);
+            if (studentData.contact.studentPhone !== undefined) updatedContactData.studentPhone = sanitizeString(studentData.contact.studentPhone);
+            if (studentData.contact.parentPhone1 !== undefined) updatedContactData.parentPhone1 = sanitizeString(studentData.contact.parentPhone1);
+            if (studentData.contact.parentPhone2 !== undefined) updatedContactData.parentPhone2 = sanitizeString(studentData.contact.parentPhone2);
+            studentToUpdate.contact = updatedContactData;
+          }
+
+          // Nested 'tuition' object: merge and sanitize
+          if (studentData.tuition) {
+             const updatedTuitionData = { ...studentToUpdate.tuition, ...studentData.tuition };
+             if (studentData.tuition.subjects !== undefined) {
+                updatedTuitionData.subjects = studentData.tuition.subjects.map(subject => sanitizeString(subject));
+             }
+             studentToUpdate.tuition = updatedTuitionData;
+          }
+
+          updatedStudent = studentToUpdate;
           return updatedStudent;
         }
         return s;
