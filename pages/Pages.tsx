@@ -16,19 +16,21 @@ import { Button, Input, Select, Modal, Card, Icon, StatDisplayCard, Badge, Texta
 // #region Helper Functions
 
 /**
- * Formats a number as currency using the provided currency symbol.
- * @param {number} amount The monetary amount to format.
- * @param {string} currencySymbol The currency symbol (e.g., "$", "€").
- * @returns {string} The formatted currency string (e.g., "$50.00").
+ * Formats a numeric amount into a currency string with a given symbol.
+ *
+ * @param {number} amount - The monetary value to be formatted.
+ * @param {string} currencySymbol - The currency symbol to prepend to the amount (e.g., "$", "€").
+ * @returns {string} The formatted currency string, with the amount fixed to two decimal places (e.g., "$50.00").
  */
 const formatCurrency = (amount: number, currencySymbol: string): string => {
   return `${currencySymbol}${amount.toFixed(2)}`;
 };
 
 /**
- * Formats an ISO date string into a more readable local date format.
- * @param {string} dateString The ISO date string (e.g., "2023-10-27T10:00:00.000Z").
- * @returns {string} The formatted date string (e.g., "Oct 27, 2023").
+ * Formats an ISO date string into a human-readable local date format (e.g., "Oct 27, 2023").
+ *
+ * @param {string} dateString - The ISO 8601 date string to format.
+ * @returns {string} The formatted date string in a short, localized format.
  */
 const formatDate = (dateString: string): string => {
   return new Date(dateString).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
@@ -50,9 +52,11 @@ interface StudentFormProps {
   onClose: () => void;
 }
 /**
- * `StudentForm` component for adding a new student or editing an existing one.
- * @param {StudentFormProps} props The properties for the StudentForm.
- * @returns {React.ReactElement} A form for student data input.
+ * A form for adding a new student or editing an existing one.
+ * It manages the state of the student's data and provides fields for all student properties.
+ *
+ * @param {StudentFormProps} props - The properties for the StudentForm component.
+ * @returns {React.ReactElement} A JSX element representing the student form.
  */
 const StudentForm: React.FC<StudentFormProps> = ({ student, onSave, onClose }) => {
   // Initial state for a new student form
@@ -85,7 +89,8 @@ const StudentForm: React.FC<StudentFormProps> = ({ student, onSave, onClose }) =
 
   /**
    * Handles changes in form input fields and updates the formData state.
-   * Supports nested fields (e.g., 'parent.name').
+   * Supports nested fields (e.g., 'parent.name') by splitting the input name.
+   * @param {React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>} e - The change event from the input field.
    */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -103,6 +108,7 @@ const StudentForm: React.FC<StudentFormProps> = ({ student, onSave, onClose }) =
   
   /**
    * Handles changes specifically for tuition detail fields, parsing numbers where appropriate.
+   * @param {React.ChangeEvent<HTMLInputElement | HTMLSelectElement>} e - The change event from the tuition input field.
    */
   const handleTuitionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -118,7 +124,8 @@ const StudentForm: React.FC<StudentFormProps> = ({ student, onSave, onClose }) =
   };
 
   /**
-   * Handles changes to the subjects input, splitting comma-separated strings into an array.
+   * Handles changes to the subjects input, splitting comma-separated strings into an array of strings.
+   * @param {React.ChangeEvent<HTMLInputElement>} e - The change event from the subjects input field.
    */
   const handleSubjectChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -131,7 +138,9 @@ const StudentForm: React.FC<StudentFormProps> = ({ student, onSave, onClose }) =
   };
 
   /**
-   * Handles form submission. Prevents default form action, constructs student object, and calls onSave.
+   * Handles form submission. It prevents the default form action, constructs the
+   * student object, and calls the onSave callback with the new or updated student data.
+   * @param {React.FormEvent} e - The form submission event.
    */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -217,10 +226,12 @@ interface StudentListItemProps {
   transactions: Transaction[];
 }
 /**
- * `StudentListItem` component displays a summary of a student in a list.
- * Shows name, contact, outstanding balance, and action buttons.
- * @param {StudentListItemProps} props The properties for the StudentListItem.
- * @returns {React.ReactElement} A card representing a student in a list.
+ * Displays a summary of a single student in a list.
+ * This component shows the student's name, contact info, their outstanding balance,
+ * and provides actions to view details or delete the student.
+ *
+ * @param {StudentListItemProps} props - The properties for the StudentListItem component.
+ * @returns {React.ReactElement} A card element representing a student in a list.
  */
 const StudentListItem: React.FC<StudentListItemProps> = ({ student, onSelect, onDelete, currencySymbol, transactions }) => {
   // Calculate the outstanding balance for this student
@@ -282,10 +293,12 @@ interface StudentDetailViewProps {
   currencySymbol: string;
 }
 /**
- * `StudentDetailView` component displays comprehensive details for a single student,
- * including contact info, tuition details, notes, and transaction history.
- * @param {StudentDetailViewProps} props The properties for StudentDetailView.
- * @returns {React.ReactElement} A detailed view of a student.
+ * Displays a comprehensive, detailed view of a single student.
+ * This view includes contact information, tuition details, notes, and a full
+ * transaction history, along with actions to edit the profile or log a new payment.
+ *
+ * @param {StudentDetailViewProps} props - The properties for the StudentDetailView component.
+ * @returns {React.ReactElement} A JSX element representing the detailed student view.
  */
 const StudentDetailView: React.FC<StudentDetailViewProps> = ({ student, onClose, onEdit, onLogPayment, transactions, currencySymbol }) => {
   // Filter and sort transactions for the current student
@@ -379,9 +392,11 @@ const StudentDetailView: React.FC<StudentDetailViewProps> = ({ student, onClose,
 // #region Transaction Management Components
 
 /**
- * Determines the color for a `Badge` based on `PaymentStatus`.
- * @param {PaymentStatus} status The payment status.
- * @returns {'green' | 'yellow' | 'red' | 'amber' | 'gray'} The corresponding color name.
+ * Maps a `PaymentStatus` enum value to a corresponding color name for the `Badge` component.
+ * This utility function helps maintain a consistent color scheme for transaction statuses.
+ *
+ * @param {PaymentStatus} status - The payment status enum value.
+ * @returns {'green' | 'yellow' | 'red' | 'amber' | 'gray'} The color name compatible with the `Badge` component.
  */
 const getPaymentStatusColor = (status: PaymentStatus): 'green' | 'yellow' | 'red' | 'amber' | 'gray' => {
     switch (status) {
@@ -394,9 +409,11 @@ const getPaymentStatusColor = (status: PaymentStatus): 'green' | 'yellow' | 'red
 };
 
 /**
- * `TransactionStatusBadge` component displays a payment status using a colored `Badge`.
- * @param {{status: PaymentStatus}} props The payment status to display.
- * @returns {React.ReactElement} A Badge component styled for the payment status.
+ * A component that displays a transaction's payment status using a colored `Badge`.
+ * The color is determined by the `getPaymentStatusColor` function.
+ *
+ * @param {{status: PaymentStatus}} props - The properties for the TransactionStatusBadge component.
+ * @returns {React.ReactElement} A `Badge` component styled according to the payment status.
  */
 const TransactionStatusBadge: React.FC<{status: PaymentStatus}> = ({status}) => {
     return <Badge text={status} color={getPaymentStatusColor(status)} />;
@@ -420,9 +437,11 @@ interface TransactionFormProps {
   currencySymbol: string;
 }
 /**
- * `TransactionForm` component for logging a new transaction or editing an existing one.
- * @param {TransactionFormProps} props The properties for the TransactionForm.
- * @returns {React.ReactElement} A form for transaction data input.
+ * A form for logging a new lesson/payment or editing an existing transaction.
+ * It can be pre-filled with a student's default tuition details.
+ *
+ * @param {TransactionFormProps} props - The properties for the TransactionForm component.
+ * @returns {React.ReactElement} A JSX element representing the transaction form.
  */
 const TransactionForm: React.FC<TransactionFormProps> = ({ transaction, students, defaultStudentId, onSave, onClose, currencySymbol }) => {
   const { getStudentById } = useData(); // Access student data for fee calculation
@@ -474,8 +493,10 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ transaction, students
   }, [transaction, defaultStudentId, students]); 
 
   /**
-   * Handles changes in form input fields and updates formData state.
-   * Includes logic to auto-calculate lessonFee for hourly-rated students if studentId or duration changes.
+   * Handles changes in form input fields and updates the form's state.
+   * It includes logic to automatically calculate the `lessonFee` for hourly-rated
+   * students when the student or lesson duration changes.
+   * @param {React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>} e - The change event from the input field.
    */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -498,7 +519,10 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ transaction, students
   };
 
   /**
-   * Handles form submission. Validates student selection, constructs transaction object, and calls onSave.
+   * Handles the submission of the transaction form.
+   * It validates that a student is selected, constructs the transaction object,
+   * and calls the `onSave` callback.
+   * @param {React.FormEvent} e - The form submission event.
    */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -574,10 +598,12 @@ interface TransactionListItemProps {
   currencySymbol: string;
 }
 /**
- * `TransactionListItem` component displays a summary of a transaction in a list.
- * Shows student name, date, fee, amount paid, status, and action buttons.
- * @param {TransactionListItemProps} props The properties for TransactionListItem.
- * @returns {React.ReactElement} A card representing a transaction in a list.
+ * Displays a summary of a single transaction in a list.
+ * This component shows the associated student's name, transaction date, financial details,
+ * payment status, and provides actions to edit or delete the transaction.
+ *
+ * @param {TransactionListItemProps} props - The properties for the TransactionListItem component.
+ * @returns {React.ReactElement} A card element representing a transaction in a list.
  */
 const TransactionListItem: React.FC<TransactionListItemProps> = ({ transaction, studentName, onEdit, onDelete, currencySymbol }) => {
   return (
@@ -615,9 +641,11 @@ const TransactionListItem: React.FC<TransactionListItemProps> = ({ transaction, 
 // #region Page Components (Dashboard, Students, Transactions, Settings, Achievements)
 
 /**
- * `DashboardPage` component displays an overview of key metrics, quick actions,
- * gamification progress, and overdue payments.
- * @returns {React.ReactElement} The dashboard page.
+ * The main dashboard page of the application.
+ * It provides a high-level overview of key financial metrics, student counts,
+ * gamification progress, and quick actions for common tasks.
+ *
+ * @returns {React.ReactElement} A JSX element representing the dashboard page.
  */
 export const DashboardPage: React.FC = () => {
   // Access global data and settings from context
@@ -729,11 +757,12 @@ export const DashboardPage: React.FC = () => {
 };
 
 /**
- * `StudentsPage` component manages the display and manipulation of student data.
- * It allows viewing a list of students, adding new students, editing existing ones,
- * and viewing detailed information for a selected student.
- * Uses URL parameters for student selection.
- * @returns {React.ReactElement} The students page.
+ * Manages the display and manipulation of student data.
+ * This page allows users to view a list of students, see detailed views,
+ * add, edit, and delete students. It uses the URL to manage the state of
+ * which student is being viewed.
+ *
+ * @returns {React.ReactElement} A JSX element representing the students page.
  */
 export const StudentsPage: React.FC = () => {
   // Access global student data and actions
@@ -782,8 +811,10 @@ export const StudentsPage: React.FC = () => {
 
 
   /**
-   * Handles saving student data (either new or edited).
-   * Closes the form and updates local state.
+   * Handles saving student data from the form (for both creation and updates).
+   * It calls the appropriate context function (`addStudent` or `updateStudent`)
+   * and closes the form modal.
+   * @param {Student} studentData - The student data to be saved.
    */
   const handleSaveStudent = (studentData: Student) => {
     if (editingStudent) { // If editing an existing student
@@ -798,22 +829,24 @@ export const StudentsPage: React.FC = () => {
   };
   
   /**
-   * Navigates to the detail view URL for the selected student.
+   * Sets the selected student for the detail view by navigating to their specific URL.
+   * @param {Student} student - The student to be selected.
    */
   const handleSelectStudent = (student: Student) => {
     navigate(`/students/${student.id}`); // Update URL to show this student's details
   };
   
   /**
-   * Navigates back to the main student list view from a detail view.
+   * Closes the student detail view by navigating back to the main students list URL.
    */
   const handleCloseDetailView = () => {
       navigate('/students'); // Clear studentId from URL
   };
 
   /**
-   * Prepares the form for editing a student.
-   * Opens the student form modal with the student's data.
+   * Prepares the form for editing a student by setting the editing state
+   * and opening the student form modal.
+   * @param {Student} student - The student to be edited.
    */
   const handleEditStudent = (student: Student) => {
     setEditingStudent(student); // Set student to be edited
@@ -823,7 +856,9 @@ export const StudentsPage: React.FC = () => {
   };
 
   /**
-   * Handles deletion of a student after confirmation.
+   * Handles the deletion of a student after receiving user confirmation.
+   * It also removes all associated transactions.
+   * @param {string} id - The ID of the student to be deleted.
    */
   const handleDeleteStudent = (id: string) => {
     if (window.confirm('Are you sure you want to delete this student and all their transactions? This action cannot be undone.')) {
@@ -836,8 +871,9 @@ export const StudentsPage: React.FC = () => {
   };
   
   /**
-   * Handles saving a transaction logged from the student context.
-   * Closes the transaction form and refreshes student data if one was selected.
+   * Handles saving a new transaction that was initiated from the student context.
+   * It calls the `addTransaction` context function and closes the transaction form.
+   * @param {Transaction} transactionData - The transaction data to be saved.
    */
   const handleSaveTransaction = (transactionData: Transaction) => {
     addTransaction(transactionData); 
@@ -850,8 +886,9 @@ export const StudentsPage: React.FC = () => {
   };
 
   /**
-   * Opens the transaction form modal pre-filled for a specific student.
-   * Typically called from the student detail view.
+   * Opens the transaction form modal, pre-filled for a specific student.
+   * This is typically triggered from the `StudentDetailView`.
+   * @param {string} studId - The ID of the student for whom the transaction is being logged.
    */
   const openTransactionFormForStudent = (studId: string) => {
     setShowTransactionFormForStudent(studId); // Set student ID for the transaction form
@@ -925,9 +962,11 @@ export const StudentsPage: React.FC = () => {
 };
 
 /**
- * `TransactionsPage` component manages the display and manipulation of financial transactions.
- * It allows viewing a list of transactions, logging new ones, and editing existing ones.
- * @returns {React.ReactElement} The transactions page.
+ * Manages the display and manipulation of financial transactions.
+ * This page allows users to view a list of all transactions, log new ones,
+ * edit existing ones, and delete them.
+ *
+ * @returns {React.ReactElement} A JSX element representing the transactions page.
  */
 export const TransactionsPage: React.FC = () => {
   // Access global transaction data, student data (for names), and settings
@@ -949,8 +988,10 @@ export const TransactionsPage: React.FC = () => {
   }, [location.state]);
 
   /**
-   * Handles saving transaction data (new or edited).
-   * Closes the form and clears editing state.
+   * Handles saving transaction data from the form (for both creation and updates).
+   * It calls the appropriate context function (`addTransaction` or `updateTransaction`)
+   * and closes the form modal.
+   * @param {Transaction} transactionData - The transaction data to be saved.
    */
   const handleSaveTransaction = (transactionData: Transaction) => {
     if (editingTransaction) { // If editing existing transaction
@@ -963,8 +1004,9 @@ export const TransactionsPage: React.FC = () => {
   };
 
   /**
-   * Prepares the form for editing a transaction.
-   * Opens the transaction form modal with the transaction's data.
+   * Prepares the form for editing a transaction by setting the editing state
+   * and opening the transaction form modal.
+   * @param {Transaction} transaction - The transaction to be edited.
    */
   const handleEditTransaction = (transaction: Transaction) => {
     setEditingTransaction(transaction); // Set transaction to be edited
@@ -972,7 +1014,8 @@ export const TransactionsPage: React.FC = () => {
   };
 
   /**
-   * Handles deletion of a transaction after confirmation.
+   * Handles the deletion of a transaction after receiving user confirmation.
+   * @param {string} id - The ID of the transaction to be deleted.
    */
   const handleDeleteTransaction = (id: string) => {
     if (window.confirm('Are you sure you want to delete this transaction?')) {
@@ -1033,9 +1076,10 @@ export const TransactionsPage: React.FC = () => {
 };
 
 /**
- * `SettingsPage` component allows users to configure application-wide settings
- * like their name and preferred currency.
- * @returns {React.ReactElement} The settings page.
+ * Allows users to configure application-wide settings, such as their name and
+ * preferred currency. It also provides information about data management.
+ *
+ * @returns {React.ReactElement} A JSX element representing the settings page.
  */
 export const SettingsPage: React.FC = () => {
   const { settings, updateSettings } = useData(); // Access global settings and update function
@@ -1050,7 +1094,8 @@ export const SettingsPage: React.FC = () => {
   }, [settings]);
 
   /**
-   * Handles changes in settings input fields and updates local `currentSettings` state.
+   * Updates the local `currentSettings` state when a form field is changed.
+   * @param {React.ChangeEvent<HTMLInputElement | HTMLSelectElement>} e - The change event from the input or select field.
    */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -1058,7 +1103,8 @@ export const SettingsPage: React.FC = () => {
   };
 
   /**
-   * Saves the current local settings to the global state.
+   * Saves the current local settings to the global application state via the `updateSettings` context function.
+   * It also displays a temporary confirmation message.
    */
   const handleSave = () => {
     updateSettings(currentSettings);
@@ -1104,9 +1150,10 @@ export const SettingsPage: React.FC = () => {
 };
 
 /**
- * `AchievementsPage` component displays the user's gamification progress,
- * including earned points, current rank, and a list of unlocked and pending achievements.
- * @returns {React.ReactElement} The achievements page.
+ * Displays the user's gamification progress, including their current rank, points,
+ * and a list of all unlocked and pending achievements.
+ *
+ * @returns {React.ReactElement} A JSX element representing the achievements page.
  */
 export const AchievementsPage: React.FC = () => {
   const { achievements, gamification } = useData(); // Access achievements and gamification data

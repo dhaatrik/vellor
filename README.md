@@ -74,6 +74,22 @@ The project follows a typical React application structure:
 
     *(For a more robust development experience, including features like hot module reloading and optimized builds, you would typically integrate a development server and build tool like Vite or Create React App. However, for viewing and basic interaction with the current setup, opening `index.html` is sufficient.)*
 
+## Codebase Documentation
+
+The entire codebase is thoroughly documented using **JSDoc**. Every function, component, type, and constant is commented to explain its purpose, parameters, and return values. This makes the code easier to understand, maintain, and contribute to.
+
+We encourage developers to read the documentation within the source files to get a deeper understanding of the implementation details.
+
+## Contributing
+
+Contributions are welcome! If you have ideas for new features, bug fixes, or improvements, please feel free to contribute.
+
+### Guidelines
+*   **Code Style**: Follow the existing code style for consistency.
+*   **Documentation**: All new code should be fully documented using JSDoc. Please ensure that every new function, component, or type has a clear and descriptive comment.
+*   **Commit Messages**: Write clear and descriptive commit messages.
+*   **Pull Requests**: Create a pull request with a clear description of the changes you have made.
+
 ## Further Development Ideas
 
 *   **Data Export/Import:** Allow users to export their data (e.g., to CSV or JSON) for backup or use in other tools, and import data.

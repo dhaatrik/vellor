@@ -1,167 +1,259 @@
 /**
- * Enum representing the available themes for the application.
+ * Represents the available UI themes.
+ * @enum {string}
  */
 export enum Theme {
+  /** The light theme. */
   Light = 'light',
+  /** The dark theme. */
   Dark = 'dark',
 }
 
 /**
- * Interface representing a parent or guardian of a student.
+ * Represents a parent or guardian of a student.
+ * @interface
  */
 export interface Parent {
-  name: string; // Full name of the parent/guardian.
-  relationship: string; // Relationship to the student (e.g., Mother, Father, Guardian).
+  /** The full name of the parent or guardian. */
+  name: string;
+  /** The relationship to the student (e.g., "Mother", "Father", "Guardian"). */
+  relationship: string;
 }
 
 /**
- * Interface for storing contact information related to a student.
+ * Represents the contact information for a student and their parents.
+ * @interface
  */
 export interface ContactInfo {
-  studentPhone?: string; // Student's phone number.
-  parentPhone1?: string; // Primary parent's phone number.
-  parentPhone2?: string; // Secondary parent's phone number (optional).
-  email?: string; // Contact email address.
+  /** The student's personal phone number. */
+  studentPhone?: string;
+  /** The primary parent's or guardian's phone number. */
+  parentPhone1?: string;
+  /** A secondary contact phone number. */
+  parentPhone2?: string;
+  /** The primary email address for communication. */
+  email?: string;
 }
 
 /**
- * Interface detailing the tuition specifics for a student.
+ * Represents the tuition and lesson details for a student.
+ * @interface
  */
 export interface TuitionDetails {
-  subjects: string[]; // List of subjects the student is taking.
-  defaultRate: number; // Default monetary rate for tuition.
-  rateType: 'hourly' | 'per_lesson' | 'monthly'; // Type of rate (e.g., per hour, per lesson, per month).
-  typicalLessonDuration: number; // Typical duration of a lesson in minutes, or number of sessions for monthly.
-  preferredPaymentMethod?: string; // Student's/Parent's preferred method of payment.
+  /** An array of subjects the student is being taught. */
+  subjects: string[];
+  /** The default monetary rate for a lesson or period. */
+  defaultRate: number;
+  /** The basis for the default rate (e.g., per hour, per lesson). */
+  rateType: 'hourly' | 'per_lesson' | 'monthly';
+  /** The typical duration of a lesson in minutes, or the number of sessions for a monthly rate. */
+  typicalLessonDuration: number;
+  /** The student's or parent's preferred method of payment (e.g., "Cash", "Bank Transfer"). */
+  preferredPaymentMethod?: string;
 }
 
 /**
- * Interface representing a student.
+ * Represents a student in the application.
+ * This is a core data model.
+ * @interface
  */
 export interface Student {
-  id: string; // Unique identifier for the student.
-  firstName: string; // Student's first name.
-  lastName: string; // Student's last name.
-  parent?: Parent; // Parent or guardian information (optional).
-  contact: ContactInfo; // Contact details for the student and/or parents.
-  tuition: TuitionDetails; // Details about the student's tuition.
-  notes?: string; // Any additional notes about the student (optional).
-  createdAt: string; // ISO date string representing when the student was added.
+  /** A unique identifier for the student (UUID). */
+  id: string;
+  /** The student's first name. */
+  firstName: string;
+  /** The student's last name. */
+  lastName: string;
+  /** Information about the student's parent or guardian. */
+  parent?: Parent;
+  /** The student's contact information. */
+  contact: ContactInfo;
+  /** Details regarding the student's tuition arrangement. */
+  tuition: TuitionDetails;
+  /** Any additional notes or important information about the student. */
+  notes?: string;
+  /** The ISO date string representing when the student's profile was created. */
+  createdAt: string;
 }
 
 /**
- * Enum representing the payment status of a transaction.
+ * Represents the payment status of a transaction.
+ * @enum {string}
  */
 export enum PaymentStatus {
-  Paid = 'Paid', // Full payment has been made.
-  PartiallyPaid = 'Partially Paid', // Partial payment has been made.
-  Due = 'Due', // Payment is pending (or Unpaid).
-  Overpaid = 'Overpaid', // More than the required amount has been paid.
+  /** The transaction has been fully paid. */
+  Paid = 'Paid',
+  /** A partial payment has been made, but a balance remains. */
+  PartiallyPaid = 'Partially Paid',
+  /** No payment has been made yet. */
+  Due = 'Due',
+  /** The amount paid exceeds the lesson fee. */
+  Overpaid = 'Overpaid',
 }
 
 /**
- * Interface representing a financial transaction.
+ * Represents a single financial transaction, typically a lesson or a payment.
+ * This is a core data model.
+ * @interface
  */
 export interface Transaction {
-  id: string; // Unique identifier for the transaction.
-  studentId: string; // ID of the student associated with this transaction.
-  date: string; // ISO date string when the lesson/transaction occurred.
-  lessonDuration: number; // Duration of the lesson in minutes, or a reference number (e.g., "1" for 1 month).
-  lessonFee: number; // The total fee for this lesson/period.
-  amountPaid: number; // The amount actually paid for this transaction.
-  paymentMethod?: string; // Method used for payment (e.g., Cash, Card).
-  status: PaymentStatus; // Current payment status of the transaction.
-  notes?: string; // Any additional notes about the transaction (optional).
-  createdAt: string; // ISO date string representing when the transaction was logged.
+  /** A unique identifier for the transaction (UUID). */
+  id: string;
+  /** The ID of the student associated with this transaction. */
+  studentId: string;
+  /** The ISO date string for when the lesson or transaction occurred. */
+  date: string;
+  /** The duration of the lesson in minutes, or a reference number (e.g., "1" for 1 month). */
+  lessonDuration: number;
+  /** The total fee charged for this lesson or period. */
+  lessonFee: number;
+  /** The amount that has been paid for this transaction. */
+  amountPaid: number;
+  /** The method used for the payment (e.g., "Cash", "Card"). */
+  paymentMethod?: string;
+  /** The calculated payment status of the transaction. */
+  status: PaymentStatus;
+  /** Any additional notes related to the transaction. */
+  notes?: string;
+  /** The ISO date string representing when the transaction was logged. */
+  createdAt: string;
 }
 
 /**
- * Interface for storing gamification statistics for the user.
+ * Represents the user's gamification statistics.
+ * @interface
  */
 export interface GamificationStats {
-  points: number; // Total points accumulated by the user.
-  level: number; // Current level achieved by the user.
-  levelName: string; // Name of the current level (e.g., "Novice Tutor").
+  /** The total number of points accumulated by the user. */
+  points: number;
+  /** The user's current level, derived from their points. */
+  level: number;
+  /** The name of the user's current rank or level (e.g., "Novice Tutor"). */
+  levelName: string;
 }
 
 /**
- * Enum for unique identifiers of achievements.
+ * Defines unique identifiers for all available achievements.
+ * @enum {string}
  */
 export enum AchievementId {
   // Financial Achievements
+  /** Unlocked when the first payment is logged. */
   FirstPaymentLogged = 'FIRST_PAYMENT_LOGGED',
+  /** Unlocked when total earnings reach $100 (or equivalent). */
   First100Earned = 'FIRST_100_EARNED',
+  /** Unlocked when all outstanding debts are cleared. */
   DebtDemolisher = 'DEBT_DEMOLISHER',
   // Organizational Achievements
+  /** Unlocked when the first student is added. */
   FirstStudentAdded = 'FIRST_STUDENT_ADDED',
-  StudentRosterStarter = 'STUDENT_ROSTER_STARTER', // e.g., for 5 students
-  // Consistency Achievements (Example, might require more complex tracking)
-  DailyTracker = 'DAILY_TRACKER', // e.g., Used app 7 days in a row
+  /** Unlocked when the user is managing at least 5 students. */
+  StudentRosterStarter = 'STUDENT_ROSTER_STARTER',
+  // Consistency Achievements (Example)
+  /** Unlocked for using the app multiple days in a row. */
+  DailyTracker = 'DAILY_TRACKER',
 }
 
 /**
- * Interface representing an achievement in the gamification system.
+ * Represents a single achievement in the gamification system.
+ * @interface
  */
 export interface Achievement {
-  id: AchievementId; // Unique identifier for the achievement.
-  name: string; // Display name of the achievement.
-  description: string; // Description of how to earn the achievement.
-  achieved: boolean; // Whether the user has earned this achievement.
-  dateAchieved?: string; // ISO date string when the achievement was earned (optional).
-  icon: string; // Emoji or SVG icon name representing the achievement.
+  /** The unique identifier for the achievement. */
+  id: AchievementId;
+  /** The display name of the achievement. */
+  name: string;
+  /** A description of how the achievement is earned. */
+  description: string;
+  /** A flag indicating whether the user has earned this achievement. */
+  achieved: boolean;
+  /** The ISO date string of when the achievement was earned. */
+  dateAchieved?: string;
+  /** An emoji or icon name representing the achievement. */
+  icon: string;
 }
 
 /**
- * Interface for application-wide settings.
+ * Represents the application's configurable settings.
+ * @interface
  */
 export interface AppSettings {
-  theme: Theme; // Current theme (Light or Dark).
-  currencySymbol: string; // Currency symbol to be used (e.g., $, €).
-  userName: string; // Name of the tutor for personalization.
+  /** The current UI theme ('light' or 'dark'). */
+  theme: Theme;
+  /** The currency symbol to be used for all financial values (e.g., "$", "€"). */
+  currencySymbol: string;
+  /** The name of the tutor, used for personalization. */
+  userName: string;
 }
 
 /**
- * Type definition for the data required to create a new student (omitting system-generated fields).
+ * Represents the data structure for the student creation/editing form.
+ * It omits system-generated fields like `id` and `createdAt`.
+ * @typedef {Omit<Student, 'id' | 'createdAt'>}
  */
 export type StudentFormData = Omit<Student, 'id' | 'createdAt'>;
 
 /**
- * Type definition for the data required to create a new transaction (omitting system-generated fields).
+ * Represents the data structure for the transaction creation/editing form.
+ * It omits system-generated fields like `id`, `status`, and `createdAt`.
+ * @typedef {Omit<Transaction, 'id' | 'status' | 'createdAt'>}
  */
 export type TransactionFormData = Omit<Transaction, 'id' | 'status' | 'createdAt'>;
 
 /**
- * Interface for the context type that provides data and actions throughout the application.
+ * Defines the complete shape of the data and actions provided by the `DataContext`.
+ * This interface is used by the `useData` hook to provide typed access to the context.
+ * @interface
  */
 export interface DataContextType {
-  // Student data and operations
+  // --- State ---
+  /** The array of all student objects. */
   students: Student[];
+  /** The array of all transaction objects. */
+  transactions: Transaction[];
+  /** The current gamification statistics for the user. */
+  gamification: GamificationStats;
+  /** The array of all achievement objects, including their status. */
+  achievements: Achievement[];
+  /** The current application settings. */
+  settings: AppSettings;
+
+  // --- Actions ---
+  /** Adds a new student to the application. */
   addStudent: (studentData: StudentFormData) => Student;
+  /** Updates an existing student's details. */
   updateStudent: (studentId: string, studentData: Partial<StudentFormData>) => Student | undefined;
+  /** Deletes a student and their associated transactions. */
   deleteStudent: (studentId: string) => void;
+  /** Retrieves a student by their ID. */
   getStudentById: (studentId: string) => Student | undefined;
 
-  // Transaction data and operations
-  transactions: Transaction[];
+  /** Adds a new transaction to the application. */
   addTransaction: (transactionData: TransactionFormData) => Transaction;
+  /** Updates an existing transaction's details. */
   updateTransaction: (transactionId: string, transactionData: Partial<TransactionFormData>) => Transaction | undefined;
+  /** Deletes a transaction. */
   deleteTransaction: (transactionId: string) => void;
+  /** Retrieves all transactions for a specific student. */
   getTransactionsByStudent: (studentId: string) => Transaction[];
   
-  // Gamification data and operations
-  gamification: GamificationStats;
-  achievements: Achievement[];
-  addPoints: (points: number, reason?: string) => void; // Reason can be used for toast/log messages.
+  /** Adds points to the user's gamification score. */
+  addPoints: (points: number, reason?: string) => void;
+  /** Checks and awards any achievements whose conditions have been met. */
   checkAndAwardAchievements: () => void;
 
-  // Application settings and operations
-  settings: AppSettings;
+  /** Updates one or more application settings. */
   updateSettings: (newSettings: Partial<AppSettings>) => void;
+  /** Toggles the application theme between light and dark mode. */
   toggleTheme: () => void;
 
-  // Derived financial and operational statistics
-  totalUnpaid: number; // Sum of all due and partially paid amounts.
-  totalPaidThisMonth: number; // Sum of payments received in the current month.
-  activeStudentsCount: number; // Count of active students.
-  overduePayments: Transaction[]; // List of transactions that are overdue.
+  // --- Derived Statistics ---
+  /** The total calculated unpaid amount across all students. */
+  totalUnpaid: number;
+  /** The total amount paid across all transactions in the current calendar month. */
+  totalPaidThisMonth: number;
+  /** The total number of active students. */
+  activeStudentsCount: number;
+  /** An array of all transactions that are currently overdue. */
+  overduePayments: Transaction[];
 }

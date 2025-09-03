@@ -23,10 +23,12 @@ interface IconProps extends React.SVGProps<SVGSVGElement> {
 }
 
 /**
- * A generic Icon component that renders SVG icons based on `iconName`.
- * Icons are defined as SVG path data.
- * @param {IconProps} props The properties for the Icon component.
- * @returns {React.ReactElement} The SVG icon element.
+ * Renders a scalable SVG icon from a predefined set.
+ * The component maps an `iconName` prop to specific SVG path data, allowing for
+ * easy and consistent use of icons throughout the application.
+ *
+ * @param {IconProps} props - The properties for the Icon component, including `iconName`.
+ * @returns {React.ReactElement} A JSX element representing the SVG icon.
  */
 export const Icon: React.FC<IconProps> = ({ iconName, className = 'w-6 h-6', ...props }) => {
   // A record mapping icon names to their SVG path elements.
@@ -89,9 +91,11 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   rightIcon?: IconProps['iconName'];
 }
 /**
- * A versatile Button component with different variants, sizes, and optional icons.
- * @param {ButtonProps} props The properties for the Button component.
- * @returns {React.ReactElement} The button element.
+ * A versatile button component that supports different visual styles, sizes, and optional icons.
+ * It is built on top of the standard HTML `<button>` element and accepts all its native attributes.
+ *
+ * @param {ButtonProps} props - The properties for the Button component.
+ * @returns {React.ReactElement} A JSX element representing the styled button.
  */
 export const Button: React.FC<ButtonProps> = ({ children, variant = 'primary', size = 'md', leftIcon, rightIcon, className, ...props }) => {
   // Base styling for all buttons
@@ -140,10 +144,11 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   wrapperClassName?: string;
 }
 /**
- * A styled Input component for text, email, number, etc. fields.
- * Includes support for labels, error messages, and helper text.
- * @param {InputProps} props The properties for the Input component.
- * @returns {React.ReactElement} The input field with optional label and messages.
+ * A styled input component for text, email, number, and other standard input fields.
+ * It provides built-in support for a label, error messages, and helper text.
+ *
+ * @param {InputProps} props - The properties for the Input component.
+ * @returns {React.ReactElement} A JSX element representing the input field, label, and associated text.
  */
 export const Input: React.FC<InputProps> = ({ label, name, error, helperText, type = "text", wrapperClassName = "", className, ...props }) => {
   const baseStyle = "block w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm bg-white dark:bg-primary-light disabled:opacity-50"; // dark:bg-slate-800 -> dark:bg-primary-light
@@ -170,10 +175,11 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
   wrapperClassName?: string;
 }
 /**
- * A styled Textarea component for multi-line text input.
- * Includes support for labels and error messages.
- * @param {TextareaProps} props The properties for the Textarea component.
- * @returns {React.ReactElement} The textarea field with optional label and error message.
+ * A styled textarea component for multi-line text input.
+ * It includes support for a label and an error message, similar to the `Input` component.
+ *
+ * @param {TextareaProps} props - The properties for the Textarea component.
+ * @returns {React.ReactElement} A JSX element representing the textarea field and its label.
  */
 export const Textarea: React.FC<TextareaProps> = ({ label, name, error, wrapperClassName = "", className, ...props }) => {
   const baseStyle = "block w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm bg-white dark:bg-primary-light disabled:opacity-50"; // dark:bg-slate-800 -> dark:bg-primary-light
@@ -204,10 +210,11 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   placeholder?: string;
 }
 /**
- * A styled Select (dropdown) component.
- * Supports labels, error messages, and a list of options.
- * @param {SelectProps} props The properties for the Select component.
- * @returns {React.ReactElement} The select dropdown field.
+ * A styled select (dropdown) component.
+ * It populates its options from an array of objects and supports a label and error messages.
+ *
+ * @param {SelectProps} props - The properties for the Select component.
+ * @returns {React.ReactElement} A JSX element representing the select dropdown field.
  */
 export const Select: React.FC<SelectProps> = ({ label, name, error, options, placeholder, wrapperClassName = "", className, ...props }) => {
   const baseStyle = "block w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm bg-white dark:bg-primary-light disabled:opacity-50"; // dark:bg-slate-800 -> dark:bg-primary-light
@@ -241,9 +248,11 @@ interface ModalProps {
   footer?: ReactNode;
 }
 /**
- * A Modal component for displaying content in a layer above the main page.
- * Includes a header with an optional title and close button, a scrollable body, and an optional footer.
- * @param {ModalProps} props The properties for the Modal component.
+ * A modal dialog component for displaying content in a layer above the main page.
+ * It includes an overlay, a close button, and optional header and footer sections.
+ * The modal's visibility is controlled by the `isOpen` prop.
+ *
+ * @param {ModalProps} props - The properties for the Modal component.
  * @returns {React.ReactElement | null} The modal element if `isOpen` is true, otherwise null.
  */
 export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, footer }) => {
@@ -295,10 +304,11 @@ interface CardProps {
   actions?: ReactNode;
 }
 /**
- * A Card component for grouping and displaying content in a visually distinct block.
- * Supports an optional title, title icon, and action elements in its header.
- * @param {CardProps} props The properties for the Card component.
- * @returns {React.ReactElement} The card element.
+ * A flexible card component for grouping and displaying content in a visually distinct block.
+ * It supports an optional header with a title, icon, and action elements.
+ *
+ * @param {CardProps} props - The properties for the Card component.
+ * @returns {React.ReactElement} A JSX element representing the card.
  */
 export const Card: React.FC<CardProps> = ({ children, className = "", title, titleIcon, actions }) => {
   return (
@@ -335,10 +345,12 @@ interface NavbarLinkProps {
   onClick?: () => void;
 }
 /**
- * A navigation link component, typically used in sidebars or navigation menus.
- * It uses `NavLink` from `react-router-dom` to provide active state styling.
- * @param {NavbarLinkProps} props The properties for the NavbarLink component.
- * @returns {React.ReactElement} The navigation link element.
+ * A navigation link component designed for use in sidebars or navigation menus.
+ * It integrates with `react-router-dom`'s `NavLink` to automatically apply active
+ * state styling when the link's route matches the current URL.
+ *
+ * @param {NavbarLinkProps} props - The properties for the NavbarLink component.
+ * @returns {React.ReactElement} A JSX element representing the navigation link.
  */
 export const NavbarLink: React.FC<NavbarLinkProps> = ({ to, children, iconName, onClick }) => {
   return (
@@ -378,9 +390,11 @@ interface StatDisplayCardProps {
     className?: string;
 }
 /**
- * A specialized Card component for displaying a single statistic with a title, value, and icon.
- * @param {StatDisplayCardProps} props The properties for the StatDisplayCard.
- * @returns {React.ReactElement} The statistic display card element.
+ * A specialized card component for displaying a single key statistic, such as a total amount or count.
+ * It features a prominent value, a title, and a decorative icon.
+ *
+ * @param {StatDisplayCardProps} props - The properties for the StatDisplayCard component.
+ * @returns {React.ReactElement} A JSX element representing the statistic display card.
  */
 export const StatDisplayCard: React.FC<StatDisplayCardProps> = ({ 
     title, 
@@ -422,10 +436,11 @@ interface BadgeProps {
 }
 
 /**
- * A Badge component for displaying status indicators, tags, or short pieces of information.
- * Supports different colors, sizes, and an optional icon.
- * @param {BadgeProps} props The properties for the Badge component.
- * @returns {React.ReactElement} The badge element.
+ * A badge component for displaying status indicators, tags, or short, categorized information.
+ * It supports various colors, sizes, and an optional leading icon.
+ *
+ * @param {BadgeProps} props - The properties for the Badge component.
+ * @returns {React.ReactElement} A JSX element representing the badge.
  */
 export const Badge: React.FC<BadgeProps> = ({ text, color = 'gray', size = 'md', iconName }) => {
   // Style mappings for different badge colors
@@ -463,10 +478,11 @@ interface ProgressBarProps {
   colorClass?: string;
 }
 /**
- * A ProgressBar component to visually represent progress towards a goal.
- * Displays a filled bar based on the `value` prop (percentage).
- * @param {ProgressBarProps} props The properties for the ProgressBar component.
- * @returns {React.ReactElement} The progress bar element.
+ * A progress bar component to visually represent the completion of a task or a goal.
+ * It displays a filled bar corresponding to the `value` prop (0-100), and can include an optional label.
+ *
+ * @param {ProgressBarProps} props - The properties for the ProgressBar component.
+ * @returns {React.ReactElement} A JSX element representing the progress bar.
  */
 export const ProgressBar: React.FC<ProgressBarProps> = ({ value, label, colorClass = 'bg-primary' }) => {
   // Ensure value is within the 0-100 range

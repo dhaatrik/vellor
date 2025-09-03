@@ -10,7 +10,13 @@ import React, { useState, useEffect, useCallback, createContext, useContext, Rea
 import { Student, Transaction, GamificationStats, Achievement, AppSettings, Theme, StudentFormData, TransactionFormData, PaymentStatus, AchievementId, DataContextType } from './types';
 import { TUTOR_RANK_LEVELS, INITIAL_GAMIFICATION_STATS, ACHIEVEMENTS_DEFINITIONS, DEFAULT_CURRENCY_SYMBOL, DEFAULT_USER_NAME, POINTS_ALLOCATION } from './constants';
 
-// Placeholder for encryption functions
+/**
+ * Encrypts data by converting it to a JSON string and then encoding it in Base64.
+ * This provides a simple way to obfuscate localStorage data.
+ *
+ * @param {*} data - The data to be encrypted (should be JSON-serializable).
+ * @returns {string} The Base64 encoded string.
+ */
 const encryptData = (data: any): string => {
   try {
     const stringifiedData = JSON.stringify(data);
@@ -21,6 +27,14 @@ const encryptData = (data: any): string => {
   }
 };
 
+/**
+ * Decrypts a Base64 encoded string back into its original data structure.
+ * It includes a fallback to parse plaintext JSON for backward compatibility.
+ *
+ * @param {(string | null)} encryptedData - The Base64 string to decrypt.
+ * @param {*} initialValue - The value to return if decryption fails.
+ * @returns {*} The decrypted data or the initial value.
+ */
 const decryptData = (encryptedData: string | null, initialValue: any): any => {
   if (encryptedData === null) return initialValue;
   try {
@@ -38,7 +52,13 @@ const decryptData = (encryptedData: string | null, initialValue: any): any => {
   }
 };
 
-// Placeholder for sanitization function
+/**
+ * A simple string sanitizer that removes HTML tags.
+ * This is a basic security measure to prevent XSS attacks via input fields.
+ *
+ * @param {(string | undefined)} str - The string to sanitize.
+ * @returns {string} The sanitized string with HTML tags removed.
+ */
 const sanitizeString = (str: string | undefined): string => {
   if (str === undefined) return '';
   return str.replace(/<[^>]*>/g, '');
@@ -46,13 +66,14 @@ const sanitizeString = (str: string | undefined): string => {
 
 
 /**
- * Custom hook `useLocalStorage` to synchronize state with the browser's localStorage.
- * It attempts to retrieve the stored value on initialization and updates localStorage
- * whenever the state changes.
- * @template T The type of the value to be stored.
- * @param {string} key The localStorage key.
- * @param {T} initialValue The initial value if no value is found in localStorage.
- * @returns {[T, React.Dispatch<React.SetStateAction<T>>]} A stateful value and a function to update it.
+ * A custom React hook that synchronizes a state value with the browser's localStorage.
+ * It retrieves the stored value on initialization (decrypting it) and persists
+ * the new value to localStorage (encrypting it) whenever the state changes.
+ *
+ * @template T - The type of the value to be stored.
+ * @param {string} key - The key under which the value is stored in localStorage.
+ * @param {T} initialValue - The initial value to use if no value is found in localStorage.
+ * @returns {[T, React.Dispatch<React.SetStateAction<T>>]} A tuple containing the stateful value and a function to update it, similar to `useState`.
  */
 const useLocalStorage = <T>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] => {
   // State to store our value
@@ -97,10 +118,12 @@ const useLocalStorage = <T>(key: string, initialValue: T): [T, React.Dispatch<Re
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 /**
- * `DataProvider` component wraps its children with the `DataContext.Provider`,
- * making all application data and manipulation functions available to descendant components.
- * It manages state for students, transactions, gamification, and settings using `useLocalStorage`.
- * @param {{ children: ReactNode }} props Props containing the child components.
+ * Provides a central data store for the entire application using React Context.
+ * It manages state for students, transactions, settings, and gamification,
+ * and persists this data to localStorage.
+ *
+ * @param {{ children: ReactNode }} props - The props object, containing the child components to be wrapped.
+ * @returns {React.ReactElement} The `DataContext.Provider` wrapping the application.
  */
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // State management using the useLocalStorage hook for persistence.
@@ -126,9 +149,11 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [settings.theme]);
 
   /**
-   * Adds points to the user's gamification stats and updates their level if necessary.
-   * @param {number} pointsToAdd The number of points to add.
-   * @param {string} [reason] Optional reason for gaining points, can be used for logging or notifications.
+   * Adds a specified number of points to the user's gamification stats and updates
+   * their level and rank name if a new threshold is met.
+   *
+   * @param {number} pointsToAdd - The number of points to add.
+   * @param {string} [reason] - An optional description for why the points were awarded.
    */
   const addPoints = useCallback((pointsToAdd: number, reason?: string) => {
     setGamification(prevStats => {
@@ -151,8 +176,9 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [setGamification]); // `setGamification` is stable from `useLocalStorage`
 
   /**
-   * Checks conditions for all defined achievements and awards them if met.
-   * This function is typically called when related data (like students or transactions) changes.
+   * Checks if any achievements' conditions have been met based on the current
+   * application state (e.g., number of students, total earnings) and updates
+   * their status to 'achieved' if so.
    */
   const checkAndAwardAchievements = useCallback(() => {
     setAchievements(prevAchievements => {
@@ -212,9 +238,11 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // --- Student Operations ---
 
   /**
-   * Adds a new student to the list.
-   * @param {StudentFormData} studentData Data for the new student.
-   * @returns {Student} The newly created student object.
+   * Adds a new student to the application state after sanitizing input data.
+   * Also awards points for the action.
+   *
+   * @param {StudentFormData} studentData - The data for the new student from the form.
+   * @returns {Student} The newly created student object, including its generated ID and timestamp.
    */
   const addStudent = (studentData: StudentFormData): Student => {
     const sanitizedStudentData: StudentFormData = {
@@ -249,10 +277,11 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   /**
-   * Updates an existing student's details.
-   * @param {string} studentId ID of the student to update.
-   * @param {Partial<StudentFormData>} studentData Partial data with fields to update.
-   * @returns {Student | undefined} The updated student object, or undefined if not found.
+   * Updates an existing student's details in the application state.
+   *
+   * @param {string} studentId - The ID of the student to update.
+   * @param {Partial<StudentFormData>} studentData - An object containing the student fields to update.
+   * @returns {Student | undefined} The updated student object, or undefined if the student was not found.
    */
   const updateStudent = (studentId: string, studentData: Partial<StudentFormData>): Student | undefined => {
     let updatedStudent: Student | undefined;
@@ -296,8 +325,9 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
   
   /**
-   * Deletes a student and all their associated transactions.
-   * @param {string} studentId ID of the student to delete.
+   * Deletes a student and all of their associated transactions from the application state.
+   *
+   * @param {string} studentId - The ID of the student to delete.
    */
   const deleteStudent = (studentId: string) => {
     setStudents(prev => prev.filter(s => s.id !== studentId));
@@ -306,8 +336,9 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   /**
-   * Retrieves a student by their ID.
-   * @param {string} studentId ID of the student to find.
+   * Retrieves a single student by their unique ID.
+   *
+   * @param {string} studentId - The ID of the student to find.
    * @returns {Student | undefined} The student object if found, otherwise undefined.
    */
   const getStudentById = (studentId: string): Student | undefined => {
@@ -317,8 +348,9 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // --- Transaction Operations ---
 
   /**
-   * Adds a new transaction to the list and calculates its initial payment status.
-   * @param {TransactionFormData} transactionData Data for the new transaction.
+   * Adds a new transaction, calculates its payment status, and awards points if applicable.
+   *
+   * @param {TransactionFormData} transactionData - The data for the new transaction from the form.
    * @returns {Transaction} The newly created transaction object.
    */
   const addTransaction = (transactionData: TransactionFormData): Transaction => {
@@ -372,9 +404,10 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   /**
-   * Updates an existing transaction's details and re-evaluates its payment status if necessary.
-   * @param {string} transactionId ID of the transaction to update.
-   * @param {Partial<TransactionFormData>} transactionData Partial data with fields to update.
+   * Updates an existing transaction's details and re-calculates its payment status.
+   *
+   * @param {string} transactionId - The ID of the transaction to update.
+   * @param {Partial<TransactionFormData>} transactionData - An object with the transaction fields to update.
    * @returns {Transaction | undefined} The updated transaction object, or undefined if not found.
    */
   const updateTransaction = (transactionId: string, transactionData: Partial<TransactionFormData>): Transaction | undefined => {
@@ -428,16 +461,18 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
   
   /**
-   * Deletes a transaction from the list.
-   * @param {string} transactionId ID of the transaction to delete.
+   * Deletes a transaction from the application state.
+   *
+   * @param {string} transactionId - The ID of the transaction to delete.
    */
   const deleteTransaction = (transactionId: string) => {
     setTransactions(prev => prev.filter(t => t.id !== transactionId));
   };
 
   /**
-   * Retrieves all transactions for a specific student, sorted by date (newest first).
-   * @param {string} studentId ID of the student.
+   * Retrieves all transactions for a specific student, sorted by date with the newest first.
+   *
+   * @param {string} studentId - The ID of the student whose transactions are to be retrieved.
    * @returns {Transaction[]} An array of the student's transactions.
    */
   const getTransactionsByStudent = (studentId: string): Transaction[] => {
@@ -447,15 +482,16 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // --- Settings Operations ---
 
   /**
-   * Updates parts of the application settings.
-   * @param {Partial<AppSettings>} newSettings An object containing the settings to update.
+   * Updates one or more application settings.
+   *
+   * @param {Partial<AppSettings>} newSettings - An object containing the settings to update.
    */
   const updateSettings = (newSettings: Partial<AppSettings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
   };
 
   /**
-   * Toggles the application theme between Light and Dark.
+   * Toggles the application theme between 'light' and 'dark' modes.
    */
   const toggleTheme = () => {
     setSettings(prev => ({
@@ -527,9 +563,11 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 };
 
 /**
- * Custom hook `useData` to easily access the `DataContextType` from any component
- * wrapped within `DataProvider`. Throws an error if used outside `DataProvider`.
- * @returns {DataContextType} The application data and action functions.
+ * A custom hook for consuming the application's data context.
+ * It provides an easy way to access all shared state and action functions.
+ * This hook will throw an error if used outside of a `DataProvider`.
+ *
+ * @returns {DataContextType} The context value, containing all application data and actions.
  */
 export const useData = (): DataContextType => {
   const context = useContext(DataContext);
