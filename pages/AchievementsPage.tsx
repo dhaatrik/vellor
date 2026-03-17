@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useData } from '../store';
+import { useStore } from '../store';
 import { Card, Icon } from '../components/ui';
 import { formatDate, formatCurrency } from '../helpers';
 import { AchievementId, PaymentStatus } from '../types';
@@ -10,7 +10,11 @@ import { motion } from 'framer-motion';
  * and a list of all unlocked and pending achievements.
  */
 export const AchievementsPage: React.FC = () => {
-  const { achievements, gamification, students, transactions, settings } = useData();
+  const achievements = useStore(s => s.achievements);
+  const gamification = useStore(s => s.gamification);
+  const students = useStore(s => s.students);
+  const transactions = useStore(s => s.transactions);
+  const settings = useStore(s => s.settings);
   
   const achievedList = achievements
     .filter(a => a.achieved)
@@ -116,7 +120,7 @@ export const AchievementsPage: React.FC = () => {
             {achievedList.map(ach => (
               <motion.div key={ach.id} variants={itemVariants} className="p-6 bg-white dark:bg-primary-light rounded-3xl shadow-sm border border-success/30 relative overflow-hidden group hover:shadow-md transition-shadow">
                 <div className="absolute -right-6 -top-6 w-24 h-24 bg-success/10 rounded-full blur-2xl group-hover:bg-success/20 transition-colors"></div>
-                <span className="text-5xl mb-4 block drop-shadow-sm" role="img" aria-label={ach.name}>{ach.icon}</span>
+                <div className="mb-4"><Icon iconName={ach.icon as any} className="w-12 h-12 text-accent drop-shadow-sm" aria-label={ach.name} /></div>
                 <h3 className="text-lg font-display font-bold text-gray-900 dark:text-white mb-1">{ach.name}</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{ach.description}</p>
                 {ach.dateAchieved && (
@@ -146,7 +150,7 @@ export const AchievementsPage: React.FC = () => {
             {pendingList.map(ach => (
               <motion.div key={ach.id} variants={itemVariants} className="p-6 bg-gray-50 dark:bg-primary/50 rounded-3xl border border-gray-200 dark:border-white/5 flex flex-col opacity-80 hover:opacity-100 transition-opacity">
                 <div className="w-16 h-16 rounded-2xl bg-gray-200 dark:bg-primary-light flex items-center justify-center mb-4 grayscale">
-                  <span className="text-3xl" role="img" aria-label={ach.name}>{ach.icon}</span>
+                  <Icon iconName={ach.icon as any} className="w-8 h-8" aria-label={ach.name} />
                 </div>
                 <h3 className="text-lg font-display font-semibold text-gray-700 dark:text-gray-300 mb-1">{ach.name}</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 flex-grow mb-4">{ach.description}</p>

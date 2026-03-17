@@ -5,7 +5,7 @@
 **Manage your tutoring business like a pro.**
 
 [![CI](https://github.com/DhaatuTheGamer/Vellor/actions/workflows/ci.yml/badge.svg)](https://github.com/DhaatuTheGamer/Vellor/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-2.0.0-8b5cf6)](https://github.com/DhaatuTheGamer/Vellor)
+[![Version](https://img.shields.io/badge/version-3.0.0-8b5cf6)](https://github.com/DhaatuTheGamer/Vellor)
 [![License: MIT](https://img.shields.io/badge/License-MIT-10b981.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white)](https://react.dev/)

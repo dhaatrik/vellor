@@ -66,6 +66,21 @@ export const Icon: React.FC<IconProps> = ({ iconName, className = 'w-6 h-6', ...
     'clock': LucideIcons.Clock,
     'lock-closed': LucideIcons.Lock,
     'chevron-right': LucideIcons.ChevronRight,
+    'trending-up': LucideIcons.TrendingUp,
+    'crown': LucideIcons.Crown,
+    'building': LucideIcons.Landmark,
+    'gem': LucideIcons.Gem,
+    'rocket': LucideIcons.Rocket,
+    'brush': LucideIcons.Brush,
+    'flame': LucideIcons.Flame,
+    'award': LucideIcons.Award,
+    'target': LucideIcons.Target,
+    'gift': LucideIcons.Gift,
+    'brain': LucideIcons.Brain,
+    'handshake': LucideIcons.Handshake,
+    'ticket': LucideIcons.Ticket,
+    'briefcase': LucideIcons.Briefcase,
+    'party-popper': LucideIcons.PartyPopper,
   };
 
   const LucideIcon = iconMap[iconName] || LucideIcons.HelpCircle;

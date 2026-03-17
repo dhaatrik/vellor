@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { useData } from '../../store';
+import { useStore } from '../../store';
 import { ToastMessage } from '../../types';
 import { Icon } from './Icon';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -52,7 +52,7 @@ const Toast: React.FC<{ toast: ToastMessage }> = ({ toast }) => {
  * @returns {React.ReactElement | null} The toast container element, or null if there are no toasts.
  */
 export const ToastContainer: React.FC = () => {
-    const { toasts } = useData();
+    const toasts = useStore(s => s.toasts);
 
     return (
         <div aria-live="assertive" className="fixed inset-0 flex items-end justify-center px-4 py-6 pointer-events-none sm:p-6 sm:items-end sm:justify-end z-[100]">

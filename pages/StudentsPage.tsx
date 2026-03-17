@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { useData } from '../store';
+import { useStore } from '../store';
 import { Student, Transaction } from '../types';
 import { Button, Input, Modal, Card, Icon, ConfirmationModal } from '../components/ui';
 import { StudentDetailView } from '../components/students/StudentDetailView';
@@ -13,7 +13,14 @@ import { motion, AnimatePresence } from 'framer-motion';
  * Manages the display and manipulation of student data.
  */
 export const StudentsPage: React.FC = () => {
-  const { students, addStudent, updateStudent, deleteStudent, getStudentById, settings, transactions, addTransaction } = useData();
+  const students = useStore(s => s.students);
+  const addStudent = useStore(s => s.addStudent);
+  const updateStudent = useStore(s => s.updateStudent);
+  const deleteStudent = useStore(s => s.deleteStudent);
+  const getStudentById = useStore(s => s.getStudentById);
+  const settings = useStore(s => s.settings);
+  const transactions = useStore(s => s.transactions);
+  const addTransaction = useStore(s => s.addTransaction);
   const [selectedStudent, setSelectedStudent] = useState<Student | undefined>(undefined);
   const [showStudentForm, setShowStudentForm] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | undefined>(undefined);

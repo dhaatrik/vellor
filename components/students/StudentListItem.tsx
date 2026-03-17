@@ -39,7 +39,7 @@ const getGradient = (name: string) => {
 /**
  * Displays a summary of a single student in a list.
  */
-export const StudentListItem: React.FC<StudentListItemProps> = ({ student, onSelect, onDelete, currencySymbol, transactions }) => {
+export const StudentListItem: React.FC<StudentListItemProps> = React.memo(({ student, onSelect, onDelete, currencySymbol, transactions }) => {
   const outstandingBalance = useMemo(() => {
     return transactions
       .filter(t => t.studentId === student.id)
@@ -88,4 +88,4 @@ export const StudentListItem: React.FC<StudentListItemProps> = ({ student, onSel
         </div>
     </Card>
   );
-};
+});

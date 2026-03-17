@@ -22,7 +22,7 @@ interface TransactionListItemProps {
 /**
  * Displays a summary of a single transaction in a list.
  */
-export const TransactionListItem: React.FC<TransactionListItemProps> = ({ transaction, studentName, onEdit, onDelete, currencySymbol }) => {
+export const TransactionListItem: React.FC<TransactionListItemProps> = React.memo(({ transaction, studentName, onEdit, onDelete, currencySymbol }) => {
   return (
     <Card className="hover:border-accent/50 transition-colors duration-300 group border border-white/20 dark:border-white/5 shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -79,4 +79,4 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = ({ transa
         </div>
     </Card>
   );
-};
+});

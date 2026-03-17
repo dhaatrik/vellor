@@ -1,17 +1,24 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useData } from '../store';
+import { useStore } from '../store';
 import { Transaction, PaymentStatus } from '../types';
 import { Button, Modal, Card, Icon, ConfirmationModal } from '../components/ui';
 import { TransactionForm } from '../components/transactions/TransactionForm';
 import { TransactionListItem } from '../components/transactions/TransactionListItem';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { useWindowVirtualizer } from '@tanstack/react-virtual';
 
 /**
  * Manages the display and manipulation of financial transactions.
  */
 export const TransactionsPage: React.FC = () => {
-  const { transactions, students, addTransaction, updateTransaction, deleteTransaction, settings, getStudentById } = useData();
+  const transactions = useStore(s => s.transactions);
+  const students = useStore(s => s.students);
+  const addTransaction = useStore(s => s.addTransaction);
+  const updateTransaction = useStore(s => s.updateTransaction);
+  const deleteTransaction = useStore(s => s.deleteTransaction);
+  const settings = useStore(s => s.settings);
+  const getStudentById = useStore(s => s.getStudentById);
   const [showForm, setShowForm] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | undefined>(undefined);
   const [confirmingDelete, setConfirmingDelete] = useState<Transaction | null>(null);
@@ -19,6 +26,8 @@ export const TransactionsPage: React.FC = () => {
   
   type FilterType = 'all' | 'paid' | 'due' | 'partially-paid' | 'overpaid' | 'unpaid';
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [dateRange, setDateRange] = useState<{ start: string; end: string }>({ start: '', end: '' });
 
   useEffect(() => {
       if (location.state?.openAddTransactionModal) {
@@ -61,24 +70,54 @@ export const TransactionsPage: React.FC = () => {
   [transactions]);
 
   const filteredTransactions = useMemo(() => {
-    if (activeFilter === 'all') {
-        return sortedTransactions;
-    }
+    let result = sortedTransactions;
+
+    // Apply status filter
     if (activeFilter === 'unpaid') {
-        return sortedTransactions.filter(t => t.status === PaymentStatus.Due || t.status === PaymentStatus.PartiallyPaid);
+        result = result.filter(t => t.status === PaymentStatus.Due || t.status === PaymentStatus.PartiallyPaid);
+    } else if (activeFilter !== 'all') {
+        const statusMap = {
+            'paid': PaymentStatus.Paid,
+            'due': PaymentStatus.Due,
+            'partially-paid': PaymentStatus.PartiallyPaid,
+            'overpaid': PaymentStatus.Overpaid,
+        };
+        const targetStatus = statusMap[activeFilter as keyof typeof statusMap];
+        if (targetStatus) {
+            result = result.filter(t => t.status === targetStatus);
+        }
     }
-    const statusMap = {
-        'paid': PaymentStatus.Paid,
-        'due': PaymentStatus.Due,
-        'partially-paid': PaymentStatus.PartiallyPaid,
-        'overpaid': PaymentStatus.Overpaid,
-    };
-    const targetStatus = statusMap[activeFilter as keyof typeof statusMap];
-    if (targetStatus) {
-      return sortedTransactions.filter(t => t.status === targetStatus);
+
+    // Apply search filter
+    if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        result = result.filter(t => {
+            const student = getStudentById(t.studentId);
+            if (!student) return false;
+            const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
+            return fullName.includes(query);
+        });
     }
-    return sortedTransactions;
-  }, [sortedTransactions, activeFilter]);
+
+    // Apply date filter
+    if (dateRange.start) {
+        result = result.filter(t => t.date >= dateRange.start);
+    }
+    if (dateRange.end) {
+        result = result.filter(t => t.date <= dateRange.end);
+    }
+
+    return result;
+  }, [sortedTransactions, activeFilter, searchQuery, dateRange, getStudentById]);
+
+  const parentRef = React.useRef<HTMLDivElement | null>(null);
+
+  const rowVirtualizer = useWindowVirtualizer({
+    count: filteredTransactions.length,
+    estimateSize: () => 100, // Estimated height of TransactionListItem + padding
+    scrollMargin: parentRef.current?.offsetTop ?? 0,
+    overscan: 5,
+  });
 
   const filterButtons: { label: string, filter: FilterType }[] = [
     { label: "All", filter: 'all' },
@@ -122,7 +161,7 @@ export const TransactionsPage: React.FC = () => {
         <Button onClick={() => { setEditingTransaction(undefined); setShowForm(true); }} leftIcon="plus" className="w-full sm:w-auto rounded-full shadow-lg shadow-accent/20">Log Lesson</Button>
       </div>
       
-      <div className="flex flex-wrap gap-2 mb-8">
+      <div className="flex flex-wrap gap-2 mb-4">
         {filterButtons.map(({ label, filter }) => (
           <Button
             key={filter}
@@ -134,6 +173,39 @@ export const TransactionsPage: React.FC = () => {
             {label}
           </Button>
         ))}
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-4 mb-8">
+        <div className="flex-1 relative">
+           <Icon iconName="search" className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+           <input 
+              type="text" 
+              placeholder="Search by student name..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-white/10 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent sm:text-sm bg-white dark:bg-primary-light transition-all duration-200"
+           />
+        </div>
+        <div className="flex items-center gap-2">
+           <input 
+              type="date"
+              value={dateRange.start}
+              onChange={(e) => setDateRange(prev => ({...prev, start: e.target.value}))}
+              className="w-full px-4 py-2 border border-gray-200 dark:border-white/10 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent sm:text-sm bg-white dark:bg-primary-light transition-all duration-200 appearance-none"
+           />
+           <span className="text-gray-500 font-medium">to</span>
+           <input 
+              type="date"
+              value={dateRange.end}
+              onChange={(e) => setDateRange(prev => ({...prev, end: e.target.value}))}
+              className="w-full px-4 py-2 border border-gray-200 dark:border-white/10 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent sm:text-sm bg-white dark:bg-primary-light transition-all duration-200 appearance-none"
+           />
+           {(dateRange.start || dateRange.end) && (
+              <Button variant="ghost" size="sm" onClick={() => setDateRange({start: '', end: ''})} className="text-gray-400 hover:text-danger rounded-full !p-2" aria-label="Clear dates">
+                 <Icon iconName="x-mark" className="w-4 h-4" />
+              </Button>
+           )}
+        </div>
       </div>
 
       {transactions.length === 0 && !showForm ? (
@@ -155,27 +227,49 @@ export const TransactionsPage: React.FC = () => {
         </motion.div>
       ) : (
         <motion.div 
-          className="space-y-4"
+          className="relative w-full"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
+          ref={parentRef}
         >
-          <AnimatePresence>
-            {filteredTransactions.map(t => {
+          <div
+            style={{
+              height: `${rowVirtualizer.getTotalSize()}px`,
+              width: '100%',
+              position: 'relative',
+            }}
+          >
+            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+              const t = filteredTransactions[virtualRow.index];
               const student = getStudentById(t.studentId);
               return (
-                <motion.div key={t.id} variants={itemVariants} layout initial="hidden" animate="visible" exit={{ opacity: 0, scale: 0.9 }}>
-                  <TransactionListItem
-                    transaction={t}
-                    studentName={student ? `${student.firstName} ${student.lastName}` : 'Unknown Student'}
-                    onEdit={handleEditTransaction}
-                    onDelete={handleDeleteRequest}
-                    currencySymbol={settings.currencySymbol}
-                  />
-                </motion.div>
+                <div
+                  key={t.id}
+                  data-index={virtualRow.index}
+                  ref={rowVirtualizer.measureElement}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    transform: `translateY(${virtualRow.start}px)`,
+                    paddingBottom: '1rem',
+                  }}
+                >
+                  <motion.div variants={itemVariants} initial="hidden" animate="visible">
+                    <TransactionListItem
+                      transaction={t}
+                      studentName={student ? `${student.firstName} ${student.lastName}` : 'Unknown Student'}
+                      onEdit={handleEditTransaction}
+                      onDelete={handleDeleteRequest}
+                      currencySymbol={settings.currencySymbol}
+                    />
+                  </motion.div>
+                </div>
               );
             })}
-          </AnimatePresence>
+          </div>
         </motion.div>
       )}
 

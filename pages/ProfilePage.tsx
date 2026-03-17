@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useData } from '../store';
+import { useStore } from '../store';
 import { AppSettings, PhoneNumber } from '../types';
 import { Button, Input, Card, PhoneInput, Modal, Icon, Select, ConfirmationModal } from '../components/ui';
 import { formatPhoneNumber } from '../helpers';
@@ -11,7 +11,12 @@ import { motion } from 'framer-motion';
  * Also includes data management features.
  */
 export const ProfilePage: React.FC = () => {
-  const { settings, updateSettings, addToast, exportData, importData, resetData } = useData();
+  const settings = useStore(s => s.settings);
+  const updateSettings = useStore(s => s.updateSettings);
+  const addToast = useStore(s => s.addToast);
+  const exportData = useStore(s => s.exportData);
+  const importData = useStore(s => s.importData);
+  const resetData = useStore(s => s.resetData);
   const [formData, setFormData] = useState<AppSettings>(settings);
   const [isCardVisible, setIsCardVisible] = useState(false);
   const [isConfirmingReset, setIsConfirmingReset] = useState(false);

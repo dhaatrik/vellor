@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useData } from '../store';
+import { useStore } from '../store';
 import { AppSettings, PhoneNumber } from '../types';
 import { CURRENCY_OPTIONS, DEFAULT_USER_NAME, COUNTRIES } from '../constants';
 import { Button, Input, Select, Card, Icon, PhoneInput } from '../components/ui';
@@ -11,7 +11,8 @@ import { motion } from 'framer-motion';
  * A one-time welcome and setup page for new users.
  */
 export const WelcomePage: React.FC = () => {
-    const { settings, updateSettings } = useData();
+    const settings = useStore(s => s.settings);
+    const updateSettings = useStore(s => s.updateSettings);
     const navigate = useNavigate();
     const [formData, setFormData] = useState<Omit<AppSettings, 'theme'>>({
         userName: '',

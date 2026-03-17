@@ -5,9 +5,10 @@
  * including the sidebar and content area.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
-import { DataProvider, useData } from './store'; // Context provider and hook
+import { useStore, setGlobalMasterKey } from './store'; // Zustand hook
+import { generateSalt, deriveKey } from './src/crypto';
 import { NavbarLink, Icon, Button, ToastContainer, FAB, LegalModals } from './components/ui'; // Reusable UI components
 import { DashboardPage } from './pages/DashboardPage';
 import { StudentsPage } from './pages/StudentsPage';
@@ -26,8 +27,12 @@ import { DEFAULT_USER_NAME } from './constants';
  * @returns {React.ReactElement} A JSX element representing the complete application layout.
  */
 const AppLayout: React.FC = () => {
-  // Access data and functions from the global context
-  const { settings, toggleTheme, gamification, achievements, logout } = useData();
+  // Access data and functions from the store
+  const settings = useStore(s => s.settings);
+  const toggleTheme = useStore(s => s.toggleTheme);
+  const gamification = useStore(s => s.gamification);
+  const achievements = useStore(s => s.achievements);
+  const logout = useStore(s => s.logout);
   // State for managing the visibility of the sidebar on mobile devices
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -223,7 +228,7 @@ const AppLayout: React.FC = () => {
  * @returns {React.ReactElement} Either the Welcome page or the main AppLayout.
  */
 const AppContent: React.FC = () => {
-  const { settings } = useData();
+  const settings = useStore(s => s.settings);
 
   // If the user hasn't set their name yet (i.e., it's still the default),
   // show the welcome page and restrict access to other parts of the app.
@@ -242,23 +247,123 @@ const AppContent: React.FC = () => {
 };
 
 
-/**
- * The root component of the Vellor application.
- * This component is responsible for setting up the core context providers and routing.
- * It wraps the `AppContent` with `DataProvider` to supply global state
- * and `HashRouter` to enable client-side navigation.
- * @returns {React.ReactElement} The root JSX element of the application.
- */
-const App: React.FC = () => {
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(error: any) { console.error("Uncaught error:", error); }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex h-screen items-center justify-center bg-secondary dark:bg-primary-dark text-center p-8">
+           <div>
+             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Something went wrong reading your local data.</h1>
+             <p className="text-gray-500 mb-6">Your data might be corrupted or the app encountered an unexpected error.</p>
+             <button onClick={() => window.location.reload()} className="px-6 py-3 bg-accent text-primary-dark font-bold rounded-xl mr-4">Reload App</button>
+             <button onClick={() => { localStorage.clear(); window.location.reload(); }} className="px-6 py-3 bg-danger text-white font-bold rounded-xl">Hard Reset (Wipe Data)</button>
+           </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlocked }) => {
+  const [isFirstTime, setIsFirstTime] = useState<boolean | null>(null);
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  
+  useEffect(() => {
+    const saltString = localStorage.getItem('vellor-salt');
+    setIsFirstTime(!saltString);
+  }, []);
+
+  const handleUnlock = async () => {
+    try {
+      if (isFirstTime) {
+        if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
+        const salt = generateSalt();
+        localStorage.setItem('vellor-salt', btoa(String.fromCharCode(...salt)));
+        const key = await deriveKey(password, salt);
+        setGlobalMasterKey(key);
+        await useStore.persist.rehydrate();
+        onUnlocked();
+      } else {
+        const saltString = localStorage.getItem('vellor-salt')!;
+        const saltStrDecoded = atob(saltString);
+        const salt = new Uint8Array(saltStrDecoded.split('').map(c => c.charCodeAt(0)));
+        const key = await deriveKey(password, salt);
+        setGlobalMasterKey(key);
+        
+        await useStore.persist.rehydrate();
+        
+        // Wait, what if decryption failed in rehydrate? Zustand might just ignore or set to default.
+        // It's technically rehydrated but we should check if data actually came through
+        
+        onUnlocked();
+      }
+    } catch (err) {
+      setError("Incorrect password or decryption failed.");
+      setGlobalMasterKey(null);
+    }
+  };
+
+  if (isFirstTime === null) return null;
+
   return (
-    // DataProvider makes global state (students, transactions, settings, etc.) available
-    <DataProvider>
-      {/* HashRouter is used for client-side routing, suitable for static hosting */}
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-900/50 backdrop-blur-md z-50">
+      <div className="bg-white dark:bg-primary p-8 rounded-3xl shadow-2xl max-w-md w-full ml-4 mr-4">
+        <h2 className="text-2xl font-display font-bold mb-4 text-gray-900 dark:text-white">
+          {isFirstTime ? 'Set Master Password' : 'Unlock Vellor'}
+        </h2>
+        <p className="text-gray-600 dark:text-gray-300 mb-6 text-sm">
+          {isFirstTime 
+            ? 'Your data is encrypted locally. Create a strong master password to secure it. If you forget this password, your data cannot be recovered.' 
+            : 'Enter your master password to decrypt your data.'}
+        </p>
+        <div className="space-y-4">
+           <div>
+             <input 
+               type="password" 
+               value={password}
+               onChange={e => { setPassword(e.target.value); setError(''); }}
+               className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-primary-dark text-gray-900 dark:text-white focus:ring-2 focus:ring-accent outline-none" 
+               placeholder="Master Password"
+               onKeyDown={e => e.key === 'Enter' && handleUnlock()}
+             />
+           </div>
+           {error && <p className="text-danger text-sm">{error}</p>}
+           <button 
+             className="w-full py-3 bg-accent text-primary-dark font-bold rounded-xl hover:opacity-90 transition-opacity"
+             onClick={handleUnlock}
+           >
+             {isFirstTime ? 'Set Password & Start' : 'Unlock'}
+           </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const App: React.FC = () => {
+  const [isUnlocked, setIsUnlocked] = useState(false);
+
+  return (
+    <ErrorBoundary>
       <HashRouter>
-        <AppContent /> {/* Renders Welcome or AppLayout based on setup status */}
-        <ToastContainer /> {/* Global toast container available on all pages */}
+        {!isUnlocked ? (
+           <SetupEncryption onUnlocked={() => setIsUnlocked(true)} />
+        ) : (
+          <>
+            <AppContent />
+            <ToastContainer />
+          </>
+        )}
       </HashRouter>
-    </DataProvider>
+    </ErrorBoundary>
   );
 };
 

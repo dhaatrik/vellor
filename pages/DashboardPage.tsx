@@ -1,18 +1,40 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useData } from '../store';
+import { useStore, useData } from '../store';
 import { Button, Card, StatDisplayCard, Icon } from '../components/ui';
 import { formatCurrency, formatDate, formatRelativeTime } from '../helpers';
 import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { PaymentStatus } from '../types';
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 /**
  * The main dashboard page of the application.
  */
 export const DashboardPage: React.FC = () => {
-  const { settings, totalUnpaid, totalPaidThisMonth, activeStudentsCount, overduePayments, gamification, students, activityLog, transactions, deleteActivity, clearActivityLog } = useData();
+  const settings = useStore(s => s.settings);
+  const gamification = useStore(s => s.gamification);
+  const students = useStore(s => s.students);
+  const activityLog = useStore(s => s.activityLog);
+  const transactions = useStore(s => s.transactions);
+  const deleteActivity = useStore(s => s.deleteActivity);
+  const clearActivityLog = useStore(s => s.clearActivityLog);
+  const addToast = useStore(s => s.addToast);
+  const { totalUnpaid, totalPaidThisMonth, activeStudentsCount, overduePayments } = useData.derived();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const lastBackup = localStorage.getItem('lastBackupDate');
+    if (lastBackup) {
+      const daysSinceBackup = (new Date().getTime() - new Date(lastBackup).getTime()) / (1000 * 3600 * 24);
+      if (daysSinceBackup > 7) {
+        // Use a timeout to ensure toasts render after initial mount
+        setTimeout(() => addToast("It's been over a week since your last backup! Go to Settings to export your data.", "info"), 1000);
+      }
+    } else if (students.length > 0) {
+      setTimeout(() => addToast("Remember to regularly export your data from Settings to keep it safe.", "info"), 1000);
+    }
+  }, []); // Run only once on mount
 
   const monthlyIncomeGoal = settings.monthlyGoal || 500; 
   const moneyTreeProgress = Math.min(100, (totalPaidThisMonth / monthlyIncomeGoal) * 100);
@@ -44,6 +66,22 @@ export const DashboardPage: React.FC = () => {
     return data;
   }, [transactions, students]);
 
+  const activityParentRef = React.useRef<HTMLDivElement>(null);
+  const rowVirtualizerActivity = useVirtualizer({
+    count: activityLog.length,
+    getScrollElement: () => activityParentRef.current,
+    estimateSize: () => 64, // Estimated height per row
+    overscan: 5,
+  });
+
+  const overdueParentRef = React.useRef<HTMLDivElement>(null);
+  const rowVirtualizerOverdue = useVirtualizer({
+    count: overduePayments.length,
+    getScrollElement: () => overdueParentRef.current,
+    estimateSize: () => 72,
+    overscan: 5,
+  });
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -72,8 +110,8 @@ export const DashboardPage: React.FC = () => {
     >
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-4xl font-display font-bold tracking-tight text-gray-900 dark:text-gray-50">
-            Welcome back, {settings.userName} <span className="text-accent">✨</span>
+          <h1 className="text-4xl font-display font-bold tracking-tight text-gray-900 dark:text-gray-50 flex items-center gap-3">
+            Welcome back, {settings.userName} <Icon iconName="sparkles" className="w-8 h-8 text-accent animate-pulse" />
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Here's what's happening with your tutoring business today.</p>
         </div>
@@ -185,7 +223,7 @@ export const DashboardPage: React.FC = () => {
                   <div className="absolute inset-0 bg-white/20 w-full h-full animate-[shimmer_2s_infinite]" style={{ backgroundImage: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)' }}></div>
                 </motion.div>
               </div>
-              {moneyTreeProgress >= 100 && <p className="text-sm mt-3 text-accent font-medium animate-pulse">Goal Achieved! 🎉</p>}
+              {moneyTreeProgress >= 100 && <p className="text-sm mt-3 text-accent font-medium animate-pulse flex items-center gap-2">Goal Achieved! <Icon iconName="party-popper" className="w-5 h-5" /></p>}
             </div>
           </Card>
         </motion.div>
@@ -207,7 +245,7 @@ export const DashboardPage: React.FC = () => {
           <Card className="h-full rounded-3xl border border-white/20 dark:border-white/5 shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl flex flex-col items-center justify-center text-center relative overflow-hidden group">
             <div className="absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl group-hover:bg-orange-500/20 transition-colors duration-500"></div>
             <div className="w-16 h-16 rounded-2xl bg-orange-500/10 flex items-center justify-center mb-4 relative z-10 group-hover:scale-110 transition-transform duration-300">
-              <span className="text-3xl">🔥</span>
+              <Icon iconName="flame" className="w-8 h-8 text-orange-500" />
             </div>
             <h3 className="text-4xl font-display font-bold text-gray-900 dark:text-white mb-1 relative z-10">{gamification.streak}</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider relative z-10">Day Streak</p>
@@ -243,36 +281,46 @@ export const DashboardPage: React.FC = () => {
                 </button>
               )}
             </div>
-            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+            <div ref={activityParentRef} className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
               {activityLog.length > 0 ? (
-                  <ul className="space-y-4">
-                      {activityLog.map((activity, index) => (
-                          <motion.li 
+                  <div style={{ height: `${rowVirtualizerActivity.getTotalSize()}px`, width: '100%', position: 'relative' }}>
+                      {rowVirtualizerActivity.getVirtualItems().map((virtualRow) => {
+                          const activity = activityLog[virtualRow.index];
+                          return (
+                          <div 
                             key={activity.id} 
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                            className="flex items-start group"
+                            data-index={virtualRow.index}
+                            ref={rowVirtualizerActivity.measureElement}
+                            className="absolute top-0 left-0 w-full pb-4"
+                            style={{ transform: `translateY(${virtualRow.start}px)` }}
                           >
-                              <div className="w-10 h-10 rounded-2xl bg-gray-100 dark:bg-primary flex items-center justify-center mr-4 flex-shrink-0 group-hover:bg-accent/10 transition-colors">
-                                <Icon iconName={activity.icon} className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-accent transition-colors" />
-                              </div>
-                              <div className="flex-grow pt-1 flex justify-between items-start">
-                                <div>
-                                  <p className="text-sm text-gray-800 dark:text-gray-200 font-medium">{activity.message}</p>
-                                  <span className="text-xs text-gray-500 dark:text-gray-400">{formatRelativeTime(activity.timestamp)}</span>
+                            <motion.li 
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: Math.min(virtualRow.index * 0.05, 0.3) }}
+                              className="flex items-start group"
+                            >
+                                <div className="w-10 h-10 rounded-2xl bg-gray-100 dark:bg-primary flex items-center justify-center mr-4 flex-shrink-0 group-hover:bg-accent/10 transition-colors">
+                                  <Icon iconName={activity.icon} className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-accent transition-colors" />
                                 </div>
-                                <button 
-                                  onClick={() => deleteActivity(activity.id)}
-                                  className="opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-gray-200 dark:hover:bg-primary-light transition-opacity"
-                                  aria-label="Delete activity"
-                                >
-                                  <Icon iconName="x-mark" className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                                </button>
-                              </div>
-                          </motion.li>
-                      ))}
-                  </ul>
+                                <div className="flex-grow pt-1 flex justify-between items-start">
+                                  <div>
+                                    <p className="text-sm text-gray-800 dark:text-gray-200 font-medium">{activity.message}</p>
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">{formatRelativeTime(activity.timestamp)}</span>
+                                  </div>
+                                  <button 
+                                    onClick={() => deleteActivity(activity.id)}
+                                    className="opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-gray-200 dark:hover:bg-primary-light transition-opacity"
+                                    aria-label="Delete activity"
+                                  >
+                                    <Icon iconName="x-mark" className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                                  </button>
+                                </div>
+                            </motion.li>
+                          </div>
+                          );
+                      })}
+                  </div>
               ) : (
                   <div className="h-full flex flex-col items-center justify-center text-center p-6">
                     <div className="w-16 h-16 rounded-3xl bg-gray-50 dark:bg-primary flex items-center justify-center mb-4">
@@ -293,25 +341,34 @@ export const DashboardPage: React.FC = () => {
               <Icon iconName="warning" className={`w-5 h-5 ${overduePayments.length > 0 ? 'text-danger' : 'text-gray-400'}`} />
               Action Needed
             </h3>
-            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+            <div ref={overdueParentRef} className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
               {overduePayments.length > 0 ? (
-                <ul className="space-y-3">
-                  {overduePayments.map(t => {
+                <div style={{ height: `${rowVirtualizerOverdue.getTotalSize()}px`, width: '100%', position: 'relative' }}>
+                  {rowVirtualizerOverdue.getVirtualItems().map(virtualRow => {
+                    const t = overduePayments[virtualRow.index];
                     const student = students.find(s => s.id === t.studentId);
                     return (
-                      <li key={t.id} className="p-4 bg-danger/5 hover:bg-danger/10 transition-colors rounded-2xl cursor-pointer border border-danger/10" onClick={() => navigate('/transactions', { state: { filter: 'unpaid' } })}>
-                        <div className="flex justify-between items-start mb-1">
-                          <span className="font-semibold text-sm text-gray-900 dark:text-white">{student ? `${student.firstName} ${student.lastName}` : 'Unknown'}</span>
-                          <span className="text-danger font-bold text-sm">{formatCurrency(t.lessonFee - t.amountPaid, settings.currencySymbol)}</span>
-                        </div>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 font-medium flex items-center gap-1">
-                          <Icon iconName="calendar" className="w-3 h-3" />
-                          {formatDate(t.date)}
-                        </span>
-                      </li>
+                      <div 
+                        key={t.id}
+                        data-index={virtualRow.index}
+                        ref={rowVirtualizerOverdue.measureElement}
+                        className="absolute top-0 left-0 w-full pb-3"
+                        style={{ transform: `translateY(${virtualRow.start}px)` }}
+                      >
+                        <li className="p-4 bg-danger/5 hover:bg-danger/10 transition-colors rounded-2xl cursor-pointer border border-danger/10 list-none block" onClick={() => navigate('/transactions', { state: { filter: 'unpaid' } })}>
+                          <div className="flex justify-between items-start mb-1">
+                            <span className="font-semibold text-sm text-gray-900 dark:text-white">{student ? `${student.firstName} ${student.lastName}` : 'Unknown'}</span>
+                            <span className="text-danger font-bold text-sm">{formatCurrency(t.lessonFee - t.amountPaid, settings.currencySymbol)}</span>
+                          </div>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 font-medium flex items-center gap-1">
+                            <Icon iconName="calendar" className="w-3 h-3" />
+                            {formatDate(t.date)}
+                          </span>
+                        </li>
+                      </div>
                     );
                   })}
-                </ul>
+                </div>
               ) : (
                 <div className="h-full flex flex-col items-center justify-center text-center p-6">
                   <div className="w-16 h-16 rounded-3xl bg-success/10 flex items-center justify-center mb-4">

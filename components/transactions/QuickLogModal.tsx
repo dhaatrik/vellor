@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon, Button, Input, Select } from '../ui';
-import { useData } from '../../store';
+import { useStore } from '../../store';
 import { TransactionFormData } from '../../types';
 
 interface QuickLogModalProps {
@@ -10,7 +10,8 @@ interface QuickLogModalProps {
 }
 
 export const QuickLogModal: React.FC<QuickLogModalProps> = ({ isOpen, onClose }) => {
-  const { students, addTransaction } = useData();
+  const students = useStore(s => s.students);
+  const addTransaction = useStore(s => s.addTransaction);
   const [studentId, setStudentId] = useState('');
   const [duration, setDuration] = useState('');
   const [amountPaid, setAmountPaid] = useState('');

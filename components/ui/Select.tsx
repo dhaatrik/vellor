@@ -3,12 +3,12 @@
  * Defines the styled Select component for dropdowns.
  */
 
-import React from 'react';
+import React, { forwardRef } from 'react';
 
 /**
  * Props for the Select component.
  */
-interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   /** Label text for the select dropdown. */
   label?: string;
   /** Error message to display below the select dropdown. */
@@ -27,14 +27,14 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
  * @param {SelectProps} props - The properties for the Select component.
  * @returns {React.ReactElement} A JSX element representing the select dropdown field.
  */
-export const Select: React.FC<SelectProps> = ({ label, name, error, options, placeholder, wrapperClassName = "", className, ...props }) => {
+export const Select = forwardRef<HTMLSelectElement, SelectProps>(({ label, name, error, options, placeholder, wrapperClassName = "", className, ...props }, ref) => {
   const baseStyle = "block w-full px-4 py-3 border border-gray-200 dark:border-white/10 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent sm:text-sm bg-white dark:bg-primary-light disabled:opacity-50 transition-all duration-200 appearance-none";
   const errorStyle = "border-danger focus:ring-danger/50 focus:border-danger";
   return (
     <div className={wrapperClassName}>
       {label && <label htmlFor={name} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 ml-1">{label}</label>}
       <div className="relative">
-        <select name={name} id={name} className={`${baseStyle} ${error ? errorStyle : ""} ${className || ""}`} {...props}>
+        <select ref={ref} name={name} id={name} className={`${baseStyle} ${error ? errorStyle : ""} ${className || ""}`} {...props}>
           {placeholder && <option value="" disabled>{placeholder}</option>}
           {options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
         </select>
@@ -47,4 +47,5 @@ export const Select: React.FC<SelectProps> = ({ label, name, error, options, pla
       {error && <p className="mt-1.5 ml-1 text-xs text-danger font-medium">{error}</p>}
     </div>
   );
-};
+});
+Select.displayName = 'Select';
