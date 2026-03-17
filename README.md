@@ -1,16 +1,16 @@
 <div align="center">
 
-# TutorFlow 🎓
+# Vellor 🎓
 
 **Manage your tutoring business like a pro.**
 
-[![CI](https://github.com/DhaatuTheGamer/TutorFlow/actions/workflows/ci.yml/badge.svg)](https://github.com/DhaatuTheGamer/TutorFlow/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-2.0.0-8b5cf6)](https://github.com/DhaatuTheGamer/TutorFlow)
+[![CI](https://github.com/DhaatuTheGamer/Vellor/actions/workflows/ci.yml/badge.svg)](https://github.com/DhaatuTheGamer/Vellor/actions/workflows/ci.yml)
+[![Version](https://img.shields.io/badge/version-2.0.0-8b5cf6)](https://github.com/DhaatuTheGamer/Vellor)
 [![License: MIT](https://img.shields.io/badge/License-MIT-10b981.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white)](https://react.dev/)
 
-TutorFlow is a modern, open-source web application built for private teachers and tutors. It provides a single, beautiful interface to manage students, track lessons and payments, and stay motivated through built-in gamification — all while keeping your data 100% private on your own device.
+Vellor is a modern, open-source web application built for private teachers and tutors. It provides a single, beautiful interface to manage students, track lessons and payments, and stay motivated through built-in gamification — all while keeping your data 100% private on your own device.
 
 [Getting Started](#-getting-started) · [Features](#-features) · [Tech Stack](#-tech-stack) · [Contributing](#-contributing)
 
@@ -20,7 +20,7 @@ TutorFlow is a modern, open-source web application built for private teachers an
 
 ## 📑 Table of Contents
 
-- [Why TutorFlow?](#-why-tutorflow)
+- [Why Vellor?](#-why-vellor)
 - [Features](#-features)
 - [Getting Started](#-getting-started)
 - [Usage](#-usage)
@@ -34,9 +34,9 @@ TutorFlow is a modern, open-source web application built for private teachers an
 
 ---
 
-## 💡 Why TutorFlow?
+## 💡 Why Vellor?
 
-Most tutoring management tools are either too complex, too expensive, or require handing over your data to a third-party service. TutorFlow was built to solve this:
+Most tutoring management tools are either too complex, too expensive, or require handing over your data to a third-party service. Vellor was built to solve this:
 
 - **Free & open-source** — no subscriptions, no hidden fees.
 - **Privacy-first** — all data lives in your browser's `localStorage`. Nothing leaves your device.
@@ -93,10 +93,10 @@ Most tutoring management tools are either too complex, too expensive, or require
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/DhaatuTheGamer/TutorFlow.git
+git clone https://github.com/DhaatuTheGamer/Vellor.git
 
 # 2. Navigate into the project
-cd TutorFlow
+cd Vellor
 
 # 3. Install dependencies
 npm install
@@ -153,7 +153,7 @@ Dashboard → Add Student → Log Lesson → Track Payments → Unlock Achieveme
 ## 📂 Project Structure
 
 ```
-TutorFlow/
+Vellor/
 ├── .github/
 │   └── workflows/
 │       └── ci.yml              # CI pipeline (lint + build)
@@ -213,7 +213,7 @@ TutorFlow/
 
 ## 🔄 CI/CD Pipeline
 
-TutorFlow uses **GitHub Actions** for continuous integration. The pipeline runs automatically on every push or pull request to the `main` branch.
+Vellor uses **GitHub Actions** for continuous integration. The pipeline runs automatically on every push or pull request to the `main` branch.
 
 **Pipeline Steps:**
 
@@ -227,7 +227,7 @@ The workflow is defined in [`.github/workflows/ci.yml`](.github/workflows/ci.yml
 
 ## 🤝 Contributing
 
-Contributions are welcome and appreciated! Whether it's a bug fix, a new feature, or a documentation improvement — every contribution makes TutorFlow better.
+Contributions are welcome and appreciated! Whether it's a bug fix, a new feature, or a documentation improvement — every contribution makes Vellor better.
 
 ### How to Contribute
 
@@ -288,7 +288,7 @@ Planned features for future releases:
 - [ ] **PDF Invoices** — Generate professional invoices for parents
 - [ ] **Advanced Analytics** — Trend analysis, student retention metrics, and forecasting
 - [ ] **Unit Tests** — Vitest + React Testing Library coverage
-- [ ] **PWA Support** — Install TutorFlow as a native-like app on mobile
+- [ ] **PWA Support** — Install Vellor as a native-like app on mobile
 
 ---
 
@@ -304,6 +304,6 @@ See the [LICENSE](LICENSE) file for details.
 
 **Built with ❤️ for educators everywhere.**
 
-[⬆ Back to Top](#tutorflow-)
+[⬆ Back to Top](#vellor-)
 
 </div>

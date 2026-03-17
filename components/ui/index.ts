@@ -19,3 +19,4 @@ export * from './Badge';
 export * from './ProgressBar';
 export * from './Toast';
 export * from './FAB';
+export * from './LegalModals';

@@ -76,7 +76,7 @@ export const WelcomePage: React.FC = () => {
                         >
                             <Icon iconName="academic-cap" className="w-10 h-10 text-accent" />
                         </motion.div>
-                        <h1 className="text-4xl font-display font-bold text-gray-900 dark:text-white tracking-tight">Welcome to TutorFlow</h1>
+                        <h1 className="text-4xl font-display font-bold text-gray-900 dark:text-white tracking-tight">Welcome to Vellor</h1>
                         <p className="text-gray-500 dark:text-gray-400 mt-3 text-lg">Let's get your profile set up to personalize your experience.</p>
                     </div>
                     

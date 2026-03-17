@@ -2,7 +2,7 @@
 
 /**
  * @file constants.ts
- * This file contains constant values used throughout the TutorFlow application.
+ * This file contains constant values used throughout the Vellor application.
  * These include configuration for currency, gamification, default user settings, etc.
  */
 

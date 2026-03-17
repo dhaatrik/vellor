@@ -1,7 +1,7 @@
 
 /**
  * @file store.ts
- * This file defines the central data store and context for the TutorFlow application.
+ * This file defines the central data store and context for the Vellor application.
  * It uses React Context API and a custom localStorage hook to manage and persist application state,
  * including students, transactions, gamification data, and settings.
  */
@@ -763,7 +763,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `tutorflow_backup_${new Date().toISOString().split('T')[0]}.json`;
+        a.download = `vellor_backup_${new Date().toISOString().split('T')[0]}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

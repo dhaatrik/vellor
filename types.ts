@@ -1,6 +1,6 @@
 /**
  * @file types.ts
- * This file contains the core TypeScript types and interfaces used throughout the TutorFlow application.
+ * This file contains the core TypeScript types and interfaces used throughout the Vellor application.
  * It defines the shape of data for students, transactions, gamification, settings, and more.
  */
 
