@@ -5,7 +5,7 @@
 **Manage your tutoring business like a pro.**
 
 [![CI](https://github.com/DhaatuTheGamer/Vellor/actions/workflows/ci.yml/badge.svg)](https://github.com/DhaatuTheGamer/Vellor/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-3.0.0-8b5cf6)](https://github.com/DhaatuTheGamer/Vellor)
+[![Version](https://img.shields.io/badge/version-3.5.0-8b5cf6)](https://github.com/DhaatuTheGamer/Vellor)
 [![License: MIT](https://img.shields.io/badge/License-MIT-10b981.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white)](https://react.dev/)
@@ -57,6 +57,8 @@ Most tutoring management tools are either too complex, too expensive, or require
 - **Payment Statuses** — Automatically categorized as `Paid`, `Due`, `Partially Paid`, or `Overpaid`.
 - **Dashboard Overview** — At-a-glance cards showing monthly income, unpaid fees, active students, and overdue alerts.
 - **Income Charts** — 6-month interactive area chart for income and student growth trends.
+- **CSV & PDF Export** — Instantly export your financial data to CSV for tax season, or generate professional PDF invoices directly from the dashboard.
+- **Calendar View** — Visualize your schedule with a color-coded calendar view of all your lessons and payments.
 
 ### 🎮 Gamification
 - **Points System** — Earn points for adding students, logging payments, and clearing debts.
@@ -66,10 +68,11 @@ Most tutoring management tools are either too complex, too expensive, or require
 - **Confetti Celebrations** — Achievement unlocks are accompanied by confetti animations 🎉
 
 ### 🔒 Privacy & Data Control
-- **100% Offline** — No server, no database, no tracking. All data is stored locally in your browser.
+- **100% Offline (PWA)** — Install Vellor directly to your device as a Progressive Web App. No server, no database, no tracking. All data is stored locally in your browser and works completely offline.
 - **Export & Import** — Back up your data to a JSON file and restore it anytime.
+- **Automated Backup Alerts** — Vellor tracks your backup habits and gently reminds you to secure your data every 14 days.
 - **Secure Reset** — Wipe all application data with one click.
-- **Encrypted Storage** — Data is encrypted before being saved to `localStorage`.
+- **Encrypted Storage** — Data is encrypted with AES-GCM before being saved to `localStorage`. Includes a secure "Recovery Key" fallback.
 
 ### 🎨 Design & UX
 - **Dark / Light Mode** — Toggle between themes with smooth transitions.
@@ -275,7 +278,7 @@ To verify the production build:
 npm run build
 ```
 
-> **Note:** Unit and integration tests are planned for a future release. Contributions to add a testing framework (e.g., Vitest + React Testing Library) are welcome!
+> **Note:** Vitest is now integrated! We have automated testing coverage for core financial derivations and gamification boundary logic. Contributions to expand the testing suite are always welcome.
 
 ---
 
@@ -284,11 +287,11 @@ npm run build
 Planned features for future releases:
 
 - [ ] **Cloud Sync** — Sync data across devices via Firebase or Supabase
-- [ ] **Calendar View** — Visual scheduling for lessons and due dates
-- [ ] **PDF Invoices** — Generate professional invoices for parents
+- [x] **Calendar View** — Visual scheduling for lessons and due dates
+- [x] **PDF Invoices** — Generate professional invoices for parents
 - [ ] **Advanced Analytics** — Trend analysis, student retention metrics, and forecasting
-- [ ] **Unit Tests** — Vitest + React Testing Library coverage
-- [ ] **PWA Support** — Install Vellor as a native-like app on mobile
+- [x] **Unit Tests** — Vitest + React Testing Library coverage
+- [x] **PWA Support** — Install Vellor as a native-like app on mobile
 
 ---
 

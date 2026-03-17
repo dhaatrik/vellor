@@ -162,6 +162,7 @@ export const ProfilePage: React.FC = () => {
           Export your data for backup, or import a previous backup. Resetting will permanently delete all data.
         </p>
         <div className="flex flex-wrap gap-3">
+            <Button onClick={useStore(s => s.exportTransactionsCSV)} variant="outline" leftIcon="document-text" className="rounded-full border-accent text-accent hover:bg-accent/10">Export CSV (Taxes)</Button>
             <Button onClick={exportData} variant="outline" leftIcon="share" className="rounded-full">Export Data</Button>
             <Button onClick={() => fileInputRef.current?.click()} variant="outline" leftIcon="arrow-right" className="rounded-full">Import Data</Button>
             <input type="file" accept=".json" ref={fileInputRef} onChange={handleImportFile} className="hidden" />

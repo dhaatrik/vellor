@@ -5,6 +5,7 @@ import { Transaction, PaymentStatus } from '../types';
 import { Button, Modal, Card, Icon, ConfirmationModal } from '../components/ui';
 import { TransactionForm } from '../components/transactions/TransactionForm';
 import { TransactionListItem } from '../components/transactions/TransactionListItem';
+import { generateInvoicePDF } from '../pdf';
 import { motion } from 'framer-motion';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 
@@ -17,6 +18,7 @@ export const TransactionsPage: React.FC = () => {
   const addTransaction = useStore(s => s.addTransaction);
   const updateTransaction = useStore(s => s.updateTransaction);
   const deleteTransaction = useStore(s => s.deleteTransaction);
+  const addToast = useStore(s => s.addToast);
   const settings = useStore(s => s.settings);
   const getStudentById = useStore(s => s.getStudentById);
   const [showForm, setShowForm] = useState(false);
@@ -56,6 +58,16 @@ export const TransactionsPage: React.FC = () => {
 
   const handleDeleteRequest = (transaction: Transaction) => {
     setConfirmingDelete(transaction);
+  };
+  
+  const handleGenerateInvoice = (transaction: Transaction) => {
+    const student = getStudentById(transaction.studentId);
+    if (student) {
+      generateInvoicePDF(transaction, student, settings);
+      addToast('Invoice generated successfully.', 'success');
+    } else {
+      addToast('Student not found.', 'error');
+    }
   };
   
   const confirmDeletion = () => {
@@ -263,6 +275,7 @@ export const TransactionsPage: React.FC = () => {
                       studentName={student ? `${student.firstName} ${student.lastName}` : 'Unknown Student'}
                       onEdit={handleEditTransaction}
                       onDelete={handleDeleteRequest}
+                      onGenerateInvoice={handleGenerateInvoice}
                       currencySymbol={settings.currencySymbol}
                     />
                   </motion.div>

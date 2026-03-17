@@ -20,7 +20,7 @@ export const deriveKey = async (password: string, salt: Uint8Array): Promise<Cry
     },
     keyMaterial,
     { name: "AES-GCM", length: 256 },
-    false,
+    true,
     ["encrypt", "decrypt"]
   );
 };
@@ -67,4 +67,25 @@ export const decryptObject = async (encryptedBase64: string, key: CryptoKey): Pr
       return null;
     }
   }
+};
+
+export const exportKeyToBase64 = async (key: CryptoKey): Promise<string> => {
+  const exported = await crypto.subtle.exportKey("raw", key);
+  const exportedArray = Array.from(new Uint8Array(exported));
+  return btoa(String.fromCharCode(...exportedArray));
+};
+
+export const importKeyFromBase64 = async (base64Str: string): Promise<CryptoKey> => {
+  const raw = atob(base64Str);
+  const keyData = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) {
+    keyData[i] = raw.charCodeAt(i);
+  }
+  return crypto.subtle.importKey(
+    "raw",
+    keyData,
+    { name: "AES-GCM", length: 256 },
+    true,
+    ["encrypt", "decrypt"]
+  );
 };

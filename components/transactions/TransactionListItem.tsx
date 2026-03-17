@@ -18,11 +18,13 @@ interface TransactionListItemProps {
   onDelete: (transaction: Transaction) => void;
   /** Current currency symbol. */
   currencySymbol: string;
+  /** Callback to generate an invoice. */
+  onGenerateInvoice?: (transaction: Transaction) => void;
 }
 /**
  * Displays a summary of a single transaction in a list.
  */
-export const TransactionListItem: React.FC<TransactionListItemProps> = React.memo(({ transaction, studentName, onEdit, onDelete, currencySymbol }) => {
+export const TransactionListItem: React.FC<TransactionListItemProps> = React.memo(({ transaction, studentName, onEdit, onDelete, onGenerateInvoice, currencySymbol }) => {
   return (
     <Card className="hover:border-accent/50 transition-colors duration-300 group border border-white/20 dark:border-white/5 shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -70,6 +72,11 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = React.mem
         )}
         
         <div className="mt-4 pt-4 border-t border-gray-100 dark:border-white/5 flex gap-2 justify-end opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            {onGenerateInvoice && (
+              <Button variant="ghost" size="sm" onClick={() => onGenerateInvoice(transaction)} className="!p-2 rounded-full text-gray-400 hover:text-accent hover:bg-accent/10" aria-label="Generate invoice">
+                <Icon iconName="document-text" className="w-5 h-5" />
+              </Button>
+            )}
             <Button variant="ghost" size="sm" onClick={() => onEdit(transaction)} className="!p-2 rounded-full text-gray-400 hover:text-accent hover:bg-accent/10" aria-label="Edit transaction">
               <Icon iconName="pencil" className="w-5 h-5" />
             </Button>
