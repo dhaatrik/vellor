@@ -79,7 +79,7 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ isOpen, onClose })
                 <h2 className="text-2xl font-display font-bold text-gray-900 dark:text-white flex items-center gap-2">
                   <span className="text-accent">⚡</span> Quick Log
                 </h2>
-                <button onClick={onClose} className="p-2 bg-gray-100 dark:bg-white/5 rounded-full text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
+                <button onClick={onClose} aria-label="Close Quick Log" className="p-2 bg-gray-100 dark:bg-white/5 rounded-full text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
                   <Icon iconName="x-mark" className="w-5 h-5" />
                 </button>
               </div>
