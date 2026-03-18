@@ -20,7 +20,6 @@ export const TransactionsPage: React.FC = () => {
   const deleteTransaction = useStore(s => s.deleteTransaction);
   const addToast = useStore(s => s.addToast);
   const settings = useStore(s => s.settings);
-  const getStudentById = useStore(s => s.getStudentById);
   const [showForm, setShowForm] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | undefined>(undefined);
   const [confirmingDelete, setConfirmingDelete] = useState<Transaction | null>(null);
@@ -60,8 +59,16 @@ export const TransactionsPage: React.FC = () => {
     setConfirmingDelete(transaction);
   };
   
+  const studentsMap = useMemo(() => {
+    const map = new Map<string, typeof students[0]>();
+    for (const student of students) {
+      map.set(student.id, student);
+    }
+    return map;
+  }, [students]);
+
   const handleGenerateInvoice = (transaction: Transaction) => {
-    const student = getStudentById(transaction.studentId);
+    const student = studentsMap.get(transaction.studentId);
     if (student) {
       generateInvoicePDF(transaction, student, settings);
       addToast('Invoice generated successfully.', 'success');
@@ -77,9 +84,16 @@ export const TransactionsPage: React.FC = () => {
     }
   };
   
-  const sortedTransactions = useMemo(() => 
-    [...transactions].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
-  [transactions]);
+  const sortedTransactions = useMemo(() => {
+    // Pre-compute timestamps for faster sorting (Schwartzian transform)
+    const withTimestamps = transactions.map(t => ({
+      t,
+      timestamp: new Date(t.date).getTime()
+    }));
+    return withTimestamps
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .map(item => item.t);
+  }, [transactions]);
 
   const filteredTransactions = useMemo(() => {
     let result = sortedTransactions;
@@ -104,7 +118,7 @@ export const TransactionsPage: React.FC = () => {
     if (searchQuery) {
         const query = searchQuery.toLowerCase();
         result = result.filter(t => {
-            const student = getStudentById(t.studentId);
+            const student = studentsMap.get(t.studentId);
             if (!student) return false;
             const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
             return fullName.includes(query);
@@ -120,7 +134,7 @@ export const TransactionsPage: React.FC = () => {
     }
 
     return result;
-  }, [sortedTransactions, activeFilter, searchQuery, dateRange, getStudentById]);
+  }, [sortedTransactions, activeFilter, searchQuery, dateRange, studentsMap]);
 
   const parentRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -254,7 +268,7 @@ export const TransactionsPage: React.FC = () => {
           >
             {rowVirtualizer.getVirtualItems().map((virtualRow) => {
               const t = filteredTransactions[virtualRow.index];
-              const student = getStudentById(t.studentId);
+              const student = studentsMap.get(t.studentId);
               return (
                 <div
                   key={t.id}
