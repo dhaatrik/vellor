@@ -158,8 +158,18 @@ export const createGamificationSlice: StateCreator<AppState, [], [], Gamificatio
                 if (transactions.length >= 100) justAchieved = true;
                 break;
             case AchievementId.RateDiversifier:
-                const rateTypes = new Set(students.map(s => s.tuition?.rateType).filter(Boolean));
-                if (rateTypes.has('hourly') && rateTypes.has('per_lesson') && rateTypes.has('monthly')) justAchieved = true;
+                let hasHourly = false, hasPerLesson = false, hasMonthly = false;
+                for (let i = 0; i < students.length; i++) {
+                    const type = students[i].tuition?.rateType;
+                    if (type === 'hourly') hasHourly = true;
+                    else if (type === 'per_lesson') hasPerLesson = true;
+                    else if (type === 'monthly') hasMonthly = true;
+
+                    if (hasHourly && hasPerLesson && hasMonthly) {
+                        justAchieved = true;
+                        break;
+                    }
+                }
                 break;
         }
 
