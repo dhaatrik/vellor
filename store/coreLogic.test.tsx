@@ -3,6 +3,10 @@ import { renderHook } from '@testing-library/react';
 import { useStore, useDerivedData } from '../store';
 import { PaymentStatus, AchievementId } from '../types';
 
+vi.mock('canvas-confetti', () => {
+    return { default: vi.fn() };
+});
+
 beforeEach(() => {
   // Reset store
   useStore.setState({
@@ -81,11 +85,6 @@ describe('useDerivedData Hook', () => {
 });
 
 describe('Gamification Logic (checkAndAwardAchievements)', () => {
-    // Mock confetti to prevent errors in Node environment
-    vi.mock('canvas-confetti', () => {
-       return { default: vi.fn() };
-    });
-
     it('awards First Student Added achievement', () => {
         useStore.setState({
             students: [{ id: '1', firstName: 'John', lastName: 'Doe', country: 'US', createdAt: '' } as any]
