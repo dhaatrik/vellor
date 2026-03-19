@@ -57,17 +57,20 @@ export const DashboardPage: React.FC = () => {
       const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
       const monthName = d.toLocaleString('default', { month: 'short' });
       
+      const targetYear = d.getFullYear();
+      const targetMonth = d.getMonth();
       const income = transactions.reduce((acc, t) => {
         const tDate = new Date(t.date);
-        if (tDate.getFullYear() === d.getFullYear() && tDate.getMonth() === d.getMonth() && (t.status === PaymentStatus.Paid || t.status === PaymentStatus.PartiallyPaid || t.status === PaymentStatus.Overpaid)) {
+        if (tDate.getFullYear() === targetYear && tDate.getMonth() === targetMonth && (t.status === PaymentStatus.Paid || t.status === PaymentStatus.PartiallyPaid || t.status === PaymentStatus.Overpaid)) {
           return acc + t.amountPaid;
         }
         return acc;
       }, 0);
 
+      const studentTargetDate = new Date(today.getFullYear(), today.getMonth() - i + 1, 0);
       const studentsCount = students.filter(s => {
-        const sDate = new Date(s.createdAt || new Date());
-        return sDate <= new Date(today.getFullYear(), today.getMonth() - i + 1, 0);
+        const sDate = new Date(s.createdAt || Date.now());
+        return sDate <= studentTargetDate;
       }).length;
 
       data.push({ name: monthName, income, students: studentsCount });
