@@ -61,9 +61,6 @@ export const decryptObject = async (encryptedBase64: string, key: CryptoKey): Pr
       const decodedData = decodeURIComponent(escape(atob(encryptedBase64))); 
       return JSON.parse(decodedData);
     } catch (oldError) {
-      if (encryptedBase64 !== null && encryptedBase64 !== '') {
-          return JSON.parse(encryptedBase64);
-      }
       return null;
     }
   }
