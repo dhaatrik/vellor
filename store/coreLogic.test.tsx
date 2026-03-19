@@ -3,6 +3,10 @@ import { renderHook } from '@testing-library/react';
 import { useStore, useDerivedData } from '../store';
 import { PaymentStatus, AchievementId } from '../types';
 
+vi.mock('canvas-confetti', () => {
+    return { default: vi.fn() };
+});
+
 beforeEach(() => {
   // Reset store
   useStore.setState({

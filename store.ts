@@ -90,27 +90,38 @@ export const useDerivedData = () => {
     return acc;
   }, 0), [transactions]);
 
-  const totalPaidThisMonth = useMemo(() => transactions.reduce((acc, t) => {
-    const transactionDate = new Date(t.date);
+  const totalPaidThisMonth = useMemo(() => {
+    // ⚡ Bolt Performance: Hoist loop-invariant Date and extraction
     const today = new Date();
-    if (
-      transactionDate.getFullYear() === today.getFullYear() &&
-      transactionDate.getMonth() === today.getMonth() &&
-      (t.status === PaymentStatus.Paid || t.status === PaymentStatus.PartiallyPaid || t.status === PaymentStatus.Overpaid)
-    ) {
-      return acc + t.amountPaid;
-    }
-    return acc;
-  }, 0), [transactions]);
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth();
+
+    return transactions.reduce((acc, t) => {
+      // ⚡ Bolt Performance: Check status before creating expensive Date objects
+      if (t.status === PaymentStatus.Paid || t.status === PaymentStatus.PartiallyPaid || t.status === PaymentStatus.Overpaid) {
+        const transactionDate = new Date(t.date);
+        if (transactionDate.getFullYear() === currentYear && transactionDate.getMonth() === currentMonth) {
+          return acc + t.amountPaid;
+        }
+      }
+      return acc;
+    }, 0);
+  }, [transactions]);
 
   const activeStudentsCount = useMemo(() => students.length, [students]);
 
-  const overduePayments = useMemo(() => transactions.filter(t => {
-    const isOverdueStatus = t.status === PaymentStatus.Due || (t.status === PaymentStatus.PartiallyPaid && t.amountPaid < t.lessonFee);
+  const overduePayments = useMemo(() => {
+    // ⚡ Bolt Performance: Hoist loop-invariant Date processing
     const today = new Date();
-    today.setHours(0,0,0,0); 
-    return isOverdueStatus && new Date(t.date) < today;
-  }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()), [transactions]);
+    today.setHours(0, 0, 0, 0);
+    const todayTime = today.getTime();
+
+    return transactions.filter(t => {
+      const isOverdueStatus = t.status === PaymentStatus.Due || (t.status === PaymentStatus.PartiallyPaid && t.amountPaid < t.lessonFee);
+      // ⚡ Bolt Performance: Check status before parsing Date
+      return isOverdueStatus && new Date(t.date).getTime() < todayTime;
+    }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [transactions]);
 
   return {
     totalUnpaid,
