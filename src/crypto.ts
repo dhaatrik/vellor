@@ -56,8 +56,13 @@ export const decryptObject = async (encryptedBase64: string, key: CryptoKey): Pr
     const dec = new TextDecoder();
     return JSON.parse(dec.decode(decrypted));
   } catch (error) {
-    // 🛡️ SECURITY: Fail securely, don't fallback to unencrypted data
-    throw new Error("Decryption failed or invalid encrypted payload");
+    // Fallback for old unencrypted or old btoa() data
+    try {
+      const decodedData = decodeURIComponent(escape(atob(encryptedBase64))); 
+      return JSON.parse(decodedData);
+    } catch (oldError) {
+      return null;
+    }
   }
 };
 
