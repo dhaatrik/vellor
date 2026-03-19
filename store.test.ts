@@ -1,6 +1,10 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useStore } from './store';
 import { PaymentStatus } from './types';
+
+vi.mock('canvas-confetti', () => {
+    return { default: vi.fn() };
+});
 
 describe('Zustand Store - Students and Transactions', () => {
     beforeEach(() => {
