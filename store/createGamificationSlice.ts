@@ -81,13 +81,20 @@ export const createGamificationSlice: StateCreator<AppState, [], [], Gamificatio
                 if (ach.id === AchievementId.First5000Earned && totalEarnedOverall >= 5000) justAchieved = true;
                 break;
             case AchievementId.DebtDemolisher:
-                const currentOverdue = transactions.filter(t => {
+                const now = Date.now();
+                const hasOverdue = transactions.some(t => {
                     const isDue = t.status === PaymentStatus.Due || (t.status === PaymentStatus.PartiallyPaid && (t.amountPaid || 0) < (t.lessonFee || 0));
+                    if (!isDue) return false;
                     try {
-                        return isDue && (new Date().getTime() - new Date(t.date).getTime()) > 24 * 60 * 60 * 1000;
+                        const txDateMs = typeof t.date === 'string' ? Date.parse(t.date) : new Date(t.date).getTime();
+                        if (isNaN(txDateMs)) return false;
+                        return (now - txDateMs) > 24 * 60 * 60 * 1000;
                     } catch (e) { return false; }
                 });
-                if (currentOverdue.length === 0 && transactions.some(t => t.status === PaymentStatus.Paid)) justAchieved = true;
+
+                if (!hasOverdue && transactions.some(t => t.status === PaymentStatus.Paid)) {
+                    justAchieved = true;
+                }
                 break;
             case AchievementId.SevenDayStreak:
                 if (gamification.streak >= 7) justAchieved = true;
@@ -121,14 +128,19 @@ export const createGamificationSlice: StateCreator<AppState, [], [], Gamificatio
                 if (transactions.some(t => t.status === PaymentStatus.Overpaid)) justAchieved = true;
                 break;
             case AchievementId.BusyBee:
-                const dateCounts = transactions.reduce((acc, t) => {
+                const dateCounts: Record<string, number> = {};
+                for (let i = 0; i < transactions.length; i++) {
                     try {
+                        const t = transactions[i];
                         const dateStr = new Date(t.date).toISOString().split('T')[0];
-                        acc[dateStr] = (acc[dateStr] || 0) + 1;
+                        const count = (dateCounts[dateStr] || 0) + 1;
+                        dateCounts[dateStr] = count;
+                        if (count >= 3) {
+                            justAchieved = true;
+                            break;
+                        }
                     } catch (e) { }
-                    return acc;
-                }, {} as Record<string, number>);
-                if (Object.values(dateCounts).some(count => count >= 3)) justAchieved = true;
+                }
                 break;
             case AchievementId.SubjectMaster:
                 const uniqueSubjects = new Set<string>();
@@ -142,11 +154,18 @@ export const createGamificationSlice: StateCreator<AppState, [], [], Gamificatio
                 if (uniqueSubjects.size >= 3) justAchieved = true;
                 break;
             case AchievementId.LoyalScholar:
-                const studentTxCounts = transactions.reduce((acc, t) => {
-                    if (t.studentId) acc[t.studentId] = (acc[t.studentId] || 0) + 1;
-                    return acc;
-                }, {} as Record<string, number>);
-                if (Object.values(studentTxCounts).some(count => count >= 10)) justAchieved = true;
+                const studentTxCounts: Record<string, number> = {};
+                for (let i = 0; i < transactions.length; i++) {
+                    const sid = transactions[i].studentId;
+                    if (sid) {
+                        const count = (studentTxCounts[sid] || 0) + 1;
+                        studentTxCounts[sid] = count;
+                        if (count >= 10) {
+                            justAchieved = true;
+                            break;
+                        }
+                    }
+                }
                 break;
             case AchievementId.HighTicket:
                 if (transactions.some(t => (t.amountPaid || 0) >= 150)) justAchieved = true;
@@ -158,8 +177,18 @@ export const createGamificationSlice: StateCreator<AppState, [], [], Gamificatio
                 if (transactions.length >= 100) justAchieved = true;
                 break;
             case AchievementId.RateDiversifier:
-                const rateTypes = new Set(students.map(s => s.tuition?.rateType).filter(Boolean));
-                if (rateTypes.has('hourly') && rateTypes.has('per_lesson') && rateTypes.has('monthly')) justAchieved = true;
+                let hasHourly = false, hasPerLesson = false, hasMonthly = false;
+                for (let i = 0; i < students.length; i++) {
+                    const type = students[i].tuition?.rateType;
+                    if (type === 'hourly') hasHourly = true;
+                    else if (type === 'per_lesson') hasPerLesson = true;
+                    else if (type === 'monthly') hasMonthly = true;
+
+                    if (hasHourly && hasPerLesson && hasMonthly) {
+                        justAchieved = true;
+                        break;
+                    }
+                }
                 break;
         }
 

@@ -42,7 +42,12 @@ export const createDataManagementSlice: StateCreator<AppState, [], [], DataManag
         try {
             const result = event.target?.result;
             if (typeof result !== 'string') { throw new Error('File could not be read.'); }
-            const data = JSON.parse(result);
+            const data = JSON.parse(result, (key, value) => {
+                if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+                    return undefined;
+                }
+                return value;
+            });
             if (
                 data &&
                 typeof data === 'object' &&

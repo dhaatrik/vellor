@@ -57,17 +57,28 @@ export const DashboardPage: React.FC = () => {
       const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
       const monthName = d.toLocaleString('default', { month: 'short' });
       
+      // ⚡ Bolt Performance: Hoist loop-invariant year and month calculations
+      const targetYear = d.getFullYear();
+      const targetMonth = d.getMonth();
+
       const income = transactions.reduce((acc, t) => {
-        const tDate = new Date(t.date);
-        if (tDate.getFullYear() === d.getFullYear() && tDate.getMonth() === d.getMonth() && (t.status === PaymentStatus.Paid || t.status === PaymentStatus.PartiallyPaid || t.status === PaymentStatus.Overpaid)) {
-          return acc + t.amountPaid;
+        // ⚡ Bolt Performance: Check status before creating expensive Date objects
+        if (t.status === PaymentStatus.Paid || t.status === PaymentStatus.PartiallyPaid || t.status === PaymentStatus.Overpaid) {
+          const tDate = new Date(t.date);
+          if (tDate.getFullYear() === targetYear && tDate.getMonth() === targetMonth) {
+            return acc + t.amountPaid;
+          }
         }
         return acc;
       }, 0);
 
+      // ⚡ Bolt Performance: Hoist loop-invariant threshold Date creation
+      const thresholdDate = new Date(today.getFullYear(), today.getMonth() - i + 1, 0).getTime();
+
       const studentsCount = students.filter(s => {
-        const sDate = new Date(s.createdAt || new Date());
-        return sDate <= new Date(today.getFullYear(), today.getMonth() - i + 1, 0);
+        // ⚡ Bolt Performance: Use Date.now() instead of new Date() for the fallback
+        const sTime = s.createdAt ? new Date(s.createdAt).getTime() : Date.now();
+        return sTime <= thresholdDate;
       }).length;
 
       data.push({ name: monthName, income, students: studentsCount });

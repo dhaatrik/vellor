@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useStore } from './store';
+
+// Mock confetti to prevent errors in Node environment
+vi.mock('canvas-confetti', () => {
+   return { default: vi.fn() };
+});
 import { PaymentStatus } from './types';
 
 vi.mock('canvas-confetti', () => {
