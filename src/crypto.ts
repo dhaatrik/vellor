@@ -58,7 +58,12 @@ export const decryptObject = async (encryptedBase64: string, key: CryptoKey): Pr
   } catch (error) {
     // Fallback for old unencrypted or old btoa() data
     try {
-      const decodedData = decodeURIComponent(escape(atob(encryptedBase64))); 
+      const raw = atob(encryptedBase64);
+      const bytes = new Uint8Array(raw.length);
+      for (let i = 0; i < raw.length; i++) {
+        bytes[i] = raw.charCodeAt(i);
+      }
+      const decodedData = new TextDecoder().decode(bytes);
       return JSON.parse(decodedData);
     } catch (oldError) {
       return null;
