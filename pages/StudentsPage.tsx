@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../store';
-import { Student, Transaction } from '../types';
+import { Student, Transaction, PaymentStatus } from '../types';
 import { Button, Input, Modal, Card, Icon, ConfirmationModal } from '../components/ui';
 import { StudentDetailView } from '../components/students/StudentDetailView';
 import { StudentForm } from '../components/students/StudentForm';
@@ -121,6 +121,19 @@ export const StudentsPage: React.FC = () => {
     );
   }, [students, searchTerm]);
 
+  const outstandingBalances = useMemo(() => {
+    const balances: Record<string, number> = {};
+    for (let i = 0; i < transactions.length; i++) {
+      const t = transactions[i];
+      if (t.status === PaymentStatus.Due) {
+        balances[t.studentId] = (balances[t.studentId] || 0) + t.lessonFee;
+      } else if (t.status === PaymentStatus.PartiallyPaid) {
+        balances[t.studentId] = (balances[t.studentId] || 0) + (t.lessonFee - t.amountPaid);
+      }
+    }
+    return balances;
+  }, [transactions]);
+
   if (selectedStudent && !showStudentForm && !showTransactionFormForStudent) {
     return <StudentDetailView 
                 student={selectedStudent} 
@@ -211,7 +224,7 @@ export const StudentsPage: React.FC = () => {
                   onSelect={handleSelectStudent} 
                   onDelete={handleDeleteRequest} 
                   currencySymbol={settings.currencySymbol}
-                  transactions={transactions}
+                  outstandingBalance={outstandingBalances[s.id] || 0}
                 />
               </motion.div>
             ))}

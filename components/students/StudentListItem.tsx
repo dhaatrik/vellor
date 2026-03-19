@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Student, Transaction, PaymentStatus } from '../../types';
+import { Student } from '../../types';
 import { Button, Card, Icon } from '../ui';
 import { formatCurrency } from '../../helpers';
 
@@ -15,8 +15,8 @@ interface StudentListItemProps {
   onDelete: (student: Student) => void;
   /** Current currency symbol for formatting. */
   currencySymbol: string;
-  /** Array of all transactions to calculate outstanding balance. */
-  transactions: Transaction[];
+  /** Pre-calculated outstanding balance. */
+  outstandingBalance: number;
 }
 
 // Helper to generate a consistent gradient based on a string
@@ -39,17 +39,7 @@ const getGradient = (name: string) => {
 /**
  * Displays a summary of a single student in a list.
  */
-export const StudentListItem: React.FC<StudentListItemProps> = React.memo(({ student, onSelect, onDelete, currencySymbol, transactions }) => {
-  const outstandingBalance = useMemo(() => {
-    return transactions
-      .filter(t => t.studentId === student.id)
-      .reduce((acc, t) => {
-        if (t.status === PaymentStatus.Due) return acc + t.lessonFee;
-        if (t.status === PaymentStatus.PartiallyPaid) return acc + (t.lessonFee - t.amountPaid);
-        return acc;
-      }, 0);
-  }, [transactions, student.id]);
-
+export const StudentListItem: React.FC<StudentListItemProps> = React.memo(({ student, onSelect, onDelete, currencySymbol, outstandingBalance }) => {
   const gradientClass = useMemo(() => getGradient(student.firstName + student.lastName), [student.firstName, student.lastName]);
 
   return (
@@ -63,7 +53,7 @@ export const StudentListItem: React.FC<StudentListItemProps> = React.memo(({ stu
                 <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{student.contact.email || 'No email provided'}</p>
             </div>
         </div>
-        
+
         <div className="mt-auto pt-4 border-t border-gray-100 dark:border-white/5 flex items-center justify-between">
             <div>
                 <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Outstanding</p>
@@ -72,10 +62,10 @@ export const StudentListItem: React.FC<StudentListItemProps> = React.memo(({ stu
                 </p>
             </div>
             <div className="flex gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={(e) => { e.stopPropagation(); onDelete(student); }} 
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => { e.stopPropagation(); onDelete(student); }}
                   className="!p-2 rounded-full text-gray-400 hover:text-danger hover:bg-danger/10"
                   aria-label="Delete student"
                 >
