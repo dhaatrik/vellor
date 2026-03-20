@@ -15,8 +15,6 @@ export const BackupPromptModal: React.FC = () => {
       const now = new Date();
 
       if (!lastBackupDateStr) {
-        // If they never backed up and they have students/transactions, maybe prompt them?
-        // Let's assume they should. But maybe not on the very first visit.
         const students = useStore.getState().students;
         if (students.length > 0) {
             setIsOpen(true);
@@ -45,8 +43,6 @@ export const BackupPromptModal: React.FC = () => {
   };
 
   const handleDismiss = () => {
-    // If they dismiss, we reset the timer for another 14 days or maybe just 1 day?
-    // Let's remind them tomorrow if they dismiss.
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() - (BACKUP_INTERVAL_DAYS - 1));
     localStorage.setItem('lastBackupDate', tomorrow.toISOString());
