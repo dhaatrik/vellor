@@ -160,7 +160,7 @@ describe('Zustand Store - Student Slice - updateStudent', () => {
         notes: '<p>Malicious notes</p>'
     });
 
-    expect(updatedStudent?.firstName).toBe('alert("XSS")Johnny');
+    expect(updatedStudent?.firstName).toBe('Johnny');
     expect(updatedStudent?.lastName).toBe('Doe');
     expect(updatedStudent?.notes).toBe('Malicious notes');
   });

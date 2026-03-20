@@ -1,11 +1,12 @@
 import { StateCreator } from 'zustand';
+import DOMPurify from 'dompurify';
 import { AppState, StudentSlice } from './types';
 import { Student, StudentFormData } from '../types';
 import { POINTS_ALLOCATION } from '../constants';
 
 const sanitizeString = (str: string | undefined): string => {
   if (str === undefined) return '';
-  return str.replace(/<[^>]*>/g, '');
+  return DOMPurify.sanitize(str, { ALLOWED_TAGS: [] });
 };
 
 export const createStudentSlice: StateCreator<AppState, [], [], StudentSlice> = (set, get) => ({
