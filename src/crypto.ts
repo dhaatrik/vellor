@@ -40,7 +40,7 @@ export const encryptObject = async (obj: any, key: CryptoKey): Promise<string> =
   return btoa(JSON.stringify({ iv: ivArray, ct: cipherArray }));
 };
 
-export const decryptObject = async (encryptedBase64: string, key: CryptoKey): Promise<any> => {
+export const decryptObject = async <T = any>(encryptedBase64: string, key: CryptoKey, schema?: import('zod').ZodSchema<T>): Promise<T | null> => {
   try {
     const parsed = JSON.parse(atob(encryptedBase64));
     if (!parsed.iv || !parsed.ct) {
@@ -54,7 +54,8 @@ export const decryptObject = async (encryptedBase64: string, key: CryptoKey): Pr
       ctArray
     );
     const dec = new TextDecoder();
-    return JSON.parse(dec.decode(decrypted));
+    const parsedData = JSON.parse(dec.decode(decrypted));
+    return schema ? schema.parse(parsedData) : parsedData;
   } catch (error) {
     // Fallback for old unencrypted or old btoa() data
     try {
@@ -64,7 +65,8 @@ export const decryptObject = async (encryptedBase64: string, key: CryptoKey): Pr
         bytes[i] = raw.charCodeAt(i);
       }
       const decodedData = new TextDecoder().decode(bytes);
-      return JSON.parse(decodedData);
+      const parsedData = JSON.parse(decodedData);
+      return schema ? schema.parse(parsedData) : parsedData;
     } catch (oldError) {
       return null;
     }

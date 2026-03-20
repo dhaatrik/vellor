@@ -9,6 +9,7 @@ import localforage from 'localforage';
 import { useMemo } from 'react';
 import { encryptObject, decryptObject } from './src/crypto';
 import { PaymentStatus } from './types';
+import { z } from 'zod';
 
 // Slice Imports
 import { AppState } from './store/types';
@@ -29,6 +30,21 @@ export const setGlobalMasterKey = (key: CryptoKey | null) => {
   globalMasterKey = key;
 };
 
+// Zustand Persist State Schema for Vellor
+// We validate the structure to ensure data integrity after decryption
+const persistSchema = z.object({
+  state: z.object({
+    students: z.array(z.any()).optional(),
+    transactions: z.array(z.any()).optional(),
+    gamification: z.any().optional(),
+    achievements: z.array(z.any()).optional(),
+    settings: z.any().optional(),
+    toasts: z.array(z.any()).optional(),
+    activityLog: z.array(z.any()).optional(),
+  }).catchall(z.any()),
+  version: z.number().optional()
+}).catchall(z.any());
+
 // Custom Storage Engine for Zustand Persist using localforage + encryption
 const storageEngine = {
   getItem: async (name: string): Promise<string | null> => {
@@ -37,7 +53,7 @@ const storageEngine = {
     
     if (globalMasterKey) {
       try {
-        const obj = await decryptObject(raw, globalMasterKey);
+        const obj = await decryptObject(raw, globalMasterKey, persistSchema);
         return JSON.stringify(obj);
       } catch (error) {
         console.error("Decryption failed", error);
