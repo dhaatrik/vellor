@@ -53,6 +53,7 @@ export const DashboardPage: React.FC = () => {
   const chartData = useMemo(() => {
     const data = [];
     const today = new Date();
+    const now = Date.now();
     for (let i = 5; i >= 0; i--) {
       const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
       const monthName = d.toLocaleString('default', { month: 'short' });
@@ -77,7 +78,7 @@ export const DashboardPage: React.FC = () => {
 
       const studentsCount = students.filter(s => {
         // ⚡ Bolt Performance: Use Date.now() instead of new Date() for the fallback
-        const sTime = s.createdAt ? new Date(s.createdAt).getTime() : Date.now();
+        const sTime = s.createdAt ? new Date(s.createdAt).getTime() : now;
         return sTime <= thresholdDate;
       }).length;
 
