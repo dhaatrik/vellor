@@ -9,13 +9,24 @@ def run():
         page = context.new_page()
 
         try:
-            # Navigate to the app (assuming it runs on port 5173 from memory)
-            page.goto("http://localhost:5173")
+            # Navigate to the app (assuming it runs on port 4173 from memory)
+            page.goto("http://localhost:4173")
             page.wait_for_timeout(1000)
+
+            # Check if we are on the Set Master Password page
+            if page.get_by_text("Set Master Password").is_visible():
+                page.get_by_placeholder("Master Password").fill("testpassword")
+                page.get_by_role("button", name="Set Password & Start").click()
+                page.wait_for_timeout(1000)
+
+            # Check for Recovery Key
+            if page.get_by_role("button", name="I have safely stored my recovery key").is_visible():
+                page.get_by_role("button", name="I have safely stored my recovery key").click()
+                page.wait_for_timeout(1000)
 
             # Check if we are on WelcomePage and need to enter a name
             if page.get_by_text("Welcome to Vellor").is_visible():
-                page.get_by_placeholder("Enter your name").fill("Bolt")
+                page.get_by_placeholder("e.g., Rahul Sharma").fill("Bolt")
                 page.get_by_role("button", name="Get Started").click()
                 page.wait_for_timeout(1000)
 

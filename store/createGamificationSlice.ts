@@ -73,9 +73,12 @@ export const createGamificationSlice: StateCreator<AppState, [], [], Gamificatio
             case AchievementId.First100Earned:
             case AchievementId.First1000Earned:
             case AchievementId.First5000Earned:
-                const totalEarnedOverall = transactions
-                    .filter(t => t.status === PaymentStatus.Paid || t.status === PaymentStatus.Overpaid || t.status === PaymentStatus.PartiallyPaid)
-                    .reduce((sum, t) => sum + (t.amountPaid || 0), 0);
+                const totalEarnedOverall = transactions.reduce((sum, t) => {
+                    if (t.status === PaymentStatus.Paid || t.status === PaymentStatus.Overpaid || t.status === PaymentStatus.PartiallyPaid) {
+                        return sum + (t.amountPaid || 0);
+                    }
+                    return sum;
+                }, 0);
                 if (ach.id === AchievementId.First100Earned && totalEarnedOverall >= 100) justAchieved = true;
                 if (ach.id === AchievementId.First1000Earned && totalEarnedOverall >= 1000) justAchieved = true;
                 if (ach.id === AchievementId.First5000Earned && totalEarnedOverall >= 5000) justAchieved = true;
@@ -86,7 +89,7 @@ export const createGamificationSlice: StateCreator<AppState, [], [], Gamificatio
                     const isDue = t.status === PaymentStatus.Due || (t.status === PaymentStatus.PartiallyPaid && (t.amountPaid || 0) < (t.lessonFee || 0));
                     if (!isDue) return false;
                     try {
-                        const txDateMs = typeof t.date === 'string' ? Date.parse(t.date) : new Date(t.date).getTime();
+                        const txDateMs = typeof t.date === 'number' ? t.date : (typeof t.date === 'string' ? Date.parse(t.date) : new Date(t.date).getTime());
                         if (isNaN(txDateMs)) return false;
                         return (now - txDateMs) > 24 * 60 * 60 * 1000;
                     } catch (e) { return false; }
@@ -113,9 +116,10 @@ export const createGamificationSlice: StateCreator<AppState, [], [], Gamificatio
                 const currentYear = new Date().getFullYear();
                 const paidThisMonth = transactions
                     .filter(t => {
+                        if (t.status !== PaymentStatus.Paid && t.status !== PaymentStatus.PartiallyPaid && t.status !== PaymentStatus.Overpaid) return false;
                         try {
                             const d = new Date(t.date);
-                            return d.getMonth() === currentMonth && d.getFullYear() === currentYear && (t.status === PaymentStatus.Paid || t.status === PaymentStatus.PartiallyPaid || t.status === PaymentStatus.Overpaid);
+                            return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
                         } catch (e) { return false; }
                     })
                     .reduce((sum, t) => sum + (t.amountPaid || 0), 0);
