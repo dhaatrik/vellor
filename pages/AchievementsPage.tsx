@@ -16,10 +16,11 @@ export const AchievementsPage: React.FC = () => {
   const transactions = useStore(s => s.transactions);
   const settings = useStore(s => s.settings);
   
-  const achievedList = achievements
+  const achievedList = useMemo(() => achievements
     .filter(a => a.achieved)
-    .sort((a,b) => new Date(b.dateAchieved || 0).getTime() - new Date(a.dateAchieved || 0).getTime());
-  const pendingList = achievements.filter(a => !a.achieved);
+    .sort((a,b) => new Date(b.dateAchieved || 0).getTime() - new Date(a.dateAchieved || 0).getTime()), [achievements]);
+
+  const pendingList = useMemo(() => achievements.filter(a => !a.achieved), [achievements]);
 
   console.log("AchievementsPage render:", { total: achievements.length, achieved: achievedList.length, pending: pendingList.length });
 
