@@ -73,9 +73,12 @@ export const createGamificationSlice: StateCreator<AppState, [], [], Gamificatio
             case AchievementId.First100Earned:
             case AchievementId.First1000Earned:
             case AchievementId.First5000Earned:
-                const totalEarnedOverall = transactions
-                    .filter(t => t.status === PaymentStatus.Paid || t.status === PaymentStatus.Overpaid || t.status === PaymentStatus.PartiallyPaid)
-                    .reduce((sum, t) => sum + (t.amountPaid || 0), 0);
+                const totalEarnedOverall = transactions.reduce((sum, t) => {
+                    if (t.status === PaymentStatus.Paid || t.status === PaymentStatus.Overpaid || t.status === PaymentStatus.PartiallyPaid) {
+                        return sum + (t.amountPaid || 0);
+                    }
+                    return sum;
+                }, 0);
                 if (ach.id === AchievementId.First100Earned && totalEarnedOverall >= 100) justAchieved = true;
                 if (ach.id === AchievementId.First1000Earned && totalEarnedOverall >= 1000) justAchieved = true;
                 if (ach.id === AchievementId.First5000Earned && totalEarnedOverall >= 5000) justAchieved = true;
