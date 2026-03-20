@@ -35,8 +35,18 @@ export const encryptObject = async (obj: any, key: CryptoKey): Promise<string> =
     encoded
   );
   
-  const ivArray = Array.from(iv);
-  const cipherArray = Array.from(new Uint8Array(ciphertext));
+  // Optimization: Pre-allocated arrays are significantly faster than Array.from for TypedArrays
+  const ivArray = new Array(iv.length);
+  for (let i = 0; i < iv.length; i++) {
+    ivArray[i] = iv[i];
+  }
+
+  const uint8Cipher = new Uint8Array(ciphertext);
+  const cipherArray = new Array(uint8Cipher.length);
+  for (let i = 0; i < uint8Cipher.length; i++) {
+    cipherArray[i] = uint8Cipher[i];
+  }
+
   return btoa(JSON.stringify({ iv: ivArray, ct: cipherArray }));
 };
 
@@ -75,7 +85,14 @@ export const decryptObject = async <T = any>(encryptedBase64: string, key: Crypt
 
 export const exportKeyToBase64 = async (key: CryptoKey): Promise<string> => {
   const exported = await crypto.subtle.exportKey("raw", key);
-  const exportedArray = Array.from(new Uint8Array(exported));
+  const uint8Exported = new Uint8Array(exported);
+
+  // Optimization: Pre-allocated arrays are significantly faster than Array.from for TypedArrays
+  const exportedArray = new Array(uint8Exported.length);
+  for (let i = 0; i < uint8Exported.length; i++) {
+    exportedArray[i] = uint8Exported[i];
+  }
+
   return btoa(String.fromCharCode(...exportedArray));
 };
 
