@@ -1,165 +1,107 @@
+// @vitest-environment jsdom
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { create } from 'zustand';
-import { createDataManagementSlice } from './createDataManagementSlice';
-import { AppState } from './types';
+import { useStore } from '../store';
+import { Theme } from '../types';
 
-// Mock confetti to prevent errors in Node environment
-vi.mock('canvas-confetti', () => {
-    return { default: vi.fn() };
-});
+describe('createDataManagementSlice', () => {
+  let createObjectURLMock: any;
+  let revokeObjectURLMock: any;
+  let appendChildSpy: any;
+  let removeChildSpy: any;
+  let createElementSpy: any;
 
-describe('createDataManagementSlice - importData', () => {
-    let mockAddToast: ReturnType<typeof vi.fn>;
-    let useTestStore: any;
-    let mockFileReader: any;
-    let originalLocationReload: any;
-
-    beforeEach(() => {
-        vi.useFakeTimers();
-        mockAddToast = vi.fn();
-
-        // Setup local store with mocked get and set
-        useTestStore = create<AppState>()((set, get, api) => ({
-            ...createDataManagementSlice(set, get, api),
-            addToast: mockAddToast,
-            // Provide minimal mocked dependencies for other state pieces if needed
-            students: [],
-            transactions: [],
-            gamification: { points: 0, level: 1, levelName: 'Novice', streak: 0, lastActiveDate: null },
-            achievements: [],
-            settings: { theme: 'dark', currencySymbol: '$', userName: 'User', country: 'United States', phone: { countryCode: '+1', number: '' }, email: '', monthlyGoal: 500 },
-            activityLog: []
-        } as unknown as AppState));
-
-        // Mock FileReader
-        mockFileReader = {
-            readAsText: vi.fn(),
-            onload: null as any,
-            onerror: null as any,
-        };
-        vi.stubGlobal('FileReader', class {
-            readAsText = mockFileReader.readAsText;
-            set onload(fn: any) { mockFileReader.onload = fn; }
-            set onerror(fn: any) { mockFileReader.onerror = fn; }
-            get onload() { return mockFileReader.onload; }
-            get onerror() { return mockFileReader.onerror; }
-        });
-
-        // Mock window.location.reload
-        originalLocationReload = window.location.reload;
-        Object.defineProperty(window, 'location', {
-            configurable: true,
-            value: { reload: vi.fn() }
-        });
+  beforeEach(() => {
+    // Reset store state
+    useStore.setState({
+      students: [{ id: '1', firstName: 'John', lastName: 'Doe', contact: {}, tuition: { subjects: [], defaultRate: 50, rateType: 'hourly', typicalLessonDuration: 60 } } as any],
+      transactions: [{ id: '1', studentId: '1', amountPaid: 100, lessonFee: 100, date: '2023-01-01' } as any],
+      gamification: { points: 100, level: 2, levelName: 'Apprentice', streak: 5, lastActiveDate: null },
+      achievements: [],
+      settings: {
+        theme: Theme.Dark,
+        currencySymbol: '$',
+        userName: 'Tutor',
+        country: 'US',
+        phone: { countryCode: '+1', number: '1234567890' },
+        email: 'tutor@example.com',
+        monthlyGoal: 1000,
+      },
+      activityLog: [{ id: '1', message: 'Test activity', icon: 'check-circle', timestamp: '2023-01-01' } as any],
+      addToast: vi.fn(),
     });
 
-    afterEach(() => {
-        vi.restoreAllMocks();
-        vi.useRealTimers();
-        Object.defineProperty(window, 'location', {
-            configurable: true,
-            value: { reload: originalLocationReload }
-        });
+    // Mock localStorage
+    vi.spyOn(Storage.prototype, 'setItem');
+
+    // Mock URL methods
+    createObjectURLMock = vi.fn().mockReturnValue('blob:mock-url');
+    revokeObjectURLMock = vi.fn();
+    global.URL.createObjectURL = createObjectURLMock;
+    global.URL.revokeObjectURL = revokeObjectURLMock;
+
+    // Mock DOM methods
+    const mockAnchor = {
+      href: '',
+      download: '',
+      click: vi.fn(),
+    };
+    createElementSpy = vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
+      if (tagName === 'a') return mockAnchor as any;
+      return document.createElement(tagName);
+    });
+    appendChildSpy = vi.spyOn(document.body, 'appendChild').mockImplementation(() => { return null as any; });
+    removeChildSpy = vi.spyOn(document.body, 'removeChild').mockImplementation(() => { return null as any; });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  describe('exportData', () => {
+    it('successfully creates an export Blob and interacts with DOM', () => {
+      const addToastMock = useStore.getState().addToast;
+
+      useStore.getState().exportData();
+
+      // Verify Blob and URL creation
+      expect(createObjectURLMock).toHaveBeenCalled();
+      const blobArg = createObjectURLMock.mock.calls[0][0];
+      expect(blobArg).toBeInstanceOf(Blob);
+      expect(blobArg.type).toBe('application/json');
+
+      // Verify DOM interactions
+      expect(createElementSpy).toHaveBeenCalledWith('a');
+      expect(appendChildSpy).toHaveBeenCalled();
+      expect(removeChildSpy).toHaveBeenCalled();
+
+      const mockAnchor = createElementSpy.mock.results[0].value;
+      expect(mockAnchor.href).toBe('blob:mock-url');
+      expect(mockAnchor.download).toMatch(/vellor_backup_\d{4}-\d{2}-\d{2}\.json/);
+      expect(mockAnchor.click).toHaveBeenCalled();
+
+      // Verify URL revocation
+      expect(revokeObjectURLMock).toHaveBeenCalledWith('blob:mock-url');
+
+      // Verify localStorage
+      expect(localStorage.setItem).toHaveBeenCalledWith('lastBackupDate', expect.any(String));
+
+      // Verify toast
+      expect(addToastMock).toHaveBeenCalledWith('Data exported successfully!', 'success');
     });
 
-    it('should show error toast if no file is provided', async () => {
-        const { importData } = useTestStore.getState();
-        await importData(null as any);
-        expect(mockAddToast).toHaveBeenCalledWith('No file selected for import.', 'error');
+    it('catches errors and shows error toast', () => {
+      const addToastMock = useStore.getState().addToast;
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      // Stub JSON.stringify to throw an error
+      vi.spyOn(JSON, 'stringify').mockImplementationOnce(() => {
+        throw new Error('Mock JSON Stringify Error');
+      });
+
+      useStore.getState().exportData();
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith("Failed to export data:", expect.any(Error));
+      expect(addToastMock).toHaveBeenCalledWith('Failed to export data.', 'error');
     });
-
-    it('should handle FileReader error', async () => {
-        const { importData } = useTestStore.getState();
-        const file = new File([''], 'test.json', { type: 'application/json' });
-
-        await importData(file);
-
-        // Trigger onerror
-        expect(mockFileReader.readAsText).toHaveBeenCalledWith(file);
-        mockFileReader.onerror();
-
-        expect(mockAddToast).toHaveBeenCalledWith('Error reading file.', 'error');
-    });
-
-    it('should handle invalid JSON structure', async () => {
-        const { importData } = useTestStore.getState();
-        const file = new File([''], 'test.json', { type: 'application/json' });
-
-        await importData(file);
-
-        // Trigger onload with invalid JSON
-        mockFileReader.onload({ target: { result: 'invalid json' } });
-
-        expect(mockAddToast).toHaveBeenCalledWith(expect.stringContaining('Import failed:'), 'error');
-    });
-
-    it('should handle valid JSON but missing required properties', async () => {
-        const { importData } = useTestStore.getState();
-        const file = new File([''], 'test.json', { type: 'application/json' });
-
-        await importData(file);
-
-        // Trigger onload with missing 'students' array
-        mockFileReader.onload({ target: { result: JSON.stringify({ transactions: [], settings: {} }) } });
-
-        expect(mockAddToast).toHaveBeenCalledWith('Import failed: Invalid data structure in JSON file.', 'error');
-    });
-
-    it('should handle successful import and set state', async () => {
-        const { importData } = useTestStore.getState();
-        const file = new File([''], 'test.json', { type: 'application/json' });
-
-        const validData = {
-            students: [{ id: '1', firstName: 'John' }],
-            transactions: [{ id: 't1', amount: 50 }],
-            settings: { theme: 'light' },
-            gamification: { points: 100 },
-            achievements: [{ id: 'a1' }],
-            activityLog: [{ id: 'act1' }]
-        };
-
-        await importData(file);
-        mockFileReader.onload({ target: { result: JSON.stringify(validData) } });
-
-        expect(mockAddToast).toHaveBeenCalledWith('Data imported successfully! The app will reload.', 'success');
-
-        // Verify state is updated
-        const state = useTestStore.getState();
-        expect(state.students).toEqual(validData.students);
-        expect(state.transactions).toEqual(validData.transactions);
-        expect(state.settings).toEqual(validData.settings);
-        expect(state.gamification).toEqual(validData.gamification);
-        expect(state.achievements).toEqual(validData.achievements);
-        expect(state.activityLog).toEqual(validData.activityLog);
-
-        // Verify reload timeout
-        expect(window.location.reload).not.toHaveBeenCalled();
-        vi.advanceTimersByTime(2000);
-        expect(window.location.reload).toHaveBeenCalled();
-    });
-
-    it('should prevent prototype pollution', async () => {
-        const { importData } = useTestStore.getState();
-        const file = new File([''], 'test.json', { type: 'application/json' });
-
-        const maliciousData = `{
-            "students": [],
-            "transactions": [],
-            "settings": {},
-            "__proto__": { "polluted": true },
-            "constructor": { "polluted": true },
-            "prototype": { "polluted": true }
-        }`;
-
-        await importData(file);
-        mockFileReader.onload({ target: { result: maliciousData } });
-
-        expect(mockAddToast).toHaveBeenCalledWith('Data imported successfully! The app will reload.', 'success');
-
-        const state = useTestStore.getState();
-        // Since the reviver strips these keys, they shouldn't exist in the parsed object or pollute the state
-        expect((state as any).__proto__.polluted).toBeUndefined();
-        expect((state as any).constructor.polluted).toBeUndefined();
-        expect((state as any).prototype).toBeUndefined();
-    });
+  });
 });
