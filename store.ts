@@ -30,7 +30,7 @@ export const setGlobalMasterKey = (key: CryptoKey | null) => {
 };
 
 // Custom Storage Engine for Zustand Persist using localforage + encryption
-const storageEngine = {
+export const storageEngine = {
   getItem: async (name: string): Promise<string | null> => {
     const raw = await localforage.getItem<string>(name);
     if (!raw) return null;

@@ -53,6 +53,10 @@ export const DashboardPage: React.FC = () => {
   const chartData = useMemo(() => {
     const data = [];
     const today = new Date();
+
+    // ⚡ Bolt Performance: Pre-compute the fallback date outside the loop
+    const fallbackDate = Date.now();
+
     for (let i = 5; i >= 0; i--) {
       const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
       const monthName = d.toLocaleString('default', { month: 'short' });
@@ -76,8 +80,8 @@ export const DashboardPage: React.FC = () => {
       const thresholdDate = new Date(today.getFullYear(), today.getMonth() - i + 1, 0).getTime();
 
       const studentsCount = students.filter(s => {
-        // ⚡ Bolt Performance: Use Date.now() instead of new Date() for the fallback
-        const sTime = s.createdAt ? new Date(s.createdAt).getTime() : Date.now();
+        // ⚡ Bolt Performance: Use pre-computed fallback date
+        const sTime = s.createdAt ? new Date(s.createdAt).getTime() : fallbackDate;
         return sTime <= thresholdDate;
       }).length;
 
