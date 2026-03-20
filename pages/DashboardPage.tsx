@@ -106,6 +106,15 @@ export const DashboardPage: React.FC = () => {
     overscan: 5,
   });
 
+  // ⚡ Bolt Performance: Pre-calculate student lookup map to avoid O(N*M) lookups in virtualized lists
+  const studentMap = useMemo(() => {
+    const map = new Map();
+    for (const student of students) {
+      map.set(student.id, student);
+    }
+    return map;
+  }, [students]);
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -393,7 +402,7 @@ export const DashboardPage: React.FC = () => {
                 <div style={{ height: `${rowVirtualizerOverdue.getTotalSize()}px`, width: '100%', position: 'relative' }}>
                   {rowVirtualizerOverdue.getVirtualItems().map(virtualRow => {
                     const t = overduePayments[virtualRow.index];
-                    const student = students.find(s => s.id === t.studentId);
+                    const student = studentMap.get(t.studentId);
                     return (
                       <div 
                         key={t.id}
