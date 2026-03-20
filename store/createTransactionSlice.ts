@@ -2,11 +2,7 @@ import { StateCreator } from 'zustand';
 import { AppState, TransactionSlice } from './types';
 import { Transaction, TransactionFormData, PaymentStatus } from '../types';
 import { POINTS_ALLOCATION } from '../constants';
-
-const sanitizeString = (str: string | undefined): string => {
-  if (str === undefined) return '';
-  return str.replace(/<[^>]*>/g, '');
-};
+import { sanitizeString } from '../helpers';
 
 export const createTransactionSlice: StateCreator<AppState, [], [], TransactionSlice> = (set, get) => ({
   transactions: [],

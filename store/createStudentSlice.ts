@@ -2,11 +2,7 @@ import { StateCreator } from 'zustand';
 import { AppState, StudentSlice } from './types';
 import { Student, StudentFormData } from '../types';
 import { POINTS_ALLOCATION } from '../constants';
-
-const sanitizeString = (str: string | undefined): string => {
-  if (str === undefined) return '';
-  return str.replace(/<[^>]*>/g, '');
-};
+import { sanitizeString } from '../helpers';
 
 export const createStudentSlice: StateCreator<AppState, [], [], StudentSlice> = (set, get) => ({
   students: [],

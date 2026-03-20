@@ -5,6 +5,42 @@
 import { PaymentStatus, PhoneNumber } from './types';
 
 /**
+ * Sanitizes a string by stripping all HTML tags using the DOMParser.
+ * This is more robust than regex-based approaches and helps prevent XSS.
+ * @param {string | undefined} str The string to sanitize.
+ * @returns {string} The sanitized text-only content.
+ */
+export const sanitizeString = (str: string | undefined): string => {
+  if (str === undefined || str === null) return '';
+
+  // Use DOMParser if available (Browser environment)
+  if (typeof DOMParser !== 'undefined') {
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(str, 'text/html');
+      return doc.body.textContent || '';
+    } catch (e) {
+      // Fallback to manual stripping if parsing fails
+    }
+  }
+
+  // Fallback for non-browser environments or when DOMParser fails.
+  // This approach is more robust than simple regex for nested tags.
+  let result = '';
+  let inTag = false;
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] === '<') {
+      inTag = true;
+    } else if (str[i] === '>') {
+      inTag = false;
+    } else if (!inTag) {
+      result += str[i];
+    }
+  }
+  return result;
+};
+
+/**
  * Formats a numeric amount into a currency string with a given symbol.
  */
 export const formatCurrency = (amount: number, currencySymbol: string): string => {
