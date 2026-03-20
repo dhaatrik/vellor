@@ -29,8 +29,11 @@ export const CalendarPage: React.FC = () => {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
 
   const events = useMemo(() => {
+    // Create a map for O(1) student lookups, improving performance from O(N*M) to O(N+M)
+    const studentMap = new Map(students.map(s => [s.id, s]));
+
     return transactions.map(t => {
-      const student = students.find(s => s.id === t.studentId);
+      const student = studentMap.get(t.studentId);
       const studentName = student ? `${student.firstName} ${student.lastName}` : 'Unknown Student';
       
       let startDateStr = t.date;
