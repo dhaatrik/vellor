@@ -85,7 +85,7 @@ describe('createSettingsSlice', () => {
         country: '<b>United States</b>'
       });
 
-      expect(useStore.getState().settings.phone?.number).toBe('alert("xss")1234567890');
+      expect(useStore.getState().settings.phone?.number).toBe('1234567890');
       expect(useStore.getState().settings.country).toBe('United States');
     });
   });
