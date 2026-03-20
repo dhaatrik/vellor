@@ -96,44 +96,39 @@ export const TransactionsPage: React.FC = () => {
   }, [transactions]);
 
   const filteredTransactions = useMemo(() => {
-    let result = sortedTransactions;
+    const query = searchQuery.toLowerCase();
+    const statusMap = {
+      'paid': PaymentStatus.Paid,
+      'due': PaymentStatus.Due,
+      'partially-paid': PaymentStatus.PartiallyPaid,
+      'overpaid': PaymentStatus.Overpaid,
+    };
+    const targetStatus = (activeFilter !== 'all' && activeFilter !== 'unpaid')
+      ? statusMap[activeFilter as keyof typeof statusMap]
+      : null;
 
-    // Apply status filter
-    if (activeFilter === 'unpaid') {
-        result = result.filter(t => t.status === PaymentStatus.Due || t.status === PaymentStatus.PartiallyPaid);
-    } else if (activeFilter !== 'all') {
-        const statusMap = {
-            'paid': PaymentStatus.Paid,
-            'due': PaymentStatus.Due,
-            'partially-paid': PaymentStatus.PartiallyPaid,
-            'overpaid': PaymentStatus.Overpaid,
-        };
-        const targetStatus = statusMap[activeFilter as keyof typeof statusMap];
-        if (targetStatus) {
-            result = result.filter(t => t.status === targetStatus);
-        }
-    }
+    return sortedTransactions.filter(t => {
+      // Apply status filter
+      if (activeFilter === 'unpaid') {
+        if (t.status !== PaymentStatus.Due && t.status !== PaymentStatus.PartiallyPaid) return false;
+      } else if (targetStatus && t.status !== targetStatus) {
+        return false;
+      }
 
-    // Apply search filter
-    if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        result = result.filter(t => {
-            const student = studentsMap.get(t.studentId);
-            if (!student) return false;
-            const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
-            return fullName.includes(query);
-        });
-    }
+      // Apply date filter
+      if (dateRange.start && t.date < dateRange.start) return false;
+      if (dateRange.end && t.date > dateRange.end) return false;
 
-    // Apply date filter
-    if (dateRange.start) {
-        result = result.filter(t => t.date >= dateRange.start);
-    }
-    if (dateRange.end) {
-        result = result.filter(t => t.date <= dateRange.end);
-    }
+      // Apply search filter
+      if (query) {
+        const student = studentsMap.get(t.studentId);
+        if (!student) return false;
+        const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
+        if (!fullName.includes(query)) return false;
+      }
 
-    return result;
+      return true;
+    });
   }, [sortedTransactions, activeFilter, searchQuery, dateRange, studentsMap]);
 
   const parentRef = React.useRef<HTMLDivElement | null>(null);

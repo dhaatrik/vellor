@@ -1,11 +1,12 @@
 import { StateCreator } from 'zustand';
+import DOMPurify from 'dompurify';
 import { AppState, SettingsSlice } from './types';
 import { Theme } from '../types';
 import { DEFAULT_CURRENCY_SYMBOL, DEFAULT_USER_NAME, POINTS_ALLOCATION } from '../constants';
 
 const sanitizeString = (str: string | undefined): string => {
   if (str === undefined) return '';
-  return str.replace(/<[^>]*>/g, '');
+  return DOMPurify.sanitize(str, { ALLOWED_TAGS: [] }); // Strip all HTML tags
 };
 
 export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> = (set, get) => ({

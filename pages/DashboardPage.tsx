@@ -53,6 +53,10 @@ export const DashboardPage: React.FC = () => {
   const chartData = useMemo(() => {
     const data = [];
     const today = new Date();
+
+    // ⚡ Bolt Performance: Pre-compute the fallback date outside the loop
+    const fallbackDate = Date.now();
+
     for (let i = 5; i >= 0; i--) {
       const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
       const monthName = d.toLocaleString('default', { month: 'short' });
@@ -76,8 +80,8 @@ export const DashboardPage: React.FC = () => {
       const thresholdDate = new Date(today.getFullYear(), today.getMonth() - i + 1, 0).getTime();
 
       const studentsCount = students.filter(s => {
-        // ⚡ Bolt Performance: Use Date.now() instead of new Date() for the fallback
-        const sTime = s.createdAt ? new Date(s.createdAt).getTime() : Date.now();
+        // ⚡ Bolt Performance: Use pre-computed fallback date
+        const sTime = s.createdAt ? new Date(s.createdAt).getTime() : fallbackDate;
         return sTime <= thresholdDate;
       }).length;
 
@@ -101,6 +105,15 @@ export const DashboardPage: React.FC = () => {
     estimateSize: () => 72,
     overscan: 5,
   });
+
+  // ⚡ Bolt Performance: Pre-calculate student lookup map to avoid O(N*M) lookups in virtualized lists
+  const studentMap = useMemo(() => {
+    const map = new Map();
+    for (const student of students) {
+      map.set(student.id, student);
+    }
+    return map;
+  }, [students]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -389,7 +402,7 @@ export const DashboardPage: React.FC = () => {
                 <div style={{ height: `${rowVirtualizerOverdue.getTotalSize()}px`, width: '100%', position: 'relative' }}>
                   {rowVirtualizerOverdue.getVirtualItems().map(virtualRow => {
                     const t = overduePayments[virtualRow.index];
-                    const student = students.find(s => s.id === t.studentId);
+                    const student = studentMap.get(t.studentId);
                     return (
                       <div 
                         key={t.id}
