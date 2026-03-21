@@ -1,12 +1,13 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore, useData } from '../store';
-import { Button, Card, StatDisplayCard, Icon, ConfirmationModal } from '../components/ui';
+import { Button, Card, StatDisplayCard, Icon, ConfirmationModal, OnboardingWizard } from '../components/ui';
 import { formatCurrency, formatDate, formatRelativeTime } from '../helpers';
 import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { PaymentStatus } from '../types';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { usePwaInstall } from '../usePwaInstall';
 
 /**
  * The main dashboard page of the application.
@@ -23,6 +24,7 @@ export const DashboardPage: React.FC = () => {
   const { totalUnpaid, totalPaidThisMonth, activeStudentsCount, overduePayments } = useData.derived();
   const navigate = useNavigate();
   const [isConfirmingClearAll, setIsConfirmingClearAll] = useState(false);
+  const { isInstallable, promptInstall } = usePwaInstall();
 
   useEffect(() => {
     const lastBackup = localStorage.getItem('lastBackupDate');
@@ -160,6 +162,26 @@ export const DashboardPage: React.FC = () => {
       initial="hidden"
       animate="visible"
     >
+      <OnboardingWizard 
+        isOpen={!settings.hasCompletedOnboarding} 
+        onClose={() => updateSettings({ hasCompletedOnboarding: true })} 
+      />
+
+      {isInstallable && (
+         <div className="bg-gradient-to-r from-accent/10 to-blue-500/10 border border-accent/20 rounded-3xl p-5 flex items-center justify-between shadow-sm">
+           <div className="flex items-center gap-4">
+             <div className="w-12 h-12 rounded-2xl bg-white dark:bg-primary-light flex items-center justify-center text-accent shadow-sm">
+                <Icon iconName="rocket" className="w-6 h-6" />
+             </div>
+             <div>
+               <h4 className="font-bold text-gray-900 dark:text-white text-base">Get the Vellor App</h4>
+               <p className="text-sm text-gray-500 dark:text-gray-400">Install Vellor on your device for a faster, full-screen native experience.</p>
+             </div>
+           </div>
+           <Button onClick={promptInstall} size="sm" variant="primary" className="rounded-xl px-6 font-bold shadow-lg shadow-accent/20">Install</Button>
+         </div>
+      )}
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-4xl font-display font-bold tracking-tight text-gray-900 dark:text-gray-50 flex items-center gap-3">
@@ -320,6 +342,7 @@ export const DashboardPage: React.FC = () => {
         </motion.div>
 
         {/* Login Streak */}
+        {settings.gamificationEnabled && (
         <motion.div variants={itemVariants} className="col-span-1 lg:col-span-1">
           <Card className="h-full rounded-3xl border border-white/20 dark:border-white/5 shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl flex flex-col items-center justify-center text-center relative overflow-hidden group">
             <div className="absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl group-hover:bg-orange-500/20 transition-colors duration-500"></div>
@@ -330,8 +353,10 @@ export const DashboardPage: React.FC = () => {
             <p className="text-sm text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider relative z-10">Day Streak</p>
           </Card>
         </motion.div>
+        )}
 
         {/* Total Points */}
+        {settings.gamificationEnabled && (
         <motion.div variants={itemVariants} className="col-span-1 lg:col-span-1">
           <Card className="h-full rounded-3xl border border-white/20 dark:border-white/5 shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl flex flex-col items-center justify-center text-center relative overflow-hidden group">
             <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-yellow-500/10 rounded-full blur-3xl group-hover:bg-yellow-500/20 transition-colors duration-500"></div>
@@ -342,6 +367,7 @@ export const DashboardPage: React.FC = () => {
             <p className="text-sm text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider relative z-10">Total Points</p>
           </Card>
         </motion.div>
+        )}
 
         {/* Recent Activity */}
         <motion.div variants={itemVariants} className="col-span-1 md:col-span-1 lg:col-span-2 row-span-2">

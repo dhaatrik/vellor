@@ -112,6 +112,8 @@ export enum PaymentStatus {
   Due = 'Due',
   /** The amount paid exceeds the lesson fee. */
   Overpaid = 'Overpaid',
+  /** The lesson is scheduled for the future. */
+  Scheduled = 'Scheduled',
 }
 
 /**
@@ -136,6 +138,10 @@ export interface Transaction {
   paymentMethod?: string;
   /** The calculated payment status of the transaction. */
   status: PaymentStatus;
+  /** The grade or score assigned for this lesson (e.g., "A", "85%"). */
+  grade?: string;
+  /** A remark or note regarding the student's progress in this lesson. */
+  progressRemark?: string;
   /** Any additional notes related to the transaction. */
   notes?: string;
   /** The ISO date string representing when the transaction was logged. */
@@ -250,6 +256,20 @@ export interface AppSettings {
   email?: string;
   /** The tutor's monthly income goal. */
   monthlyGoal?: number;
+  /** Flag indicating if the user has completed the onboarding. */
+  hasCompletedOnboarding?: boolean;
+  /** Flag to enable browser notifications for reminders. */
+  enableReminders?: boolean;
+  /** Base64 encoded logo image for invoices. */
+  invoiceLogoBase64?: string;
+  /** Selected invoice template. */
+  invoiceTemplate?: 'modern' | 'classic' | 'minimal';
+  /** Flag to globally toggle gamification. */
+  gamificationEnabled?: boolean;
+  /** Array of custom titles for gamification ranks. */
+  customRankTitles?: string[];
+  customAchievement?: string;
+  customAchievementEarned?: boolean;
 }
 
 /**
@@ -275,7 +295,7 @@ export type StudentFormData = Omit<Student, 'id' | 'createdAt'>;
  * It omits system-generated fields like `id`, `status`, and `createdAt`.
  * @typedef {Omit<Transaction, 'id' | 'status' | 'createdAt'>}
  */
-export type TransactionFormData = Omit<Transaction, 'id' | 'status' | 'createdAt'>;
+export type TransactionFormData = Omit<Transaction, 'id' | 'status' | 'createdAt'> & { status?: PaymentStatus };
 
 /**
  * Represents the structure of a toast notification message.

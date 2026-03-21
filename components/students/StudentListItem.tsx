@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Student } from '../../types';
 import { Button, Card, Icon } from '../ui';
 import { formatCurrency } from '../../helpers';
+import { setHoveredStudent } from '../../helpers/globalHover';
 
 /**
  * Props for the StudentListItem component.
@@ -17,6 +18,10 @@ interface StudentListItemProps {
   currencySymbol: string;
   /** Pre-calculated outstanding balance. */
   outstandingBalance: number;
+  /** Whether this item is currently selected in bulk mode. */
+  isSelected?: boolean;
+  /** Callback to toggle selection status. */
+  onToggleSelect?: (student: Student) => void;
 }
 
 // Helper to generate a consistent gradient based on a string
@@ -39,11 +44,23 @@ const getGradient = (name: string) => {
 /**
  * Displays a summary of a single student in a list.
  */
-export const StudentListItem: React.FC<StudentListItemProps> = React.memo(({ student, onSelect, onDelete, currencySymbol, outstandingBalance }) => {
+export const StudentListItem: React.FC<StudentListItemProps> = React.memo(({ student, onSelect, onDelete, currencySymbol, outstandingBalance, isSelected, onToggleSelect }) => {
   const gradientClass = useMemo(() => getGradient(student.firstName + student.lastName), [student.firstName, student.lastName]);
 
   return (
-    <Card className="h-full flex flex-col hover:border-accent/50 transition-colors duration-300 cursor-pointer group border border-white/20 dark:border-white/5 shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl" onClick={() => onSelect(student)}>
+    <Card
+      className={`h-full flex flex-col hover:border-accent/50 transition-colors duration-300 cursor-pointer group border shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl relative ${isSelected ? 'border-accent ring-2 ring-accent/50' : 'border-white/20 dark:border-white/5'}`}
+      onClick={() => onSelect(student)}
+      onMouseEnter={() => setHoveredStudent(student.id)}
+      onMouseLeave={() => setHoveredStudent(null)}
+    >
+        {onToggleSelect && (
+            <div className="absolute top-4 right-4 z-10" onClick={(e) => { e.stopPropagation(); onToggleSelect(student); }}>
+                <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors ${isSelected ? 'bg-accent border-accent text-primary-dark' : 'border-gray-300 dark:border-white/20 opacity-0 group-hover:opacity-100'}`}>
+                    {isSelected && <Icon iconName="check-circle" className="w-5 h-5 text-primary-dark" />}
+                </div>
+            </div>
+        )}
         <div className="flex items-start gap-4 mb-4">
             <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${gradientClass} text-white flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
               <span className="text-xl font-display font-bold shadow-sm">{student.firstName.charAt(0)}{student.lastName.charAt(0)}</span>

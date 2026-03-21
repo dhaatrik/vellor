@@ -7,6 +7,8 @@ import { StudentDetailView } from '../components/students/StudentDetailView';
 import { StudentForm } from '../components/students/StudentForm';
 import { StudentListItem } from '../components/students/StudentListItem';
 import { TransactionForm } from '../components/transactions/TransactionForm';
+import { generateInvoicePDF } from '../pdf';
+import { CSVImportWizard } from '../components/students/CSVImportWizard';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
@@ -21,12 +23,17 @@ export const StudentsPage: React.FC = () => {
   const settings = useStore(s => s.settings);
   const transactions = useStore(s => s.transactions);
   const addTransaction = useStore(s => s.addTransaction);
+  const addToast = useStore(s => s.addToast);
   const [selectedStudent, setSelectedStudent] = useState<Student | undefined>(undefined);
   const [showStudentForm, setShowStudentForm] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | undefined>(undefined);
   const [showTransactionFormForStudent, setShowTransactionFormForStudent] = useState<string | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState('');
   const [confirmingDelete, setConfirmingDelete] = useState<Student | null>(null);
+  const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
+  const [showBulkLogModal, setShowBulkLogModal] = useState(false);
+  const [showImportWizard, setShowImportWizard] = useState(false);
+  const [bulkLogData, setBulkLogData] = useState({ date: new Date().toISOString().split('T')[0], duration: 60, fee: 50, notes: 'Bulk logged lesson' });
 
   const { studentId } = useParams<{studentId?: string}>();
   const navigate = useNavigate();
@@ -115,6 +122,59 @@ export const StudentsPage: React.FC = () => {
     }
   }
 
+  const toggleStudentSelection = (student: Student) => {
+    setSelectedStudentIds(prev => 
+      prev.includes(student.id) ? prev.filter(id => id !== student.id) : [...prev, student.id]
+    );
+  };
+
+  const updateTransaction = useStore(s => s.updateTransaction);
+  const handleBulkMarkPaid = () => {
+     let count = 0;
+     selectedStudentIds.forEach(id => {
+         const unpaid = transactions.filter(t => t.studentId === id && t.status !== PaymentStatus.Paid && t.status !== PaymentStatus.Overpaid && t.status !== PaymentStatus.Scheduled);
+         unpaid.forEach(t => {
+             updateTransaction(t.id, { amountPaid: t.lessonFee });
+             count++;
+         });
+     });
+     addToast(`Marked ${count} lessons as paid!`, 'success');
+     setSelectedStudentIds([]);
+  }
+
+  const handleBulkExport = () => {
+      let count = 0;
+      selectedStudentIds.forEach(id => {
+          const student = students.find(s => s.id === id);
+          if (!student) return;
+          const unpaid = transactions.filter(t => t.studentId === id && t.status !== PaymentStatus.Paid && t.status !== PaymentStatus.Overpaid && t.status !== PaymentStatus.Scheduled);
+          if (unpaid.length > 0) {
+              generateInvoicePDF(unpaid[0], student, settings);
+              count++;
+          }
+      });
+      addToast(count > 0 ? `Exported ${count} invoices!` : 'No unpaid lessons to export for selected students.', count > 0 ? 'success' : 'info');
+      setSelectedStudentIds([]);
+  }
+
+  const submitBulkLog = () => {
+      let count = 0;
+      selectedStudentIds.forEach(id => {
+          addTransaction({
+              studentId: id,
+              date: bulkLogData.date,
+              lessonDuration: bulkLogData.duration,
+              lessonFee: bulkLogData.fee,
+              amountPaid: 0,
+              notes: bulkLogData.notes
+          } as any);
+          count++;
+      });
+      addToast(`Logged same lesson for ${count} students!`, 'success');
+      setShowBulkLogModal(false);
+      setSelectedStudentIds([]);
+  };
+
   const filteredStudents = useMemo(() => {
     return students.filter(student =>
       `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
@@ -176,7 +236,10 @@ export const StudentsPage: React.FC = () => {
           <h1 className="text-4xl font-display font-bold tracking-tight text-gray-900 dark:text-gray-50">Students</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Manage your roster and track progress.</p>
         </div>
-        <Button onClick={() => { setEditingStudent(undefined); setShowStudentForm(true); setSelectedStudent(undefined); if(studentId) navigate('/students'); }} leftIcon="plus" className="w-full sm:w-auto rounded-full shadow-lg shadow-accent/20">Add Student</Button>
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mt-4 sm:mt-0">
+           <Button onClick={() => setShowImportWizard(true)} variant="outline" leftIcon="document-text" className="w-full sm:w-auto rounded-full">Import CSV</Button>
+           <Button onClick={() => { setEditingStudent(undefined); setShowStudentForm(true); setSelectedStudent(undefined); if(studentId) navigate('/students'); }} leftIcon="plus" variant="primary" className="w-full sm:w-auto rounded-full shadow-lg shadow-accent/20">Add Student</Button>
+        </div>
       </div>
 
        <div className="relative max-w-md mb-8">
@@ -225,6 +288,8 @@ export const StudentsPage: React.FC = () => {
                   onDelete={handleDeleteRequest} 
                   currencySymbol={settings.currencySymbol}
                   outstandingBalance={outstandingBalances[s.id] || 0}
+                  isSelected={selectedStudentIds.includes(s.id)}
+                  onToggleSelect={toggleStudentSelection}
                 />
               </motion.div>
             ))}
@@ -262,6 +327,55 @@ export const StudentsPage: React.FC = () => {
         }
         confirmButtonText="Delete Student"
       />
+
+      {/* Floating Action Bar for Bulk Actions */}
+      <AnimatePresence>
+        {selectedStudentIds.length > 0 && (
+          <motion.div 
+            initial={{ y: 100, opacity: 0 }} 
+            animate={{ y: 0, opacity: 1 }} 
+            exit={{ y: 100, opacity: 0 }} 
+            className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-4 rounded-full shadow-2xl z-50 flex items-center justify-center gap-4 transition-colors"
+          >
+            <span className="font-bold text-sm whitespace-nowrap">{selectedStudentIds.length} Selected</span>
+            <div className="h-6 w-px bg-white/20 dark:bg-black/20 hidden sm:block"></div>
+            <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar no-scrollbar">
+                <Button size="sm" variant="ghost" className="!text-white dark:!text-gray-900 hover:bg-white/10 dark:hover:bg-black/10 whitespace-nowrap" onClick={() => setShowBulkLogModal(true)}>Log Same</Button>
+                <Button size="sm" variant="ghost" className="!text-white dark:!text-gray-900 hover:bg-white/10 dark:hover:bg-black/10 whitespace-nowrap" onClick={handleBulkMarkPaid}>Mark Paid</Button>
+                <Button size="sm" variant="primary" className="shadow-none rounded-full whitespace-nowrap" onClick={handleBulkExport}>Export Invoices</Button>
+            </div>
+            <button onClick={() => setSelectedStudentIds([])} className="ml-2 p-2 rounded-full hover:bg-white/10 dark:hover:bg-black/10 flex-shrink-0">
+                <Icon iconName="x-mark" className="w-5 h-5"/>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <Modal isOpen={showBulkLogModal} onClose={() => setShowBulkLogModal(false)} title={`Bulk Log Lesson (${selectedStudentIds.length} Students)`}>
+         <div className="space-y-4 p-2">
+            <div>
+               <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Date</label>
+               <Input type="date" value={bulkLogData.date} onChange={e => setBulkLogData({...bulkLogData, date: e.target.value})} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Duration (mins)</label>
+                  <Input type="number" value={bulkLogData.duration} onChange={e => setBulkLogData({...bulkLogData, duration: Number(e.target.value)})} />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Fee ({settings.currencySymbol})</label>
+                  <Input type="number" value={bulkLogData.fee} onChange={e => setBulkLogData({...bulkLogData, fee: Number(e.target.value)})} />
+                </div>
+            </div>
+            <div>
+               <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Notes</label>
+               <Input value={bulkLogData.notes} onChange={e => setBulkLogData({...bulkLogData, notes: e.target.value})} placeholder="Optional notes for all" />
+            </div>
+            <Button className="w-full mt-4" variant="primary" onClick={submitBulkLog}>Log Lesson for All</Button>
+         </div>
+      </Modal>
+
+      <CSVImportWizard isOpen={showImportWizard} onClose={() => setShowImportWizard(false)} />
     </motion.div>
   );
 };

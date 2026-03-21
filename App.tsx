@@ -9,7 +9,10 @@ import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { useStore, setGlobalMasterKey } from './store'; // Zustand hook
 import { generateSalt, deriveKey, exportKeyToBase64, importKeyFromBase64 } from './src/crypto';
-import { NavbarLink, Icon, Button, ToastContainer, FAB, LegalModals, Modal } from './components/ui';
+import { NavbarLink, Icon, Button, ToastContainer, FAB, LegalModals, Modal, SearchModal } from './components/ui';
+import { useReminders } from './useReminders';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { QuickLogModal } from './components/transactions/QuickLogModal';
 import { DashboardPage } from './pages/DashboardPage';
 import { StudentsPage } from './pages/StudentsPage';
 import { BackupPromptModal } from './components/BackupPromptModal';
@@ -42,6 +45,17 @@ const AppLayout: React.FC = () => {
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [termsOpen, setTermsOpen] = useState(false);
   const [rankModalOpen, setRankModalOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isQuickLogOpen, setIsQuickLogOpen] = useState(false);
+
+  useKeyboardShortcuts(
+    () => setIsSearchOpen(true),
+    () => setIsQuickLogOpen(true),
+    () => setAboutOpen(true)
+  );
+
+  // Initialize background reminders check
+  useReminders();
 
   // Calculate the number of achieved achievements to display a badge in the navbar
   const achievedCount = achievements.filter(a => a.achieved).length;
@@ -121,29 +135,34 @@ const AppLayout: React.FC = () => {
         </nav>
 
         {/* Sidebar Footer: Gamification Stats */}
-        <div 
-          className="p-6 m-4 mt-auto bg-gray-50 dark:bg-primary-light rounded-3xl border border-gray-100 dark:border-white/5 cursor-pointer hover:border-accent/30 transition-colors"
-          onClick={() => setRankModalOpen(true)}
-        >
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
-                <Icon iconName="star" className="w-5 h-5 text-accent" />
+        {settings.gamificationEnabled !== false && (
+          <div 
+            className="p-6 m-4 mt-auto bg-gray-50 dark:bg-primary-light rounded-3xl border border-gray-100 dark:border-white/5 cursor-pointer hover:border-accent/30 transition-colors"
+            onClick={() => setRankModalOpen(true)}
+          >
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
+                  <Icon iconName="star" className="w-5 h-5 text-accent" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Level {gamification.level}</div>
+                  <div className="text-sm font-semibold text-gray-900 dark:text-white">{gamification.levelName}</div>
+                </div>
               </div>
-              <div>
-                <div className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Level {gamification.level}</div>
-                <div className="text-sm font-semibold text-gray-900 dark:text-white">{gamification.levelName}</div>
+              <div className="mt-3">
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-gray-500 dark:text-gray-400 font-medium">Points</span>
+                  <span className="font-bold text-accent">{gamification.points}</span>
+                </div>
+                <div className="w-full h-2 bg-gray-200 dark:bg-primary rounded-full overflow-hidden">
+                  <div className="h-full bg-accent" style={{ width: `${(gamification.points % 100)}%` }}></div>
+                </div>
+                <div className="mt-2 text-xs text-gray-500 font-medium">
+                  {gamification.points} Points • {gamification.streak} Day Streak
+                </div>
               </div>
-            </div>
-            <div className="mt-3">
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-gray-500 dark:text-gray-400 font-medium">Points</span>
-                <span className="font-bold text-accent">{gamification.points}</span>
-              </div>
-              <div className="w-full h-2 bg-gray-200 dark:bg-primary rounded-full overflow-hidden">
-                <div className="h-full bg-accent" style={{ width: `${(gamification.points % 100)}%` }}></div>
-              </div>
-            </div>
-        </div>
+          </div>
+        )}
 
         {/* Sidebar Footer: Legal Links */}
         <div className="px-6 pb-6 text-xs text-center text-gray-500 dark:text-gray-400 space-x-3">
@@ -219,6 +238,8 @@ const AppLayout: React.FC = () => {
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
           <FAB />
+          <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+          <QuickLogModal isOpen={isQuickLogOpen} onClose={() => setIsQuickLogOpen(false)} />
         </main>
       </div>
 

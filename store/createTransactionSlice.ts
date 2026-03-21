@@ -15,7 +15,9 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
     };
 
     let status: PaymentStatus;
-    if (sanitizedTransactionData.amountPaid >= sanitizedTransactionData.lessonFee) {
+    if (sanitizedTransactionData.status) {
+      status = sanitizedTransactionData.status;
+    } else if (sanitizedTransactionData.amountPaid >= sanitizedTransactionData.lessonFee) {
       status = sanitizedTransactionData.amountPaid > sanitizedTransactionData.lessonFee ? PaymentStatus.Overpaid : PaymentStatus.Paid;
     } else if (sanitizedTransactionData.amountPaid > 0 && sanitizedTransactionData.amountPaid < sanitizedTransactionData.lessonFee) {
       status = PaymentStatus.PartiallyPaid;

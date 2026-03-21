@@ -1,9 +1,13 @@
 import React, { useMemo } from 'react';
 import { Student, Transaction, PaymentStatus } from '../../types';
-import { Button, Card, Icon } from '../ui';
+import { Button, Card, Icon, Modal, Textarea } from '../ui';
 import { formatCurrency, formatDate, formatPhoneNumber } from '../../helpers';
 import { TransactionStatusBadge } from '../transactions/TransactionStatusBadge';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { generateProgressReportPDF } from '../../pdf';
+import { useStore } from '../../store';
 
 /**
  * Props for the StudentDetailView component.
@@ -57,6 +61,46 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({ student, o
     return sum;
   }, 0);
   const totalPaidForStudent = studentTransactions.reduce((sum, t) => sum + t.amountPaid, 0);
+
+  const [activeTab, setActiveTab] = useState<'history' | 'progress'>('history');
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [parentNote, setParentNote] = useState('');
+  const settings = useStore(s => s.settings);
+
+  const gradeToNumber = (grade: string) => {
+     if (grade === 'A') return 5;
+     if (grade === 'B') return 4;
+     if (grade === 'C') return 3;
+     if (grade === 'D') return 2;
+     if (grade === 'F') return 1;
+     return null;
+  };
+
+  const formatGrade = (val: number) => {
+     if (val === 5) return 'A';
+     if (val === 4) return 'B';
+     if (val === 3) return 'C';
+     if (val === 2) return 'D';
+     if (val === 1) return 'F';
+     return '';
+  };
+
+  const gradeChartData = useMemo(() => {
+     return [...studentTransactions]
+        .reverse()
+        .filter(t => t.grade && ['A','B','C','D','F'].includes(t.grade))
+        .map(t => ({
+           date: formatDate(t.date),
+           val: gradeToNumber(t.grade as string),
+           grade: t.grade
+        }));
+  }, [studentTransactions]);
+
+  const handleExportReport = () => {
+      generateProgressReportPDF(student, transactions, settings, parentNote);
+      setShowReportModal(false);
+      useStore.getState().addToast('Progress Report exported!', 'success');
+  };
 
   const gradientClass = useMemo(() => getGradient(student.firstName + student.lastName), [student.firstName, student.lastName]);
 
@@ -216,9 +260,16 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({ student, o
           </motion.div>
       )}
 
-      {/* Lesson & Payment History Card */}
-      <motion.div variants={itemVariants}>
-        <Card className="border-gray-100 dark:border-white/5">
+      {/* Tabs */}
+      <motion.div variants={itemVariants} className="flex gap-2 justify-center sm:justify-start">
+         <Button variant={activeTab === 'history' ? 'primary' : 'outline'} onClick={() => setActiveTab('history')} className="rounded-full px-6 shadow-sm">Lesson History</Button>
+         <Button variant={activeTab === 'progress' ? 'primary' : 'outline'} onClick={() => setActiveTab('progress')} className="rounded-full px-6 shadow-sm">Academic Progress</Button>
+      </motion.div>
+
+      <AnimatePresence mode="wait">
+        {activeTab === 'history' ? (
+          <motion.div key="history" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+            <Card className="border-gray-100 dark:border-white/5">
            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
               <h3 className="text-lg font-display font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <Icon iconName="clock" className="w-5 h-5 text-gray-400" />
@@ -278,11 +329,78 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({ student, o
           )}
         </Card>
       </motion.div>
+      ) : (
+          <motion.div key="progress" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+            <Card className="border-gray-100 dark:border-white/5">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                   <h3 className="text-lg font-display font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                     <Icon iconName="star" className="w-5 h-5 text-accent" />
+                     Progress & Remarks
+                   </h3>
+                   <Button size="sm" onClick={() => setShowReportModal(true)} variant="primary" className="rounded-full shadow-md shadow-accent/20 text-xs">Export Report</Button>
+                </div>
+
+                {gradeChartData.length > 1 && (
+                   <div className="h-48 w-full mb-8 mt-2 pr-4 bg-gray-50/50 dark:bg-primary-light/10 p-4 rounded-3xl">
+                      <ResponsiveContainer width="100%" height="100%">
+                         <LineChart data={gradeChartData}>
+                            <XAxis dataKey="date" stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
+                            <YAxis domain={[1, 5]} tickFormatter={formatGrade} stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} width={30} />
+                            <Tooltip 
+                               contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
+                               formatter={(_value: any, _name: any, props: any) => [props.payload.grade, 'Grade']}
+                            />
+                            <Line type="monotone" dataKey="val" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4, fill: '#8b5cf6', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6 }} />
+                         </LineChart>
+                      </ResponsiveContainer>
+                   </div>
+                )}
+
+                {studentTransactions.filter(t => t.grade || t.progressRemark).length > 0 ? (
+                  <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                     {studentTransactions.filter(t => t.grade || t.progressRemark).map(t => (
+                        <div key={t.id + "-prog"} className="p-4 bg-gray-50 dark:bg-primary/30 rounded-2xl border border-gray-100 dark:border-white/5 relative transition-colors hover:border-accent/40">
+                           <div className="flex justify-between items-start mb-2">
+                              <span className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1.5"><Icon iconName="calendar" className="w-4 h-4" /> {formatDate(t.date)}</span>
+                              {t.grade && <span className="px-2.5 py-0.5 rounded-full bg-accent text-primary-dark font-bold text-sm shadow-sm">Grade: {t.grade}</span>}
+                           </div>
+                           {t.progressRemark && <p className="text-gray-900 dark:text-gray-100 font-medium mt-2">{t.progressRemark}</p>}
+                        </div>
+                     ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12 bg-gray-50 dark:bg-primary/30 rounded-2xl border border-dashed border-gray-200 dark:border-white/10">
+                     <div className="w-16 h-16 mx-auto bg-white dark:bg-primary-light rounded-full flex items-center justify-center mb-4 shadow-sm">
+                       <Icon iconName="star" className="w-8 h-8 text-gray-400" />
+                     </div>
+                     <p className="text-gray-500 dark:text-gray-400 font-medium">No progress records found.</p>
+                     <p className="text-sm text-gray-400 mt-1">Add a grade or remark when logging lessons.</p>
+                  </div>
+                )}
+            </Card>
+          </motion.div>
+      )}
+      </AnimatePresence>
       
       {/* Back Button */}
       <motion.div variants={itemVariants} className="flex justify-start pt-2">
           <Button onClick={onClose} variant="ghost" leftIcon="arrow-left" className="rounded-full hover:bg-gray-100 dark:hover:bg-primary-light">Back to Students</Button>
       </motion.div>
+
+      {/* Progress Report Modal */}
+      <Modal isOpen={showReportModal} onClose={() => setShowReportModal(false)} title="Export Progress Report">
+         <div className="space-y-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">Add a personal note to the parent/student to include in this progress report PDF.</p>
+            <Textarea 
+               label="Teacher Note (Optional)" 
+               placeholder="Write an encouraging note or highlight general improvement..." 
+               value={parentNote} 
+               onChange={e => setParentNote(e.target.value)} 
+               rows={4}
+            />
+            <Button onClick={handleExportReport} variant="primary" className="w-full mt-4 rounded-xl shadow-lg shadow-accent/20">Generate PDF</Button>
+         </div>
+      </Modal>
     </motion.div>
   );
 };

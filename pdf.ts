@@ -5,57 +5,84 @@ import { Transaction, Student, AppSettings, PaymentStatus } from './types';
 export const generateInvoicePDF = (
   transaction: Transaction,
   student: Student,
-  settings: AppSettings
-) => {
+  settings: AppSettings,
+  returnBlob: boolean = false
+): Blob | undefined => {
   const doc = new jsPDF();
+  const template = settings.invoiceTemplate || 'modern';
   
-  // Header
-  doc.setFontSize(22);
-  doc.text('INVOICE', 14, 20);
+  let currentY = 20;
+  
+  if (settings.invoiceLogoBase64) {
+    try {
+      doc.addImage(settings.invoiceLogoBase64, 'JPEG', 14, 10, 30, 30, undefined, 'FAST');
+      currentY = 45;
+    } catch (e) {
+      console.warn("Logo injection failed", e);
+    }
+  }
+
+  if (template === 'minimal') {
+      doc.setFontSize(16);
+      doc.text('INVOICE', 14, currentY);
+  } else if (template === 'classic') {
+      doc.setFontSize(22);
+      doc.setFont("times", "bold");
+      doc.text('INVOICE', 14, currentY);
+      doc.setFont("helvetica", "normal");
+  } else {
+      // modern
+      doc.setFontSize(24);
+      doc.setTextColor(139, 92, 246); // accent
+      doc.text('INVOICE', 14, currentY);
+  }
   
   doc.setFontSize(10);
   doc.setTextColor(100);
-  doc.text(`Invoice ID: ${transaction.id.substring(0, 8).toUpperCase()}`, 14, 30);
-  doc.text(`Date: ${new Date(transaction.date).toLocaleDateString()}`, 14, 35);
-  doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 40);
-
+  currentY += 8;
+  doc.text(`Invoice ID: ${transaction.id.substring(0, 8).toUpperCase()}`, 14, currentY);
+  currentY += 5;
+  doc.text(`Date: ${new Date(transaction.date).toLocaleDateString()}`, 14, currentY);
+  
+  currentY += 15;
+  
   // Tutor Details
   doc.setTextColor(0);
   doc.setFontSize(12);
-  doc.text('From:', 14, 55);
+  doc.text('From:', 14, currentY);
   doc.setFontSize(10);
-  doc.text(settings.userName || 'Tutor', 14, 62);
-  if (settings.email) doc.text(settings.email, 14, 67);
-  if (settings.phone?.number) doc.text(`${settings.phone.countryCode} ${settings.phone.number}`, 14, 72);
+  doc.text(settings.userName || 'Tutor', 14, currentY + 7);
+  if (settings.email) doc.text(settings.email, 14, currentY + 12);
+  if (settings.phone?.number) doc.text(`${settings.phone.countryCode} ${settings.phone.number}`, 14, currentY + 17);
 
   // Student Details
   doc.setFontSize(12);
-  doc.text('Bill To:', 120, 55);
+  doc.text('Bill To:', 120, currentY);
   doc.setFontSize(10);
-  doc.text(`${student.firstName} ${student.lastName}`, 120, 62);
-  if (student.contact?.email) doc.text(student.contact.email, 120, 67);
+  doc.text(`${student.firstName} ${student.lastName}`, 120, currentY + 7);
+  if (student.contact?.email) doc.text(student.contact.email, 120, currentY + 12);
   
-  // Table
+  currentY += 25;
+
   autoTable(doc, {
-    startY: 85,
-    head: [['Description', 'Duration/Period', 'Fee', 'Amount']],
+    startY: currentY,
+    head: [['Description', 'Duration', 'Fee']],
     body: [
       [
         'Tutoring Lesson / Package',
         `${transaction.lessonDuration} mins/units`,
-        `${settings.currencySymbol}${transaction.lessonFee}`,
         `${settings.currencySymbol}${transaction.lessonFee}`
       ]
     ],
-    theme: 'striped',
-    headStyles: { fillColor: [139, 92, 246] }, // Violet-500 from Tailwind theme
+    theme: template === 'classic' ? 'grid' : (template === 'minimal' ? 'plain' : 'striped'),
+    headStyles: template === 'modern' ? { fillColor: [139, 92, 246] } : (template === 'classic' ? { fillColor: [0, 0, 0] } : { fillColor: [200, 200, 200], textColor: 0 }),
   });
 
-  // Summary
-  const finalY = (doc as any).lastAutoTable.finalY + 10;
+  const finalY = (doc as any).lastAutoTable.finalY + 15;
   
   doc.setFontSize(10);
   doc.setTextColor(0);
+  
   doc.text(`Total Amount:`, 140, finalY);
   doc.text(`${settings.currencySymbol}${transaction.lessonFee}`, 180, finalY, { align: 'right' });
   
@@ -63,21 +90,20 @@ export const generateInvoicePDF = (
   doc.text(`${settings.currencySymbol}${transaction.amountPaid}`, 180, finalY + 7, { align: 'right' });
   
   const balance = transaction.lessonFee - transaction.amountPaid;
-  doc.setFontSize(11);
-  doc.setTextColor(balance > 0 ? 220 : 0, balance > 0 ? 38 : 160, balance > 0 ? 38 : 0);
+  doc.setFontSize(12);
+  if (template === 'modern') doc.setFont('helvetica', 'bold');
+  doc.setTextColor(balance > 0 ? 220 : 0, balance > 0 ? 38 : 150, balance > 0 ? 38 : 0);
   doc.text(`Balance Due:`, 140, finalY + 16);
   doc.text(`${settings.currencySymbol}${Math.max(0, balance)}`, 180, finalY + 16, { align: 'right' });
+  doc.setFont('helvetica', 'normal');
 
-  // Status Badge
   doc.setFontSize(14);
   const statusColor = transaction.status === PaymentStatus.Paid || transaction.status === PaymentStatus.Overpaid 
-    ? [16, 185, 129] // success
-    : (transaction.status === PaymentStatus.PartiallyPaid ? [245, 158, 11] : [244, 63, 94]); // warning : danger
+    ? [16, 185, 129] : (transaction.status === PaymentStatus.PartiallyPaid ? [245, 158, 11] : [244, 63, 94]); 
   
   doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
   doc.text(`STATUS: ${transaction.status.toUpperCase()}`, 14, finalY + 16);
 
-  // Notes
   if (transaction.notes) {
     doc.setTextColor(100);
     doc.setFontSize(10);
@@ -86,10 +112,80 @@ export const generateInvoicePDF = (
     doc.text(splitNotes, 14, finalY + 36);
   }
 
-  // Footer
   doc.setFontSize(9);
   doc.setTextColor(150);
   doc.text('Thank you for your business!', 105, 280, { align: 'center' });
 
-  doc.save(`Invoice_${student.firstName}_${transaction.date.split('T')[0]}.pdf`);
+  if (returnBlob) {
+    return doc.output('blob');
+  } else {
+    doc.save(`Invoice_${student.firstName}_${transaction.date.split('T')[0]}.pdf`);
+  }
+};
+
+export const generateProgressReportPDF = (
+  student: Student,
+  transactions: Transaction[],
+  settings: AppSettings,
+  parentNote: string
+) => {
+  const doc = new jsPDF();
+  const template = settings.invoiceTemplate || 'modern';
+  let currentY = 20;
+
+  if (settings.invoiceLogoBase64) {
+    try { doc.addImage(settings.invoiceLogoBase64, 'JPEG', 14, 10, 30, 30, undefined, 'FAST'); currentY = 45; } catch (e) {}
+  }
+
+  doc.setFontSize(22);
+  doc.setTextColor(template === 'modern' ? 139 : 0, template === 'modern' ? 92 : 0, template === 'modern' ? 246 : 0);
+  doc.text('PROGRESS REPORT', 14, currentY);
+  
+  doc.setFontSize(10);
+  doc.setTextColor(100);
+  currentY += 8;
+  doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, currentY);
+  
+  currentY += 15;
+  doc.setTextColor(0);
+  doc.setFontSize(12);
+  doc.text('Student:', 14, currentY);
+  doc.setFontSize(10);
+  doc.text(`${student.firstName} ${student.lastName}`, 14, currentY + 7);
+  
+  if (parentNote) {
+     currentY += 20;
+     doc.setFontSize(12);
+     doc.text('Teacher Note:', 14, currentY);
+     doc.setFontSize(10);
+     doc.setTextColor(80);
+     const splitNotes = doc.splitTextToSize(parentNote, 180);
+     doc.text(splitNotes, 14, currentY + 7);
+     currentY += (splitNotes.length * 5) + 5;
+  } else {
+     currentY += 15;
+  }
+
+  const reportTransactions = transactions
+     .filter(t => t.studentId === student.id && (t.grade || t.progressRemark))
+     .sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  if (reportTransactions.length > 0) {
+      autoTable(doc, {
+        startY: currentY + 5,
+        head: [['Date', 'Grade', 'Remarks']],
+        body: reportTransactions.map(t => [
+          new Date(t.date).toLocaleDateString(),
+          t.grade || '-',
+          t.progressRemark || '-'
+        ]),
+        theme: template === 'classic' ? 'grid' : (template === 'minimal' ? 'plain' : 'striped'),
+        headStyles: template === 'modern' ? { fillColor: [139, 92, 246] } : (template === 'classic' ? { fillColor: [0, 0, 0] } : { fillColor: [200, 200, 200], textColor: 0 }),
+      });
+  } else {
+      currentY += 15;
+      doc.text("No progress records found.", 14, currentY);
+  }
+
+  doc.save(`ProgressReport_${student.firstName}_${new Date().toISOString().split('T')[0]}.pdf`);
 };

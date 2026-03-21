@@ -4,6 +4,9 @@ import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { enUS } from 'date-fns/locale/en-US';
 // @ts-expect-error - CSS import does not have type declarations
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
+// @ts-expect-error
+import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import { useStore } from '../store';
 import { motion } from 'framer-motion';
 import { Transaction, PaymentStatus } from '../types';
@@ -22,11 +25,17 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
+const DragAndDropCalendar = withDragAndDrop(Calendar);
+
 export const CalendarPage: React.FC = () => {
   const transactions = useStore(s => s.transactions);
   const students = useStore(s => s.students);
   const settings = useStore(s => s.settings);
+  const addTransaction = useStore(s => s.addTransaction);
+  const updateTransaction = useStore(s => s.updateTransaction);
+  const addToast = useStore(s => s.addToast);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [draggedStudentId, setDraggedStudentId] = useState<string | null>(null);
 
   const events = useMemo(() => {
     // Create a map for O(1) student lookups, improving performance from O(N*M) to O(N+M)
@@ -74,6 +83,50 @@ export const CalendarPage: React.FC = () => {
     return { style };
   };
 
+  const handleEventDrop = ({ event, start, end }: any) => {
+    const t = event.resource as Transaction;
+    updateTransaction(t.id, {
+      ...t,
+      date: start.toISOString(),
+      lessonDuration: Math.round((end.getTime() - start.getTime()) / 60000)
+    });
+    addToast('Lesson rescheduled successfully.', 'success');
+  };
+
+  const handleEventResize = ({ event, start, end }: any) => {
+    const t = event.resource as Transaction;
+    updateTransaction(t.id, {
+      ...t,
+      date: start.toISOString(),
+      lessonDuration: Math.round((end.getTime() - start.getTime()) / 60000)
+    });
+    addToast('Lesson duration updated.', 'success');
+  };
+
+  const dragFromOutsideItem = () => {
+    const student = students.find(s => s.id === draggedStudentId);
+    if (!student) return {};
+    return { title: `${student.firstName} ${student.lastName}` };
+  };
+
+  const onDropFromOutside = ({ start, end }: any) => {
+    if (!draggedStudentId) return;
+    const student = students.find(s => s.id === draggedStudentId);
+    if (!student) return;
+    
+    addTransaction({
+       studentId: student.id,
+       date: start.toISOString(),
+       amountPaid: 0,
+       lessonFee: student.tuition?.defaultRate || 0,
+       paymentMethod: 'Cash',
+       status: PaymentStatus.Scheduled,
+       lessonDuration: Math.round((end.getTime() - start.getTime()) / 60000) || student.tuition?.typicalLessonDuration || 60,
+    });
+    addToast(`Scheduled lesson for ${student.firstName}`, 'success');
+    setDraggedStudentId(null);
+  };
+
   return (
     <motion.div 
       className="max-w-6xl mx-auto h-[80vh] flex flex-col"
@@ -86,17 +139,50 @@ export const CalendarPage: React.FC = () => {
         <p className="text-gray-500 dark:text-gray-400 mt-1">View your teaching schedule and lesson statuses.</p>
       </div>
 
-      <div className="flex-1 bg-white dark:bg-primary rounded-3xl shadow-sm border border-gray-100 dark:border-white/5 p-6 overflow-hidden calendar-container">
-        <Calendar
-          localizer={localizer}
-          events={events}
-          startAccessor="start"
-          endAccessor="end"
-          style={{ height: '100%' }}
-          eventPropGetter={eventStyleGetter}
-          onSelectEvent={(event: any) => setSelectedEvent(event)}
-          views={['month', 'week', 'day']}
-        />
+      <div className="flex flex-col md:flex-row gap-6 h-[65vh]">
+        {/* Draggable Students Sidebar */}
+        <div className="w-full md:w-64 bg-white dark:bg-primary rounded-3xl p-4 border border-gray-100 dark:border-white/5 flex flex-col h-48 md:h-full flex-shrink-0 shadow-sm">
+           <h3 className="font-display font-medium mb-3 dark:text-gray-50 flex items-center gap-2">
+             <Icon iconName="users" className="w-5 h-5 text-accent" />
+             Drag to Schedule
+           </h3>
+           <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+              {students.map(student => (
+                 <div
+                    key={student.id}
+                    draggable
+                    onDragStart={(e) => {
+                       setDraggedStudentId(student.id);
+                       // HTML5 API requires setting some data
+                       e.dataTransfer.setData('text/plain', student.id);
+                    }}
+                    className="p-3 bg-gray-50 dark:bg-primary-light rounded-xl cursor-grab active:cursor-grabbing border border-gray-200 dark:border-white/10 hover:border-accent hover:shadow-sm transition-colors group"
+                 >
+                    <p className="font-semibold text-sm select-none dark:text-gray-200 group-hover:text-accent transition-colors">{student.firstName} {student.lastName}</p>
+                 </div>
+              ))}
+              {students.length === 0 && <p className="text-sm text-gray-500 text-center py-4">No students available.</p>}
+           </div>
+        </div>
+
+        {/* Calendar View */}
+        <div className="flex-1 bg-white dark:bg-primary rounded-3xl shadow-sm border border-gray-100 dark:border-white/5 p-6 overflow-hidden calendar-container relative z-10 w-full min-h-[500px]">
+          <DragAndDropCalendar
+            localizer={localizer}
+            events={events}
+            startAccessor={(event: any) => event.start}
+            endAccessor={(event: any) => event.end}
+            style={{ height: '100%' }}
+            eventPropGetter={eventStyleGetter}
+            onSelectEvent={(event: any) => setSelectedEvent(event)}
+            views={['month', 'week', 'day']}
+            onEventDrop={handleEventDrop}
+            onEventResize={handleEventResize}
+            resizable
+            dragFromOutsideItem={dragFromOutsideItem}
+            onDropFromOutside={onDropFromOutside}
+          />
+        </div>
       </div>
 
       <Modal isOpen={!!selectedEvent} onClose={() => setSelectedEvent(null)} title="Lesson Details">

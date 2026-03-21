@@ -3,6 +3,7 @@ import { Transaction } from '../../types';
 import { Button, Card, Icon } from '../ui';
 import { formatCurrency, formatDate } from '../../helpers';
 import { TransactionStatusBadge } from './TransactionStatusBadge';
+import { setHoveredTransaction } from '../../helpers/globalHover';
 
 /**
  * Props for the TransactionListItem component.
@@ -20,13 +21,19 @@ interface TransactionListItemProps {
   currencySymbol: string;
   /** Callback to generate an invoice. */
   onGenerateInvoice?: (transaction: Transaction) => void;
+  /** Callback to share invoice via WhatsApp. */
+  onShareWhatsApp?: (transaction: Transaction) => void;
 }
 /**
  * Displays a summary of a single transaction in a list.
  */
-export const TransactionListItem: React.FC<TransactionListItemProps> = React.memo(({ transaction, studentName, onEdit, onDelete, onGenerateInvoice, currencySymbol }) => {
+export const TransactionListItem: React.FC<TransactionListItemProps> = React.memo(({ transaction, studentName, onEdit, onDelete, onGenerateInvoice, onShareWhatsApp, currencySymbol }) => {
   return (
-    <Card className="hover:border-accent/50 transition-colors duration-300 group border border-white/20 dark:border-white/5 shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl">
+    <Card
+      className="hover:border-accent/50 transition-colors duration-300 group border border-white/20 dark:border-white/5 shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl"
+      onMouseEnter={() => setHoveredTransaction(transaction.id)}
+      onMouseLeave={() => setHoveredTransaction(null)}
+    >
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex items-center gap-4 w-full sm:w-auto">
                 <div className="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-primary flex items-center justify-center flex-shrink-0">
@@ -72,6 +79,11 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = React.mem
         )}
         
         <div className="mt-4 pt-4 border-t border-gray-100 dark:border-white/5 flex gap-2 justify-end opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            {onShareWhatsApp && (
+              <Button variant="ghost" size="sm" onClick={() => onShareWhatsApp(transaction)} className="!p-2 rounded-full text-green-500 hover:text-green-600 hover:bg-green-500/10" aria-label="Share via WhatsApp">
+                <Icon iconName="share" className="w-5 h-5" />
+              </Button>
+            )}
             {onGenerateInvoice && (
               <Button variant="ghost" size="sm" onClick={() => onGenerateInvoice(transaction)} className="!p-2 rounded-full text-gray-400 hover:text-accent hover:bg-accent/10" aria-label="Generate invoice">
                 <Icon iconName="document-text" className="w-5 h-5" />

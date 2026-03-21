@@ -13,7 +13,9 @@ const transactionSchema = z.object({
   lessonFee: z.coerce.number().min(0, 'Fee cannot be negative'),
   amountPaid: z.coerce.number().min(0, 'Paid amount cannot be negative'),
   paymentMethod: z.string().optional(),
-  notes: z.string().optional()
+  notes: z.string().optional(),
+  grade: z.string().optional(),
+  progressRemark: z.string().optional()
 });
 
 type TransactionFormValues = z.infer<typeof transactionSchema>;
@@ -51,6 +53,8 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({ transaction, s
       amountPaid: 0,
       paymentMethod: '',
       notes: '',
+      grade: '',
+      progressRemark: '',
   };
 
   if (transaction) {
@@ -62,6 +66,8 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({ transaction, s
           amountPaid: transaction.amountPaid,
           paymentMethod: transaction.paymentMethod || '',
           notes: transaction.notes || '',
+          grade: transaction.grade || '',
+          progressRemark: transaction.progressRemark || '',
       };
   } else if (defaultStudentId) {
       const student = getStudentById(defaultStudentId);
@@ -216,6 +222,36 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({ transaction, s
             error={errors.paymentMethod?.message}
             placeholder="e.g. Cash, Bank Transfer" 
           />
+        </div>
+
+        <div className="bg-gray-50 dark:bg-primary/50 p-6 rounded-3xl border border-gray-100 dark:border-white/5 space-y-4">
+          <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <Icon iconName="star" className="w-4 h-4" />
+            Academic Progress
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <Select 
+               label="Grade / Rating" 
+               {...register('grade')} 
+               options={[
+                  {label: '(No Grade)', value: ''},
+                  {label: 'A / Excellent', value: 'A'},
+                  {label: 'B / Good', value: 'B'},
+                  {label: 'C / Average', value: 'C'},
+                  {label: 'D / Below Average', value: 'D'},
+                  {label: 'F / Needs Help', value: 'F'},
+                  {label: 'Pass', value: 'Pass'},
+                  {label: 'Fail', value: 'Fail'},
+               ]}
+               error={errors.grade?.message}
+             />
+             <Input 
+               label="Progress Remark" 
+               {...register('progressRemark')} 
+               placeholder="e.g. Mastered fractions"
+               error={errors.progressRemark?.message}
+             />
+          </div>
         </div>
 
         <div className="bg-gray-50 dark:bg-primary/50 p-6 rounded-3xl border border-gray-100 dark:border-white/5">

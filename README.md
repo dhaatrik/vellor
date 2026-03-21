@@ -47,6 +47,19 @@ Most tutoring management tools are either too complex, too expensive, or require
 
 ## ✨ Features
 
+### 🚀 The Power-Tutor Update (v3.5)
+Vellor has been supercharged with 10 high-impact features designed for busy private tutors:
+- **Guided Onboarding Wizard** — A beautiful 4-step interactive walkthrough for new users.
+- **Push Notifications** — Automated local lesson reminders sent directly to your device.
+- **PWA Install Prompt** — Persistent prompts to install Vellor as a native app for a seamless offline experience.
+- **Bulk Actions** — Easily manage, archive, clear debts, or delete multiple students at once.
+- **Branded PDF Invoices & WhatsApp Share** — Generate professional invoices with one click and share them instantly.
+- **Progress & Grade Tracking** — Track academic performance and add progress remarks alongside payments.
+- **Smart Data Import Wizard** — Migrate your existing student roster seamlessly from a CSV file.
+- **Customizable Gamification** — Set custom rank titles and deeply personalized achievements to stay motivated.
+- **Interactive Drag-and-Drop Calendar** — Schedule lessons visually by dragging students right onto the dates.
+- **Power-User Keyboard Shortcuts** — Use `Ctrl+K` for a global command palette, `Ctrl+L` for quick logging, and `Shift+P` for instant quick-pay via hover.
+
 ### 🍎 Student Management
 - **Organized Profiles** — Store contact info, parent details, rates, and subjects in one place.
 - **Instant Search** — Filter your roster by name in real time.
@@ -292,6 +305,8 @@ Planned features for future releases:
 - [ ] **Advanced Analytics** — Trend analysis, student retention metrics, and forecasting
 - [x] **Unit Tests** — Vitest + React Testing Library coverage
 - [x] **PWA Support** — Install Vellor as a native-like app on mobile
+- [x] **Smart CSV Imports** — Import existing student rosters seamlessly
+- [x] **Browser Push Notifications** — Get automated local reminders for lessons
 
 ---
 

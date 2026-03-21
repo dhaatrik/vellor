@@ -4,15 +4,27 @@ import { Theme } from '../types';
 import { DEFAULT_CURRENCY_SYMBOL, DEFAULT_USER_NAME, POINTS_ALLOCATION } from '../constants';
 import { sanitizeString } from '../helpers';
 
+const getInitialTheme = (): Theme => {
+  if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    return Theme.Dark;
+  }
+  return Theme.Light;
+};
+
 export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> = (set, get) => ({
   settings: {
-    theme: Theme.Dark,
+    theme: getInitialTheme(),
     currencySymbol: DEFAULT_CURRENCY_SYMBOL,
     userName: DEFAULT_USER_NAME,
     country: 'United States',
     phone: { countryCode: '+1', number: '' },
     email: '',
     monthlyGoal: 500,
+    hasCompletedOnboarding: false,
+    enableReminders: false,
+    invoiceTemplate: 'modern',
+    gamificationEnabled: true,
+    customRankTitles: [],
   },
 
   updateSettings: (newSettings) => {

@@ -17,7 +17,8 @@ export const createGamificationSlice: StateCreator<AppState, [], [], Gamificatio
     for (let i = TUTOR_RANK_LEVELS.length - 1; i >= 0; i--) {
       if (newPoints >= TUTOR_RANK_LEVELS[i].points) {
         newLevel = i + 1;
-        newLevelName = TUTOR_RANK_LEVELS[i].name;
+        const customTitles = get().settings?.customRankTitles;
+        newLevelName = (customTitles && customTitles[i]) ? customTitles[i] : TUTOR_RANK_LEVELS[i].name;
         break;
       }
     }

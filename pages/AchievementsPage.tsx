@@ -16,11 +16,36 @@ export const AchievementsPage: React.FC = () => {
   const transactions = useStore(s => s.transactions);
   const settings = useStore(s => s.settings);
   
-  const achievedList = useMemo(() => achievements
-    .filter(a => a.achieved)
-    .sort((a,b) => new Date(b.dateAchieved || 0).getTime() - new Date(a.dateAchieved || 0).getTime()), [achievements]);
+  const achievedList = useMemo(() => {
+    const list = achievements.filter(a => a.achieved);
+    if (settings?.customAchievement && settings?.customAchievementEarned) {
+      list.push({
+        id: 'custom-achievement' as any,
+        name: 'Personal Goal',
+        description: settings.customAchievement,
+        achieved: true,
+        icon: 'star',
+        dateAchieved: new Date().toISOString() // Assuming earned today for sorting purposes if not stored
+      });
+    }
+    return list.sort((a,b) => new Date(b.dateAchieved || 0).getTime() - new Date(a.dateAchieved || 0).getTime());
+  }, [achievements, settings?.customAchievement, settings?.customAchievementEarned]);
 
-  const pendingList = useMemo(() => achievements.filter(a => !a.achieved), [achievements]);
+  const pendingList = useMemo(() => {
+    const list = achievements.filter(a => !a.achieved);
+    if (settings?.customAchievement && !settings?.customAchievementEarned) {
+      list.unshift({
+        id: 'custom-achievement' as any,
+        name: 'Personal Goal',
+        description: settings.customAchievement,
+        achieved: false,
+        icon: 'star'
+      });
+    }
+    return list;
+  }, [achievements, settings?.customAchievement, settings?.customAchievementEarned]);
+
+  const totalAchievements = achievements.length + (settings?.customAchievement ? 1 : 0);
 
   const totalEarned = useMemo(() => transactions
       .filter(t => t.status === PaymentStatus.Paid || t.status === PaymentStatus.Overpaid || t.status === PaymentStatus.PartiallyPaid)
@@ -73,7 +98,7 @@ export const AchievementsPage: React.FC = () => {
     >
       <div className="mb-8">
         <h1 className="text-4xl font-display font-bold tracking-tight text-gray-900 dark:text-gray-50">Achievements & Badges</h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">Track your progress and unlock rewards as you grow your tutoring business. (Total: {achievements.length})</p>
+        <p className="text-gray-500 dark:text-gray-400 mt-1">Track your progress and unlock rewards as you grow your tutoring business. (Total: {totalAchievements})</p>
       </div>
       
       <Card className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
@@ -98,7 +123,7 @@ export const AchievementsPage: React.FC = () => {
                 <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mb-3">
                   <Icon iconName="sparkles" className="w-8 h-8 text-success" />
                 </div>
-                <p className="text-4xl font-display font-bold text-success">{achievedList.length} <span className="text-2xl text-gray-400">/ {achievements.length}</span></p>
+                <p className="text-4xl font-display font-bold text-success">{achievedList.length} <span className="text-2xl text-gray-400">/ {totalAchievements}</span></p>
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-1">Unlocked</p>
             </div>
         </div>

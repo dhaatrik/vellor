@@ -76,6 +76,32 @@ export const TransactionsPage: React.FC = () => {
       addToast('Student not found.', 'error');
     }
   };
+
+  const handleShareWhatsApp = async (transaction: Transaction) => {
+    const student = studentsMap.get(transaction.studentId);
+    if (!student) return addToast('Student not found.', 'error');
+
+    try {
+      if (navigator.share) {
+         const blob = generateInvoicePDF(transaction, student, settings, true) as Blob;
+         if (!blob) return;
+         const file = new File([blob], `Invoice_${student.firstName}_${transaction.date.split('T')[0]}.pdf`, { type: 'application/pdf' });
+         await navigator.share({
+           title: 'Tutoring Invoice',
+           text: `Hello ${student.firstName}, here is your latest invoice from ${settings.userName}.`,
+           files: [file]
+         });
+         addToast('Shared via WhatsApp!', 'success');
+      } else {
+         addToast('Native file sharing is not supported on this browser/device.', 'error');
+         // Fallback just text
+         window.open(`https://wa.me/?text=Hello ${student.firstName}, your invoice for ${settings.currencySymbol}${transaction.lessonFee} is ready.`, '_blank');
+      }
+    } catch (e) {
+      console.error(e);
+      // user likely cancelled sharing
+    }
+  };
   
   const confirmDeletion = () => {
     if (confirmingDelete) {
@@ -288,6 +314,7 @@ export const TransactionsPage: React.FC = () => {
                       onEdit={handleEditTransaction}
                       onDelete={handleDeleteRequest}
                       onGenerateInvoice={handleGenerateInvoice}
+                      onShareWhatsApp={handleShareWhatsApp}
                       currencySymbol={settings.currencySymbol}
                     />
                   </motion.div>
