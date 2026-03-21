@@ -64,7 +64,12 @@ export const storageEngine = {
   },
   setItem: async (name: string, value: string): Promise<void> => {
     if (globalMasterKey) {
-      const obj = JSON.parse(value);
+      const obj = JSON.parse(value, (k, v) => {
+        if (k === '__proto__' || k === 'constructor' || k === 'prototype') {
+          return undefined;
+        }
+        return v;
+      });
       const encrypted = await encryptObject(obj, globalMasterKey);
       await localforage.setItem(name, encrypted);
     } else {

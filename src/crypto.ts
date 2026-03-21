@@ -51,8 +51,15 @@ export const encryptObject = async (obj: any, key: CryptoKey): Promise<string> =
 };
 
 export const decryptObject = async <T = any>(encryptedBase64: string, key: CryptoKey, schema?: import('zod').ZodSchema<T>): Promise<T | null> => {
+  const jsonReviver = (key: string, value: any) => {
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+      return undefined;
+    }
+    return value;
+  };
+
   try {
-    const parsed = JSON.parse(atob(encryptedBase64));
+    const parsed = JSON.parse(atob(encryptedBase64), jsonReviver);
     if (!parsed.iv || !parsed.ct) {
       throw new Error("Invalid encrypted wrapper");
     }
@@ -64,7 +71,7 @@ export const decryptObject = async <T = any>(encryptedBase64: string, key: Crypt
       ctArray
     );
     const dec = new TextDecoder();
-    const parsedData = JSON.parse(dec.decode(decrypted));
+    const parsedData = JSON.parse(dec.decode(decrypted), jsonReviver);
     return schema ? schema.parse(parsedData) : parsedData;
   } catch (error) {
     // Fallback for old unencrypted or old btoa() data
@@ -75,7 +82,7 @@ export const decryptObject = async <T = any>(encryptedBase64: string, key: Crypt
         bytes[i] = raw.charCodeAt(i);
       }
       const decodedData = new TextDecoder().decode(bytes);
-      const parsedData = JSON.parse(decodedData);
+      const parsedData = JSON.parse(decodedData, jsonReviver);
       return schema ? schema.parse(parsedData) : parsedData;
     } catch (oldError) {
       return null;
