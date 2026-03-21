@@ -58,33 +58,51 @@ export const DashboardPage: React.FC = () => {
     // ⚡ Bolt Performance: Pre-compute the fallback date outside the loop
     const fallbackDate = Date.now();
 
+    // ⚡ Bolt Performance: Pre-calculate target months to avoid O(6*N) loop inside map
+    const monthIncomes = new Array(6).fill(0);
+    const targetMonths: {year: number, month: number}[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      targetMonths.push({ year: d.getFullYear(), month: d.getMonth() });
+    }
+
+    // ⚡ Bolt Performance: Single pass over transactions
+    for (let j = 0; j < transactions.length; j++) {
+      const t = transactions[j];
+      // ⚡ Bolt Performance: Check status before creating expensive Date objects
+      if (t.status === PaymentStatus.Paid || t.status === PaymentStatus.PartiallyPaid || t.status === PaymentStatus.Overpaid) {
+        const tDate = new Date(t.date);
+        const tYear = tDate.getFullYear();
+        const tMonth = tDate.getMonth();
+        for (let k = 0; k < 6; k++) {
+          if (targetMonths[k].year === tYear && targetMonths[k].month === tMonth) {
+            monthIncomes[k] += t.amountPaid;
+            break;
+          }
+        }
+      }
+    }
+
+    // ⚡ Bolt Performance: Pre-calculate student creation times
+    const studentTimes = new Float64Array(students.length);
+    for (let j = 0; j < students.length; j++) {
+      const s = students[j];
+      studentTimes[j] = s.createdAt ? new Date(s.createdAt).getTime() : fallbackDate;
+    }
+
     for (let i = 5; i >= 0; i--) {
       const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
       const monthName = d.toLocaleString('default', { month: 'short' });
-      
-      // ⚡ Bolt Performance: Hoist loop-invariant year and month calculations
-      const targetYear = d.getFullYear();
-      const targetMonth = d.getMonth();
 
-      const income = transactions.reduce((acc, t) => {
-        // ⚡ Bolt Performance: Check status before creating expensive Date objects
-        if (t.status === PaymentStatus.Paid || t.status === PaymentStatus.PartiallyPaid || t.status === PaymentStatus.Overpaid) {
-          const tDate = new Date(t.date);
-          if (tDate.getFullYear() === targetYear && tDate.getMonth() === targetMonth) {
-            return acc + t.amountPaid;
-          }
-        }
-        return acc;
-      }, 0);
+      const income = monthIncomes[5 - i];
 
       // ⚡ Bolt Performance: Hoist loop-invariant threshold Date creation
       const thresholdDate = new Date(today.getFullYear(), today.getMonth() - i + 1, 0).getTime();
 
-      const studentsCount = students.filter(s => {
-        // ⚡ Bolt Performance: Use pre-computed fallback date
-        const sTime = s.createdAt ? new Date(s.createdAt).getTime() : fallbackDate;
-        return sTime <= thresholdDate;
-      }).length;
+      let studentsCount = 0;
+      for (let j = 0; j < studentTimes.length; j++) {
+          if (studentTimes[j] <= thresholdDate) studentsCount++;
+      }
 
       data.push({ name: monthName, income, students: studentsCount });
     }
