@@ -190,14 +190,18 @@ export const DashboardPage: React.FC = () => {
                 <Icon iconName={activeChart === 'income' ? 'chart-bar' : 'users'} className={`w-5 h-5 ${activeChart === 'income' ? 'text-accent' : 'text-blue-500'}`} />
                 {activeChart === 'income' ? 'Income Overview' : 'Student Growth'}
               </h3>
-              <div className="flex bg-gray-100 dark:bg-primary rounded-full p-1">
+              <div className="flex bg-gray-100 dark:bg-primary rounded-full p-1" role="tablist" aria-label="Chart view options">
                 <button 
+                  role="tab"
+                  aria-selected={activeChart === 'income'}
                   onClick={() => setActiveChart('income')}
                   className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${activeChart === 'income' ? 'bg-white dark:bg-primary-light text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
                 >
                   Income
                 </button>
                 <button 
+                  role="tab"
+                  aria-selected={activeChart === 'students'}
                   onClick={() => setActiveChart('students')}
                   className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${activeChart === 'students' ? 'bg-white dark:bg-primary-light text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
                 >

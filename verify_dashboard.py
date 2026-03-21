@@ -31,11 +31,19 @@ def run():
                 page.wait_for_timeout(1000)
 
             # Verification of DashboardPage
-            # We want to see the charts rendering which depends on the logic we changed
             expect(page.get_by_text("Welcome back, Bolt")).to_be_visible()
 
+            # Click on 'Students' tab (now aria-label enabled)
+            tab_students = page.get_by_role("tab", name="Students")
+            tab_students.click()
+            page.wait_for_timeout(1000)
+
+            # Click on 'Income' tab
+            tab_income = page.get_by_role("tab", name="Income")
+            tab_income.click()
+
             # Wait for charts to potentially animate
-            page.wait_for_timeout(2000)
+            page.wait_for_timeout(1000)
 
             # Take screenshot
             os.makedirs("/home/jules/verification", exist_ok=True)
