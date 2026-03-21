@@ -5,7 +5,7 @@
 **Manage your tutoring business like a pro.**
 
 [![CI](https://github.com/DhaatuTheGamer/Vellor/actions/workflows/ci.yml/badge.svg)](https://github.com/DhaatuTheGamer/Vellor/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-3.5.0-8b5cf6)](https://github.com/DhaatuTheGamer/Vellor)
+[![Version](https://img.shields.io/badge/version-4.0.0-8b5cf6)](https://github.com/DhaatuTheGamer/Vellor)
 [![License: MIT](https://img.shields.io/badge/License-MIT-10b981.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white)](https://react.dev/)
@@ -47,8 +47,18 @@ Most tutoring management tools are either too complex, too expensive, or require
 
 ## ✨ Features
 
-### 🚀 The Power-Tutor Update (v3.5)
-Vellor has been supercharged with 10 high-impact features designed for busy private tutors:
+### 🚀 The Tutor OS Update (v4.0)
+Vellor has evolved into a complete operating system for private educators with 7 massive new capabilities:
+- **WhatsApp Integration** — One-click, pre-filled WhatsApp reminders for overdue payments directly from the dashboard.
+- **Automated Monthly Invoicing** — Generate comprehensive, multi-page PDF statements for all unpaid lessons with a single click.
+- **Secure Client Portals** — Generate "read-only" Base64 URL snapshots of a student's progress and attendance to share with parents instantly.
+- **Financial Forecasting** — Dynamic charts predicting your future monthly income based on scheduled lessons and active student rates.
+- **Smart Rescheduling** — Automatically prompts and pre-fills the make-up class scheduler whenever a student is marked as "Absent" or "Cancelled".
+- **White-Label Customization** — Upload your own brand logo and set a custom accent color that dynamically themes the entire UI and PDF invoices.
+- **Enhanced Offline Engine** — Seamlessly detects network drops with UI indicators and proactively reminds you to backup data upon reconnecting.
+
+### ⚡ The Power-Tutor Update (v3.5)
+Vellor was recently supercharged with these high-impact features:
 - **Guided Onboarding Wizard** — A beautiful 4-step interactive walkthrough for new users.
 - **Push Notifications** — Automated local lesson reminders sent directly to your device.
 - **PWA Install Prompt** — Persistent prompts to install Vellor as a native app for a seamless offline experience.

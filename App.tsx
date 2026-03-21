@@ -23,6 +23,7 @@ import { AchievementsPage } from './pages/AchievementsPage';
 import { WelcomePage } from './pages/WelcomePage';
 import { ProfilePage } from './pages/ProfilePage';
 import { TutorAdvicePage } from './pages/TutorAdvicePage';
+import { PortalPage } from './pages/PortalPage';
 import { Theme } from './types'; // Theme enum
 import { DEFAULT_USER_NAME, TUTOR_RANK_LEVELS } from './constants';
 
@@ -53,6 +54,35 @@ const AppLayout: React.FC = () => {
     () => setIsQuickLogOpen(true),
     () => setAboutOpen(true)
   );
+
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOffline(false);
+      useStore.getState().addToast('Back online! Please consider exporting a backup of your data.', 'info');
+    };
+    const handleOffline = () => {
+      setIsOffline(true);
+      useStore.getState().addToast('You are offline. Changes will be saved locally.', 'info');
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (settings.brandColor) {
+      document.documentElement.style.setProperty('--color-accent', settings.brandColor);
+    } else {
+      document.documentElement.style.removeProperty('--color-accent');
+    }
+  }, [settings.brandColor]);
 
   // Initialize background reminders check
   useReminders();
@@ -101,10 +131,16 @@ const AppLayout: React.FC = () => {
               onClick={handleNavLinkClick} 
               className="text-2xl font-display font-bold text-gray-900 dark:text-white flex items-center gap-3 group"
             >
-              <div className="w-10 h-10 rounded-2xl bg-accent flex items-center justify-center text-primary-dark group-hover:scale-105 transition-transform">
-                <Icon iconName="academic-cap" className="w-6 h-6" />
-              </div>
-              Vellor
+              {settings.brandLogoBase64 ? (
+                <div className="w-10 h-10 rounded-2xl bg-white dark:bg-primary-dark flex items-center justify-center overflow-hidden border border-gray-100 dark:border-white/5 shadow-sm group-hover:scale-105 transition-transform">
+                  <img src={settings.brandLogoBase64} alt="Brand Logo" className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="w-10 h-10 rounded-2xl bg-accent flex items-center justify-center text-primary-dark group-hover:scale-105 transition-transform">
+                  <Icon iconName="academic-cap" className="w-6 h-6" />
+                </div>
+              )}
+              {settings.userName.split(' ')[0] || 'Vellor'}
             </Link>
             {/* Close button for mobile sidebar */}
             <Button
@@ -192,6 +228,12 @@ const AppLayout: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4">
+            {isOffline && (
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-warning/10 text-warning rounded-full text-xs font-bold whitespace-nowrap" title="Changes are saved locally">
+                <Icon iconName="bolt" className="w-4 h-4" />
+                Offline Mode
+              </div>
+            )}
             {/* Theme Toggle Button */}
             <Button
                 onClick={toggleTheme}
@@ -485,6 +527,25 @@ const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlocked }) =
 
 const App: React.FC = () => {
   const [isUnlocked, setIsUnlocked] = useState(false);
+  const [isPortal, setIsPortal] = useState(window.location.hash.startsWith('#/portal'));
+
+  useEffect(() => {
+    const handleHashChange = () => setIsPortal(window.location.hash.startsWith('#/portal'));
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  if (isPortal) {
+    return (
+      <ErrorBoundary>
+        <HashRouter>
+          <Routes>
+            <Route path="/portal" element={<PortalPage />} />
+          </Routes>
+        </HashRouter>
+      </ErrorBoundary>
+    );
+  }
 
   return (
     <ErrorBoundary>

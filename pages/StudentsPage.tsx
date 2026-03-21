@@ -7,6 +7,7 @@ import { StudentDetailView } from '../components/students/StudentDetailView';
 import { StudentForm } from '../components/students/StudentForm';
 import { StudentListItem } from '../components/students/StudentListItem';
 import { TransactionForm } from '../components/transactions/TransactionForm';
+import { QuickLogModal } from '../components/transactions/QuickLogModal';
 import { generateInvoicePDF } from '../pdf';
 import { CSVImportWizard } from '../components/students/CSVImportWizard';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -34,6 +35,9 @@ export const StudentsPage: React.FC = () => {
   const [showBulkLogModal, setShowBulkLogModal] = useState(false);
   const [showImportWizard, setShowImportWizard] = useState(false);
   const [bulkLogData, setBulkLogData] = useState({ date: new Date().toISOString().split('T')[0], duration: 60, fee: 50, notes: 'Bulk logged lesson' });
+
+  const [makeupPrompt, setMakeupPrompt] = useState<{isOpen: boolean, studentId: string}>({isOpen: false, studentId: ''});
+  const [showMakeupModal, setShowMakeupModal] = useState<{isOpen: boolean, studentId: string}>({isOpen: false, studentId: ''});
 
   const { studentId } = useParams<{studentId?: string}>();
   const navigate = useNavigate();
@@ -112,6 +116,15 @@ export const StudentsPage: React.FC = () => {
         setSelectedStudent(refreshedStudent); 
         navigate(`/students/${selectedStudent.id}`);
     }
+
+    if (transactionData.attendance === 'Absent' || transactionData.attendance === 'Cancelled') {
+        setMakeupPrompt({ isOpen: true, studentId: transactionData.studentId });
+    }
+  };
+
+  const handleMakeupConfirm = () => {
+      setShowMakeupModal({ isOpen: true, studentId: makeupPrompt.studentId });
+      setMakeupPrompt({ isOpen: false, studentId: '' });
   };
 
   const openTransactionFormForStudent = (studId: string) => {
@@ -195,14 +208,32 @@ export const StudentsPage: React.FC = () => {
   }, [transactions]);
 
   if (selectedStudent && !showStudentForm && !showTransactionFormForStudent) {
-    return <StudentDetailView 
+    return (
+        <>
+            <StudentDetailView 
                 student={selectedStudent} 
                 onClose={handleCloseDetailView} 
                 onEdit={handleEditStudent}
                 onLogPayment={openTransactionFormForStudent}
                 transactions={transactions}
                 currencySymbol={settings.currencySymbol}
-            />;
+            />
+            <ConfirmationModal
+                isOpen={makeupPrompt.isOpen}
+                onClose={() => setMakeupPrompt({ isOpen: false, studentId: '' })}
+                onConfirm={handleMakeupConfirm}
+                title="Schedule Make-up Class?"
+                message="Since this lesson was marked as Absent/Cancelled, would you like to schedule a make-up class now?"
+                confirmButtonText="Yes, Schedule"
+            />
+            <QuickLogModal
+                isOpen={showMakeupModal.isOpen}
+                onClose={() => setShowMakeupModal({ isOpen: false, studentId: '' })}
+                defaultStudentId={showMakeupModal.studentId}
+                isMakeup={true}
+            />
+        </>
+    );
   }
 
   const containerVariants = {
@@ -376,6 +407,22 @@ export const StudentsPage: React.FC = () => {
       </Modal>
 
       <CSVImportWizard isOpen={showImportWizard} onClose={() => setShowImportWizard(false)} />
+
+      <ConfirmationModal
+        isOpen={makeupPrompt.isOpen}
+        onClose={() => setMakeupPrompt({ isOpen: false, studentId: '' })}
+        onConfirm={handleMakeupConfirm}
+        title="Schedule Make-up Class?"
+        message="Since this lesson was marked as Absent/Cancelled, would you like to schedule a make-up class now?"
+        confirmButtonText="Yes, Schedule"
+      />
+
+      <QuickLogModal
+         isOpen={showMakeupModal.isOpen}
+         onClose={() => setShowMakeupModal({ isOpen: false, studentId: '' })}
+         defaultStudentId={showMakeupModal.studentId}
+         isMakeup={true}
+      />
     </motion.div>
   );
 };

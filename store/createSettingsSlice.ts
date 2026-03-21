@@ -25,6 +25,8 @@ export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> 
     invoiceTemplate: 'modern',
     gamificationEnabled: true,
     customRankTitles: [],
+    brandColor: '#8b5cf6', // default violet-500
+    brandLogoBase64: '',
   },
 
   updateSettings: (newSettings) => {

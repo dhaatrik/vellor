@@ -117,6 +117,16 @@ export enum PaymentStatus {
 }
 
 /**
+ * Represents the attendance status of a student for a specific lesson.
+ * @enum {string}
+ */
+export enum AttendanceStatus {
+  Present = 'Present',
+  Absent = 'Absent',
+  Cancelled = 'Cancelled',
+}
+
+/**
  * Represents a single financial transaction, typically a lesson or a payment.
  * This is a core data model.
  * @interface
@@ -138,6 +148,8 @@ export interface Transaction {
   paymentMethod?: string;
   /** The calculated payment status of the transaction. */
   status: PaymentStatus;
+  /** The attendance status of the student for this lesson. */
+  attendance?: AttendanceStatus;
   /** The grade or score assigned for this lesson (e.g., "A", "85%"). */
   grade?: string;
   /** A remark or note regarding the student's progress in this lesson. */
@@ -270,6 +282,10 @@ export interface AppSettings {
   customRankTitles?: string[];
   customAchievement?: string;
   customAchievementEarned?: boolean;
+  /** Custom primary brand color for the UI. */
+  brandColor?: string;
+  /** Custom logo for dynamic white-labeling. */
+  brandLogoBase64?: string;
 }
 
 /**
@@ -295,7 +311,7 @@ export type StudentFormData = Omit<Student, 'id' | 'createdAt'>;
  * It omits system-generated fields like `id`, `status`, and `createdAt`.
  * @typedef {Omit<Transaction, 'id' | 'status' | 'createdAt'>}
  */
-export type TransactionFormData = Omit<Transaction, 'id' | 'status' | 'createdAt'> & { status?: PaymentStatus };
+export type TransactionFormData = Omit<Transaction, 'id' | 'status' | 'createdAt'> & { status?: PaymentStatus, attendance?: AttendanceStatus };
 
 /**
  * Represents the structure of a toast notification message.

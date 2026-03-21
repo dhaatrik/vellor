@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Student, Transaction, PaymentStatus } from '../../types';
 import { Button, Card, Icon, Modal, Textarea } from '../ui';
-import { formatCurrency, formatDate, formatPhoneNumber } from '../../helpers';
+import { formatCurrency, formatDate, formatPhoneNumber, generateWhatsAppLink, generatePortalLink } from '../../helpers';
 import { TransactionStatusBadge } from '../transactions/TransactionStatusBadge';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
@@ -102,6 +102,12 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({ student, o
       useStore.getState().addToast('Progress Report exported!', 'success');
   };
 
+  const handleSharePortal = () => {
+     const link = generatePortalLink(student, studentTransactions, settings);
+     navigator.clipboard.writeText(link);
+     useStore.getState().addToast('Portal link copied to clipboard!', 'success');
+  };
+
   const gradientClass = useMemo(() => getGradient(student.firstName + student.lastName), [student.firstName, student.lastName]);
 
   const containerVariants = {
@@ -149,6 +155,7 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({ student, o
             </div>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 relative z-10 w-full sm:w-auto">
+          <Button onClick={handleSharePortal} leftIcon="share" variant="outline" className="w-full sm:w-auto rounded-full hidden sm:flex border-gray-200 dark:border-white/10 hover:border-accent hover:text-accent">Portal</Button>
           <Button onClick={() => onEdit(student)} leftIcon="pencil" variant="outline" className="w-full sm:w-auto rounded-full">Edit Profile</Button>
           <Button onClick={() => onLogPayment(student.id)} leftIcon="plus" variant="primary" className="w-full sm:w-auto rounded-full shadow-lg shadow-accent/20">Log Lesson</Button>
         </div>
@@ -169,7 +176,14 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({ student, o
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-0.5">Student Phone</p>
-                  <p className="text-gray-900 dark:text-white font-medium">{formatPhoneNumber(student.contact.studentPhone)}</p>
+                  <p className="text-gray-900 dark:text-white font-medium flex items-center gap-2">
+                    {formatPhoneNumber(student.contact.studentPhone)}
+                    {student.contact.studentPhone?.number && (
+                      <a href={generateWhatsAppLink(student.contact.studentPhone)} target="_blank" rel="noopener noreferrer" className="text-green-500 hover:text-green-600 outline-none p-1 rounded hover:bg-green-500/10 transition-colors" title="Message on WhatsApp">
+                        <Icon iconName="share" className="w-4 h-4" />
+                      </a>
+                    )}
+                  </p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -178,9 +192,21 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({ student, o
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-0.5">Parent Phones</p>
-                  <p className="text-gray-900 dark:text-white font-medium">{formatPhoneNumber(student.contact.parentPhone1)}</p>
+                  <p className="text-gray-900 dark:text-white font-medium flex items-center gap-2">
+                    {formatPhoneNumber(student.contact.parentPhone1)}
+                    {student.contact.parentPhone1?.number && (
+                      <a href={generateWhatsAppLink(student.contact.parentPhone1)} target="_blank" rel="noopener noreferrer" className="text-green-500 hover:text-green-600 outline-none p-1 rounded hover:bg-green-500/10 transition-colors" title="Message on WhatsApp">
+                        <Icon iconName="share" className="w-4 h-4" />
+                      </a>
+                    )}
+                  </p>
                   {student.contact.parentPhone2?.number && (
-                    <p className="text-gray-900 dark:text-white font-medium mt-1">{formatPhoneNumber(student.contact.parentPhone2)}</p>
+                    <p className="text-gray-900 dark:text-white font-medium mt-1 flex items-center gap-2">
+                      {formatPhoneNumber(student.contact.parentPhone2)}
+                      <a href={generateWhatsAppLink(student.contact.parentPhone2)} target="_blank" rel="noopener noreferrer" className="text-green-500 hover:text-green-600 outline-none p-1 rounded hover:bg-green-500/10 transition-colors" title="Message on WhatsApp">
+                        <Icon iconName="share" className="w-4 h-4" />
+                      </a>
+                    </p>
                   )}
                 </div>
               </div>

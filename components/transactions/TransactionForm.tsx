@@ -1,6 +1,6 @@
 import React from 'react';
 import { useStore } from '../../store';
-import { Transaction, Student, PaymentStatus } from '../../types';
+import { Transaction, Student, PaymentStatus, AttendanceStatus } from '../../types';
 import { Button, Input, Select, Textarea, Icon } from '../ui';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -15,7 +15,8 @@ const transactionSchema = z.object({
   paymentMethod: z.string().optional(),
   notes: z.string().optional(),
   grade: z.string().optional(),
-  progressRemark: z.string().optional()
+  progressRemark: z.string().optional(),
+  attendance: z.nativeEnum(AttendanceStatus).optional(),
 });
 
 type TransactionFormValues = z.infer<typeof transactionSchema>;
@@ -55,6 +56,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({ transaction, s
       notes: '',
       grade: '',
       progressRemark: '',
+      attendance: AttendanceStatus.Present,
   };
 
   if (transaction) {
@@ -68,6 +70,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({ transaction, s
           notes: transaction.notes || '',
           grade: transaction.grade || '',
           progressRemark: transaction.progressRemark || '',
+          attendance: transaction.attendance || AttendanceStatus.Present,
       };
   } else if (defaultStudentId) {
       const student = getStudentById(defaultStudentId);
@@ -166,7 +169,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({ transaction, s
             <Icon iconName="identification" className="w-4 h-4" />
             Lesson Details
           </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Select 
               label="Student" 
               {...restStudentId} 
@@ -180,6 +183,16 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({ transaction, s
               {...register('date')} 
               error={errors.date?.message}
             />
+            <Select 
+               label="Attendance" 
+               {...register('attendance')} 
+               options={[
+                  {label: 'Present', value: AttendanceStatus.Present},
+                  {label: 'Absent', value: AttendanceStatus.Absent},
+                  {label: 'Cancelled', value: AttendanceStatus.Cancelled},
+               ]}
+               error={errors.attendance?.message}
+             />
           </div>
           <Input 
             label="Lesson Duration (minutes) / Reference" 

@@ -5,7 +5,9 @@ import { Transaction, PaymentStatus } from '../types';
 import { Button, Modal, Card, Icon, ConfirmationModal } from '../components/ui';
 import { TransactionForm } from '../components/transactions/TransactionForm';
 import { TransactionListItem } from '../components/transactions/TransactionListItem';
-import { generateInvoicePDF } from '../pdf';
+import { QuickLogModal } from '../components/transactions/QuickLogModal';
+import { generateInvoicePDF, generateBulkInvoicePDF } from '../pdf';
+import { generateWhatsAppLink } from '../helpers';
 import { motion } from 'framer-motion';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 
@@ -23,6 +25,10 @@ export const TransactionsPage: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | undefined>(undefined);
   const [confirmingDelete, setConfirmingDelete] = useState<Transaction | null>(null);
+  
+  const [makeupPrompt, setMakeupPrompt] = useState<{isOpen: boolean, studentId: string}>({isOpen: false, studentId: ''});
+  const [showMakeupModal, setShowMakeupModal] = useState<{isOpen: boolean, studentId: string}>({isOpen: false, studentId: ''});
+  
   const location = useLocation();
   
   type FilterType = 'all' | 'paid' | 'due' | 'partially-paid' | 'overpaid' | 'unpaid';
@@ -48,6 +54,15 @@ export const TransactionsPage: React.FC = () => {
     }
     setShowForm(false);
     setEditingTransaction(undefined);
+
+    if (transactionData.attendance === 'Absent' || transactionData.attendance === 'Cancelled') {
+        setMakeupPrompt({ isOpen: true, studentId: transactionData.studentId });
+    }
+  };
+
+  const handleMakeupConfirm = () => {
+      setShowMakeupModal({ isOpen: true, studentId: makeupPrompt.studentId });
+      setMakeupPrompt({ isOpen: false, studentId: '' });
   };
 
   const handleEditTransaction = (transaction: Transaction) => {
@@ -94,12 +109,23 @@ export const TransactionsPage: React.FC = () => {
          addToast('Shared via WhatsApp!', 'success');
       } else {
          addToast('Native file sharing is not supported on this browser/device.', 'error');
-         // Fallback just text
-         window.open(`https://wa.me/?text=Hello ${student.firstName}, your invoice for ${settings.currencySymbol}${transaction.lessonFee} is ready.`, '_blank');
+         // Fallback just text to parent's phone or student's phone
+         const phoneToUse = student.contact.parentPhone1 || student.contact.studentPhone;
+         const message = `Hello ${student.firstName}, your invoice for ${settings.currencySymbol}${transaction.lessonFee} is ready.`;
+         window.open(generateWhatsAppLink(phoneToUse, message), '_blank');
       }
     } catch (e) {
       console.error(e);
       // user likely cancelled sharing
+    }
+  };
+
+  const handleBulkInvoice = () => {
+    const success = generateBulkInvoicePDF(students, transactions, settings);
+    if (success) {
+       addToast('Monthly statements generated successfully!', 'success');
+    } else {
+       addToast('No unpaid transactions found to invoice.', 'info');
     }
   };
   
@@ -205,7 +231,10 @@ export const TransactionsPage: React.FC = () => {
           <h1 className="text-4xl font-display font-bold tracking-tight text-gray-900 dark:text-gray-50">Transactions</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Track lessons, payments, and outstanding balances.</p>
         </div>
-        <Button onClick={() => { setEditingTransaction(undefined); setShowForm(true); }} leftIcon="plus" className="w-full sm:w-auto rounded-full shadow-lg shadow-accent/20">Log Lesson</Button>
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <Button onClick={handleBulkInvoice} variant="outline" leftIcon="document-text" className="w-full sm:w-auto rounded-full">Monthly Statements</Button>
+          <Button onClick={() => { setEditingTransaction(undefined); setShowForm(true); }} leftIcon="plus" className="w-full sm:w-auto rounded-full shadow-lg shadow-accent/20">Log Lesson</Button>
+        </div>
       </div>
       
       <div className="flex flex-wrap gap-2 mb-4">
@@ -342,6 +371,22 @@ export const TransactionsPage: React.FC = () => {
         title="Confirm Transaction Deletion"
         message={<span className="text-danger">Are you sure you want to delete this transaction? This action cannot be undone.</span>}
         confirmButtonText="Delete Transaction"
+      />
+
+      <ConfirmationModal
+        isOpen={makeupPrompt.isOpen}
+        onClose={() => setMakeupPrompt({ isOpen: false, studentId: '' })}
+        onConfirm={handleMakeupConfirm}
+        title="Schedule Make-up Class?"
+        message="Since this lesson was marked as Absent/Cancelled, would you like to schedule a make-up class now?"
+        confirmButtonText="Yes, Schedule"
+      />
+
+      <QuickLogModal
+         isOpen={showMakeupModal.isOpen}
+         onClose={() => setShowMakeupModal({ isOpen: false, studentId: '' })}
+         defaultStudentId={showMakeupModal.studentId}
+         isMakeup={true}
       />
     </motion.div>
   );

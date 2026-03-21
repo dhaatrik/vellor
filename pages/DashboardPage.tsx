@@ -22,6 +22,15 @@ export const DashboardPage: React.FC = () => {
   const clearActivityLog = useStore(s => s.clearActivityLog);
   const addToast = useStore(s => s.addToast);
   const { totalUnpaid, totalPaidThisMonth, activeStudentsCount, overduePayments } = useData.derived();
+  
+  const predictedIncome = useMemo(() => {
+    return students.reduce((sum, student) => {
+      let monthlyMultiplier = 4;
+      if (student.tuition.rateType === 'monthly') monthlyMultiplier = 1;
+      return sum + (student.tuition.defaultRate * monthlyMultiplier);
+    }, 0);
+  }, [students]);
+
   const navigate = useNavigate();
   const [isConfirmingClearAll, setIsConfirmingClearAll] = useState(false);
   const { isInstallable, promptInstall } = usePwaInstall();
@@ -200,7 +209,7 @@ export const DashboardPage: React.FC = () => {
         
         {/* Stats Row */}
         <motion.div variants={itemVariants} className="col-span-1 md:col-span-2 lg:col-span-2">
-          <div className="grid grid-cols-2 gap-4 h-full">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 h-full">
             <StatDisplayCard 
                 title="Total Unpaid" 
                 value={formatCurrency(totalUnpaid, settings.currencySymbol)} 
@@ -218,6 +227,14 @@ export const DashboardPage: React.FC = () => {
                 iconBgClass="bg-accent/10"
                 onClick={() => navigate('/transactions', { state: { filter: 'paid' } })}
                 className="rounded-3xl border border-white/20 dark:border-white/5 shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl cursor-pointer hover:border-accent/30 transition-colors"
+            />
+            <StatDisplayCard 
+                title="Predicted Income" 
+                value={formatCurrency(predictedIncome, settings.currencySymbol)} 
+                iconName="trending-up" 
+                iconColorClass="text-indigo-500"
+                iconBgClass="bg-indigo-500/10"
+                className="rounded-3xl border border-white/20 dark:border-white/5 shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl"
             />
           </div>
         </motion.div>

@@ -1,20 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon, Button, Input, Select } from '../ui';
 import { useStore } from '../../store';
-import { TransactionFormData } from '../../types';
+import { TransactionFormData, AttendanceStatus, PaymentStatus } from '../../types';
 
 interface QuickLogModalProps {
   isOpen: boolean;
   onClose: () => void;
+  defaultStudentId?: string;
+  isMakeup?: boolean;
 }
 
-export const QuickLogModal: React.FC<QuickLogModalProps> = ({ isOpen, onClose }) => {
+export const QuickLogModal: React.FC<QuickLogModalProps> = ({ isOpen, onClose, defaultStudentId, isMakeup }) => {
   const students = useStore(s => s.students);
   const addTransaction = useStore(s => s.addTransaction);
-  const [studentId, setStudentId] = useState('');
+  const [studentId, setStudentId] = useState(defaultStudentId || '');
   const [duration, setDuration] = useState('');
   const [amountPaid, setAmountPaid] = useState('');
+  const [attendance, setAttendance] = useState<AttendanceStatus>(AttendanceStatus.Present);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (defaultStudentId) setStudentId(defaultStudentId);
+      if (isMakeup) {
+          setAmountPaid('0');
+      } else {
+          setAmountPaid('');
+      }
+      setDuration('');
+      setAttendance(AttendanceStatus.Present);
+    }
+  }, [isOpen, defaultStudentId, isMakeup]);
 
   const activeStudents = students;
 
@@ -44,7 +60,9 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ isOpen, onClose })
       lessonFee,
       amountPaid: paid,
       paymentMethod: '',
-      notes: 'Quick logged lesson',
+      notes: isMakeup ? 'Scheduled Make-up Class' : 'Quick logged lesson',
+      status: isMakeup ? PaymentStatus.Scheduled : undefined,
+      attendance,
     };
 
     addTransaction(transactionData);
@@ -77,7 +95,7 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ isOpen, onClose })
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-display font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <span className="text-accent">⚡</span> Quick Log
+                  <span className="text-accent">{isMakeup ? '📅' : '⚡'}</span> {isMakeup ? 'Schedule Make-up' : 'Quick Log'}
                 </h2>
                 <button onClick={onClose} aria-label="Close Quick Log" className="p-2 bg-gray-100 dark:bg-white/5 rounded-full text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
                   <Icon iconName="x-mark" className="w-5 h-5" />
@@ -104,6 +122,20 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ isOpen, onClose })
                   required
                 />
 
+                {!isMakeup && (
+                  <Select
+                    label="Attendance"
+                    name="attendance"
+                    value={attendance}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setAttendance(e.target.value as AttendanceStatus)}
+                    options={[
+                      { value: AttendanceStatus.Present, label: 'Present' },
+                      { value: AttendanceStatus.Absent, label: 'Absent' },
+                      { value: AttendanceStatus.Cancelled, label: 'Cancelled' }
+                    ]}
+                  />
+                )}
+
                 <div className="grid grid-cols-2 gap-4">
                   <Input
                     label="Duration (mins)"
@@ -129,7 +161,7 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ isOpen, onClose })
                 </div>
 
                 <Button type="submit" variant="primary" className="w-full py-4 text-lg rounded-2xl shadow-lg shadow-accent/20 mt-4">
-                  Log Lesson
+                  {isMakeup ? 'Schedule' : 'Log Lesson'}
                 </Button>
               </form>
             </div>

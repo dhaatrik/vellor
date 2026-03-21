@@ -32,9 +32,9 @@
               dark: '#f1f5f9', // slate-100
             },
             accent: {
-              light: '#a78bfa', // violet-400
-              DEFAULT: '#8b5cf6', // violet-500
-              dark: '#7c3aed', // violet-600
+              light: 'var(--color-accent-light, #a78bfa)', // fallback to violet-400
+              DEFAULT: 'var(--color-accent, #8b5cf6)', // fallback to violet-500
+              dark: 'var(--color-accent-dark, #7c3aed)', // fallback to violet-600
             },
             success: '#10b981', // emerald-500
             warning: '#f59e0b', // amber-500

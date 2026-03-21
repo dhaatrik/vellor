@@ -168,6 +168,54 @@ export const ProfilePage: React.FC = () => {
         </div>
       </Card>
 
+      <Card title="Custom Branding" titleIcon="brush">
+        <div className="space-y-6">
+           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ml-1">Brand Accent Color</label>
+                <div className="flex items-center gap-4">
+                  <input 
+                    type="color" 
+                    name="brandColor"
+                    value={formData.brandColor || '#8b5cf6'}
+                    onChange={handleChange}
+                    className="w-12 h-12 rounded-xl border border-gray-200 dark:border-white/10 cursor-pointer overflow-hidden p-0 bg-transparent"
+                  />
+                  <div className="text-sm text-gray-500 font-mono">{formData.brandColor || '#8b5cf6'}</div>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">Personalize the application's primary color.</p>
+              </div>
+
+              <div>
+                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ml-1">App Logo (Square)</label>
+                 <div className="flex items-center gap-4">
+                   {formData.brandLogoBase64 ? (
+                     <div className="relative w-16 h-16 rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden bg-white shadow-sm">
+                       <img src={formData.brandLogoBase64} alt="App Logo" className="w-full h-full object-cover" />
+                       <button onClick={() => setFormData(prev => ({ ...prev, brandLogoBase64: undefined }))} className="absolute top-0 right-0 bg-danger text-white rounded-bl-xl p-1 hover:bg-danger/80">
+                         <Icon iconName="x-mark" className="w-3 h-3" />
+                       </button>
+                     </div>
+                   ) : (
+                     <label className="cursor-pointer px-4 py-2 border border-dashed border-gray-300 dark:border-white/20 rounded-xl text-sm font-medium hover:border-accent hover:text-accent transition-colors">
+                        Upload Logo
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => setFormData(prev => ({ ...prev, brandLogoBase64: reader.result as string }));
+                            reader.readAsDataURL(file);
+                          }
+                        }} />
+                     </label>
+                   )}
+                 </div>
+                 <p className="text-xs text-gray-500 mt-2">Replaces the default graduation cap icon.</p>
+              </div>
+           </div>
+        </div>
+      </Card>
+
       <Card title="Invoice Settings" titleIcon="document-text">
         <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

@@ -3,7 +3,7 @@
  * This file contains helper functions for formatting data and determining display logic.
  */
 import DOMPurify from 'dompurify';
-import { PaymentStatus, PhoneNumber } from './types';
+import { PaymentStatus, PhoneNumber, Student, Transaction, AppSettings } from './types';
 
 /**
  * Sanitizes a string by stripping all HTML tags using DOMPurify.
@@ -70,4 +70,50 @@ export const formatRelativeTime = (dateString: string): string => {
     if (minutes < 60) return `${minutes}m ago`;
     if (hours < 24) return `${hours}h ago`;
     return `${days}d ago`;
+};
+
+/**
+ * Generates a WhatsApp wa.me link with an optional pre-filled message.
+ */
+export const generateWhatsAppLink = (phone: PhoneNumber | undefined, message: string = ''): string => {
+  if (!phone || !phone.number) {
+    return '#';
+  }
+  // Remove all non-numeric characters from the country code and number
+  const cleanCountryCode = phone.countryCode.replace(/\D/g, '');
+  const cleanNumber = phone.number.replace(/\D/g, '');
+  const waNumber = `${cleanCountryCode}${cleanNumber}`;
+  
+  if (!message) {
+    return `https://wa.me/${waNumber}`;
+  }
+  return `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
+};
+
+/**
+ * Generates a Base64 encoded URL for the read-only student/parent portal.
+ */
+export const generatePortalLink = (student: Student, transactions: Transaction[], settings: AppSettings): string => {
+  const payload = {
+    tutorName: settings.userName,
+    currencySymbol: settings.currencySymbol,
+    student: {
+      firstName: student.firstName,
+      lastName: student.lastName,
+      subjects: student.tuition.subjects,
+    },
+    transactions: transactions.map(t => ({
+      id: t.id,
+      date: t.date,
+      lessonFee: t.lessonFee,
+      amountPaid: t.amountPaid,
+      status: t.status,
+      grade: t.grade,
+      progressRemark: t.progressRemark,
+    })).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  };
+  
+  const base64 = btoa(encodeURIComponent(JSON.stringify(payload)));
+  const baseUrl = window.location.href.split('#')[0];
+  return `${baseUrl}#/portal?data=${base64}`;
 };
