@@ -81,6 +81,8 @@ export const Icon: React.FC<IconProps> = ({ iconName, className = 'w-6 h-6', ...
     'ticket': LucideIcons.Ticket,
     'briefcase': LucideIcons.Briefcase,
     'party-popper': LucideIcons.PartyPopper,
+    'chevron-down': LucideIcons.ChevronDown,
+    'heart': LucideIcons.Heart,
   };
 
   const LucideIcon = iconMap[iconName] || LucideIcons.HelpCircle;

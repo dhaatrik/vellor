@@ -1,6 +1,6 @@
-// Import React and ReactDOM for building and rendering the React application.
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { HelmetProvider } from 'react-helmet-async';
 // Import the main App component, which serves as the entry point of the application's UI.
 import App from './App';
 
@@ -16,6 +16,8 @@ const root = ReactDOM.createRoot(rootElement);
 // Render the App component within React's StrictMode for highlighting potential problems.
 root.render(
   <React.StrictMode>
-    <App />
+    <HelmetProvider>
+      <App />
+    </HelmetProvider>
   </React.StrictMode>
 );
