@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --color-accent: #8b5cf6;
   --color-accent-light: color-mix(in srgb, var(--color-accent) 80%, white);

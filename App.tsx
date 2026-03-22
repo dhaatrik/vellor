@@ -21,6 +21,7 @@ import { CalendarPage } from './pages/CalendarPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { AchievementsPage } from './pages/AchievementsPage';
 import { WelcomePage } from './pages/WelcomePage';
+import { MarketingPage } from './pages/MarketingPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { TutorAdvicePage } from './pages/TutorAdvicePage';
 import { PortalPage } from './pages/PortalPage';
@@ -528,12 +529,25 @@ const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlocked }) =
 const App: React.FC = () => {
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [isPortal, setIsPortal] = useState(window.location.hash.startsWith('#/portal'));
+  const [isFirstTime] = useState<boolean>(() => !localStorage.getItem('vellor-salt'));
+  const [showSetup, setShowSetup] = useState(false);
 
   useEffect(() => {
     const handleHashChange = () => setIsPortal(window.location.hash.startsWith('#/portal'));
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
+
+  const theme = useStore(s => s.settings.theme);
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (theme === Theme.Dark) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  }, [theme]);
 
   if (isPortal) {
     return (
@@ -547,11 +561,17 @@ const App: React.FC = () => {
     );
   }
 
+  if (isFirstTime === null) return null;
+
   return (
     <ErrorBoundary>
       <HashRouter>
         {!isUnlocked ? (
-           <SetupEncryption onUnlocked={() => setIsUnlocked(true)} />
+           (isFirstTime && !showSetup) ? (
+               <MarketingPage onGetStarted={() => setShowSetup(true)} />
+           ) : (
+               <SetupEncryption onUnlocked={() => setIsUnlocked(true)} />
+           )
         ) : (
           <>
             <AppContent />

@@ -57,7 +57,7 @@ Vellor has evolved into a complete operating system for private educators with 7
 - **White-Label Customization** — Upload your own brand logo and set a custom accent color that dynamically themes the entire UI and PDF invoices.
 - **Enhanced Offline Engine** — Seamlessly detects network drops with UI indicators and proactively reminds you to backup data upon reconnecting.
 
-### ⚡ The Power-Tutor Update (v3.5)
+### ⚡ The Power-Tutor Update (v4.0.0)
 Vellor was recently supercharged with these high-impact features:
 - **Guided Onboarding Wizard** — A beautiful 4-step interactive walkthrough for new users.
 - **Push Notifications** — Automated local lesson reminders sent directly to your device.
