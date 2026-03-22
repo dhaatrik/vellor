@@ -74,12 +74,13 @@ export const createGamificationSlice: StateCreator<AppState, [], [], Gamificatio
             case AchievementId.First100Earned:
             case AchievementId.First1000Earned:
             case AchievementId.First5000Earned:
-                const totalEarnedOverall = transactions.reduce((sum, t) => {
+                let totalEarnedOverall = 0;
+                for (let i = 0; i < transactions.length; i++) {
+                    const t = transactions[i];
                     if (t.status === PaymentStatus.Paid || t.status === PaymentStatus.Overpaid || t.status === PaymentStatus.PartiallyPaid) {
-                        return sum + (t.amountPaid || 0);
+                        totalEarnedOverall += (t.amountPaid || 0);
                     }
-                    return sum;
-                }, 0);
+                }
                 if (ach.id === AchievementId.First100Earned && totalEarnedOverall >= 100) justAchieved = true;
                 if (ach.id === AchievementId.First1000Earned && totalEarnedOverall >= 1000) justAchieved = true;
                 if (ach.id === AchievementId.First5000Earned && totalEarnedOverall >= 5000) justAchieved = true;
@@ -115,15 +116,18 @@ export const createGamificationSlice: StateCreator<AppState, [], [], Gamificatio
             case AchievementId.FirstGoalMet:
                 const currentMonth = new Date().getMonth();
                 const currentYear = new Date().getFullYear();
-                const paidThisMonth = transactions
-                    .filter(t => {
-                        if (t.status !== PaymentStatus.Paid && t.status !== PaymentStatus.PartiallyPaid && t.status !== PaymentStatus.Overpaid) return false;
+                let paidThisMonth = 0;
+                for (let i = 0; i < transactions.length; i++) {
+                    const t = transactions[i];
+                    if (t.status === PaymentStatus.Paid || t.status === PaymentStatus.PartiallyPaid || t.status === PaymentStatus.Overpaid) {
                         try {
                             const d = new Date(t.date);
-                            return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
-                        } catch (e) { return false; }
-                    })
-                    .reduce((sum, t) => sum + (t.amountPaid || 0), 0);
+                            if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) {
+                                paidThisMonth += (t.amountPaid || 0);
+                            }
+                        } catch (e) { }
+                    }
+                }
                 if (paidThisMonth >= (settings?.monthlyGoal || 500) && (settings?.monthlyGoal || 500) > 0) justAchieved = true;
                 break;
             case AchievementId.MarathonSession:
@@ -137,7 +141,8 @@ export const createGamificationSlice: StateCreator<AppState, [], [], Gamificatio
                 for (let i = 0; i < transactions.length; i++) {
                     try {
                         const t = transactions[i];
-                        const dateStr = new Date(t.date).toISOString().split('T')[0];
+                        // ⚡ Bolt Performance: Avoid Date parsing for guaranteed ISO strings
+                        const dateStr = typeof t.date === 'string' ? t.date.split('T')[0] : new Date(t.date).toISOString().split('T')[0];
                         const count = (dateCounts[dateStr] || 0) + 1;
                         dateCounts[dateStr] = count;
                         if (count >= 3) {
