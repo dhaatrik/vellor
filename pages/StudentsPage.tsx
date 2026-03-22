@@ -279,11 +279,20 @@ export const StudentsPage: React.FC = () => {
             placeholder="Search students..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-11 py-3 rounded-full bg-white dark:bg-primary-light border-gray-200 dark:border-white/10 focus:ring-accent"
+            className="pl-11 pr-11 py-3 rounded-full bg-white dark:bg-primary-light border-gray-200 dark:border-white/10 focus:ring-accent"
           />
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
             <Icon iconName="search" className="w-5 h-5 text-gray-400" />
           </div>
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+              aria-label="Clear search"
+            >
+              <Icon iconName="x-mark" className="w-5 h-5" />
+            </button>
+          )}
        </div>
 
       {students.length === 0 && !showStudentForm ? (

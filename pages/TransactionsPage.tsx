@@ -260,8 +260,17 @@ export const TransactionsPage: React.FC = () => {
               placeholder="Search by student name..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-white/10 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent sm:text-sm bg-white dark:bg-primary-light transition-all duration-200"
+              className="w-full pl-10 pr-10 py-2 border border-gray-200 dark:border-white/10 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent sm:text-sm bg-white dark:bg-primary-light transition-all duration-200"
            />
+           {searchQuery && (
+             <button
+               onClick={() => setSearchQuery('')}
+               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+               aria-label="Clear search"
+             >
+               <Icon iconName="x-mark" className="w-5 h-5" />
+             </button>
+           )}
         </div>
         <div className="flex items-center gap-2">
            <input 
