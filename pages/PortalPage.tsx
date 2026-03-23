@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { Card, Icon } from '../components/ui';
 import { formatCurrency, formatDate } from '../helpers';
 import { TransactionStatusBadge } from '../components/transactions/TransactionStatusBadge';
+import { jsonReviver } from '../src/crypto';
 
 export const PortalPage: React.FC = () => {
   const location = useLocation();
@@ -13,7 +14,7 @@ export const PortalPage: React.FC = () => {
       const dataParam = searchParams.get('data');
       if (!dataParam) return null;
       const decodedStr = decodeURIComponent(atob(dataParam));
-      return JSON.parse(decodedStr);
+      return JSON.parse(decodedStr, jsonReviver);
     } catch (e) {
       console.error("Failed to parse portal data", e);
       return null;

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useStore } from './store';
 import { PaymentStatus } from './types';
+import { jsonReviver } from './src/crypto';
 
 export const useReminders = () => {
   const settings = useStore((s) => s.settings);
@@ -26,7 +27,7 @@ export const useReminders = () => {
 
       // Get already notified IDs from sessionStorage to prevent spam
       const notifiedStr = sessionStorage.getItem('notified_reminders') || '[]';
-      const notified = new Set<string>(JSON.parse(notifiedStr));
+      const notified = new Set<string>(JSON.parse(notifiedStr, jsonReviver));
 
       let newNotified = false;
 
