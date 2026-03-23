@@ -1,10 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import * as Accordion from '@radix-ui/react-accordion';
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis } from 'recharts';
-import { Github, Linkedin } from 'lucide-react';
+import { Github, Linkedin, X } from 'lucide-react';
 import { Button, Icon } from '../components/ui';
 
 const XIcon = ({ className }: { className?: string }) => (
@@ -28,11 +28,102 @@ const data = [
   { month: 'Jun', revenue: 2800 },
 ];
 
+const BeforeAfterSlider = () => {
+  const [sliderPos, setSliderPos] = React.useState(50);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!containerRef.current || e.buttons !== 1) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    setSliderPos((x / rect.width) * 100);
+  };
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    setSliderPos((x / rect.width) * 100);
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.releasePointerCapture(e.pointerId);
+  };
+
+  return (
+    <div 
+      ref={containerRef}
+      className="relative w-full aspect-[4/3] md:aspect-[21/9] rounded-[2rem] overflow-hidden cursor-ew-resize select-none bg-white shadow-2xl border border-gray-200 dark:border-white/10 group"
+      onPointerMove={handlePointerMove}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerUp}
+      style={{ touchAction: 'none' }}
+    >
+      {/* Before Image (Messy Spreadsheet) */}
+      <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800 flex items-center justify-center p-4 md:p-8">
+         <div className="w-full h-full bg-white dark:bg-gray-900 shadow-sm border border-gray-300 dark:border-gray-700 overflow-hidden flex flex-col">
+            <div className="h-8 bg-gray-200 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700 flex items-center px-2 gap-1 overflow-hidden">
+               {['File', 'Edit', 'View', 'Insert', 'Format', 'Data'].map(m => <div key={m} className="px-2 py-0.5 text-[10px] text-gray-600 dark:text-gray-400">{m}</div>)}
+            </div>
+            <div className="flex-1 grid grid-cols-6 grid-rows-8 gap-px bg-gray-300 dark:bg-gray-700 p-px">
+               {Array.from({length: 48}).map((_, i) => (
+                  <div key={i} className={`bg-white dark:bg-gray-900 p-1 md:p-2 text-[8px] md:text-[10px] text-gray-500 font-mono truncate ${i%6===0 ? 'font-bold bg-gray-50 dark:bg-gray-800' : ''}`}>
+                     {i===0?'ID' : i===1?'Student' : i===2?'Date' : i===3?'Hours' : i===4?'Rate' : i===5?'Paid?' : (i%6===0 ? i/6 : i%6===5 ? (i%3===0 ? 'NO' : 'YES') : `Data ${i}`)}
+                  </div>
+               ))}
+            </div>
+         </div>
+         <div className="absolute top-6 left-6 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg font-bold text-sm transform -rotate-3 transition-transform group-hover:scale-110">Chaotic Spreadsheet</div>
+      </div>
+
+      {/* After Image (Vellor Dashboard) */}
+      <div 
+         className="absolute inset-0 bg-white dark:bg-primary-dark overflow-hidden flex items-center justify-center p-4 md:p-8"
+         style={{ clipPath: `inset(0 0 0 ${sliderPos}%)` }}
+      >
+         <div className="w-full h-full bg-gray-50 dark:bg-primary border border-gray-200 dark:border-white/10 rounded-xl shadow-xl flex flex-col overflow-hidden">
+             <img src="/dashboard.png" alt="Vellor OS Dashboard" className="w-full h-full object-cover object-left-top" />
+         </div>
+         <div className="absolute top-6 right-6 bg-accent text-white px-4 py-2 rounded-lg shadow-lg font-bold text-sm transform rotate-3 transition-transform group-hover:scale-110">Vellor OS</div>
+      </div>
+
+      {/* Slider Handle */}
+      <div 
+        className="absolute top-0 bottom-0 w-12 flex items-center justify-center -ml-6 z-10"
+        style={{ left: `${sliderPos}%` }}
+      >
+        <div className="w-1.5 h-full bg-white shadow-[0_0_15px_rgba(0,0,0,0.5)] flex items-center justify-center">
+           <div className="w-12 h-12 bg-white rounded-full shadow-2xl border-2 border-gray-200 flex items-center justify-center text-accent ring-4 ring-white/50 backdrop-blur-md transition-transform active:scale-95 group-hover:scale-110">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6 rotate-90 text-gray-800">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+              </svg>
+           </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) => {
+  const [isTermsOpen, setIsTermsOpen] = React.useState(false);
+  const [isPrivacyOpen, setIsPrivacyOpen] = React.useState(false);
+  const [isAdviceOpen, setIsAdviceOpen] = React.useState(false);
   const gamificationRef = useRef<HTMLElement>(null);
   const isGamificationInView = useInView(gamificationRef, { once: true, amount: 0.5 });
   const settings = useStore(s => s.settings);
   const toggleTheme = useStore(s => s.toggleTheme);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  const { scrollY } = useScroll();
+  const yBg1 = useTransform(scrollY, [0, 1000], [0, 250]);
+  const yBg2 = useTransform(scrollY, [0, 1000], [0, -250]);
+  const yMacBook = useTransform(scrollY, [0, 1000], [0, 150]);
+  const yIphone = useTransform(scrollY, [0, 1000], [0, -100]);
 
   useEffect(() => {
     if (isGamificationInView) {
@@ -68,7 +159,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-primary text-gray-900 dark:text-gray-100 overflow-x-hidden font-sans custom-scrollbar">
+    <main className="min-h-screen bg-gray-50 dark:bg-primary text-gray-900 dark:text-gray-100 overflow-x-hidden font-sans custom-scrollbar">
       <style>{`
         @keyframes marquee {
           0% { transform: translateX(0); }
@@ -84,6 +175,9 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
       <Helmet>
         <title>Vellor - The Ultimate Tutoring OS</title>
         <meta name="description" content="Manage your tutoring business like a pro with Vellor. Zero subscriptions, offline-first, local storage." />
+        <meta property="og:title" content="Vellor - Private Educator Dashboard" />
+        <meta property="og:description" content="Manage your tutoring business like a pro with Vellor. Zero subscriptions, offline-first, local storage." />
+        <meta property="og:type" content="website" />
         <script type="application/ld+json">
           {`
             {
@@ -119,6 +213,8 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
              <button onClick={() => scrollTo('features')} className="hover:text-accent transition-colors">Features</button>
              <button onClick={() => scrollTo('gamification')} className="hover:text-accent transition-colors">Gamification</button>
              <button onClick={() => scrollTo('privacy')} className="hover:text-accent transition-colors">Privacy</button>
+             <button onClick={() => scrollTo('open-source')} className="hover:text-accent transition-colors">Open Source</button>
+             <button onClick={() => scrollTo('faq')} className="hover:text-accent transition-colors">FAQ</button>
          </nav>
 
          <div className="flex items-center gap-4">
@@ -140,13 +236,18 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
             >
                 <Icon iconName={settings.theme === Theme.Dark ? 'sun' : 'moon'} className="w-5 h-5 text-gray-700 dark:text-gray-300" />
             </Button>
+            <div className="hidden sm:block ml-2">
+                <Button onClick={onGetStarted} className="rounded-full px-5 text-sm font-bold shadow-lg shadow-accent/20 tracking-wide">
+                    Get Started
+                </Button>
+            </div>
          </div>
       </header>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center pt-20 pb-32 px-4 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-accent/20 rounded-full blur-[100px] -z-10 animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-accent/10 rounded-full blur-[120px] -z-10 animate-pulse delay-1000"></div>
+      <section className="relative min-h-screen flex items-center justify-center pt-32 pb-40 px-4 overflow-hidden">
+        <motion.div style={{ y: yBg1 }} className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-accent/20 rounded-full blur-[120px] -z-10 animate-pulse"></motion.div>
+        <motion.div style={{ y: yBg2 }} className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[140px] -z-10 animate-pulse delay-1000"></motion.div>
         
         <div className="max-w-4xl mx-auto text-center z-10">
           <motion.div
@@ -159,12 +260,12 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
               <span>Vellor 4.0 is now live</span>
             </div>
             
-            <h1 className="text-5xl md:text-7xl font-design font-bold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
+            <h1 className="text-5xl md:text-[4.5rem] lg:text-[6rem] leading-[1.05] font-display font-extrabold tracking-[-0.03em] mb-8 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 dark:from-white dark:via-gray-300 dark:to-gray-500">
               Manage Your Tutoring <br className="hidden md:block" />
-              Business Like a <span className="text-accent">Pro.</span>
+              Business Like a <span className="bg-clip-text text-transparent bg-gradient-to-r from-accent to-accent-light">Pro.</span>
             </h1>
             
-            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 mb-10 max-w-2xl mx-auto font-medium">
+            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 mb-10 max-w-2xl mx-auto font-medium leading-relaxed tracking-tight">
               The ultimate operating system for private educators. Zero subscriptions, zero tracking. 100% yours.
             </p>
             
@@ -184,64 +285,111 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
             transition={{ duration: 0.8, delay: 0.2 }}
             className="mt-16 mx-auto relative max-w-5xl h-[400px] hidden md:block"
           >
-             {/* MacBook Frame */}
-             <motion.div 
-                animate={{ y: [-10, 10, -10] }} 
-                transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
-                className="absolute left-1/2 -translate-x-1/2 w-[800px] h-[480px] bg-white dark:bg-[#0f172a] rounded-t-2xl shadow-2xl border-[8px] border-gray-900 border-b-0 overflow-hidden z-10"
-             >
-                {/* Mockup Top Bar */}
-                <div className="h-6 w-full bg-gray-900 flex items-center px-4 gap-2">
-                   <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
-                   <div className="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
-                   <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
-                </div>
-                {/* Dashboard Mock UI */}
-                <div className="flex h-full bg-gray-50 dark:bg-primary-dark">
-                   <div className="w-48 bg-white dark:bg-primary border-r border-gray-200 dark:border-white/5 p-4 flex flex-col gap-4">
-                      {/* Sidebar */}
-                      <div className="w-full flex items-center gap-2 mb-4"><div className="w-6 h-6 bg-accent rounded-md"></div><div className="h-4 w-20 bg-gray-200 dark:bg-white/10 rounded"></div></div>
-                      <div className="w-full h-8 bg-accent/10 rounded-lg"></div>
-                      <div className="w-full h-8 bg-gray-100 dark:bg-white/5 rounded-lg"></div>
-                      <div className="w-full h-8 bg-gray-100 dark:bg-white/5 rounded-lg"></div>
-                   </div>
-                   <div className="flex-1 p-6 flex flex-col gap-6">
-                      <div className="h-20 w-full bg-white dark:bg-primary rounded-xl border border-gray-200 dark:border-white/5 p-4 flex justify-between items-center group">
-                          <div className="h-8 w-32 bg-gray-200 dark:bg-white/10 rounded"></div>
-                          <div className="h-8 w-24 bg-accent/20 rounded-full"></div>
-                      </div>
-                      <div className="grid grid-cols-3 gap-4">
-                          <div className="h-32 bg-white dark:bg-primary rounded-xl border border-gray-200 dark:border-white/5 p-4"><div className="h-4 w-16 bg-gray-200 dark:bg-white/10 rounded mb-2"></div><div className="h-8 w-24 bg-gray-300 dark:bg-white/20 rounded"></div></div>
-                          <div className="col-span-2 h-32 bg-white dark:bg-primary rounded-xl border border-gray-200 dark:border-white/5 p-4"><div className="w-full h-full border-b border-gray-100 dark:border-white/5 relative"><div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-accent/20 to-transparent"></div></div></div>
-                      </div>
-                   </div>
-                </div>
+             {/* MacBook Frame Wrapper for Parallax */}
+             <motion.div style={{ y: yMacBook }} className="absolute left-1/2 -translate-x-1/2 z-10 hidden lg:block">
+                <motion.div 
+                    animate={{ y: [-15, 15, -15] }} 
+                    transition={{ repeat: Infinity, duration: 7, ease: "easeInOut" }}
+                    className="w-[850px] h-[510px] bg-white/40 dark:bg-[#0f172a]/40 backdrop-blur-3xl rounded-t-[2.5rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.4)] border-[8px] border-white/60 dark:border-white/10 border-b-0 overflow-hidden relative"
+                >
+                    {/* Pomelli Semantic Image Crawler Hook */}
+                    <img src="/vellor-student-dashboard.png" alt="Vellor Student Dashboard - Premium Tutor Management Interface" className="sr-only" />
+                    
+                    {/* High-end Photorealistic Glare Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/40 via-white/5 to-transparent pointer-events-none z-50"></div>
+                    <div className="absolute top-0 right-0 w-[500px] h-[300px] bg-white/20 blur-[80px] -rotate-45 transform pointer-events-none z-40 rounded-full"></div>
+                    
+                    {/* Mockup Top Bar */}
+                    <div className="h-7 w-full bg-white/60 dark:bg-black/60 backdrop-blur-md flex items-center px-5 gap-2.5 border-b border-white/30 dark:border-white/10">
+                       <div className="w-3 h-3 rounded-full bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.6)]"></div>
+                       <div className="w-3 h-3 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]"></div>
+                       <div className="w-3 h-3 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)]"></div>
+                    </div>
+
+                    {/* Dashboard Mock UI */}
+                    <div className="flex h-full bg-gray-50/90 dark:bg-primary-dark/90 backdrop-blur-md">
+                       <div className="w-52 bg-white/70 dark:bg-primary/70 border-r border-gray-200/50 dark:border-white/5 p-5 flex flex-col gap-4">
+                          {/* Sidebar */}
+                          <div className="w-full flex items-center gap-3 mb-6"><div className="w-7 h-7 bg-accent rounded-md shadow-[0_0_15px_var(--color-accent)]"></div><div className="h-4 w-24 bg-gray-200/80 dark:bg-white/10 rounded"></div></div>
+                          <div className="w-full h-10 bg-accent/20 rounded-xl relative overflow-hidden"><div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] animate-[shimmer_2s_infinite]"></div></div>
+                          <div className="w-full h-10 bg-gray-100/80 dark:bg-white/5 rounded-xl"></div>
+                          <div className="w-full h-10 bg-gray-100/80 dark:bg-white/5 rounded-xl"></div>
+                       </div>
+                       <div className="flex-1 p-8 flex flex-col gap-8 relative z-10">
+                          <div className="h-24 w-full bg-white/90 dark:bg-primary/90 rounded-2xl border border-gray-200/50 dark:border-white/5 p-5 flex justify-between items-center group shadow-sm backdrop-blur-md">
+                              <div className="space-y-2"><div className="h-4 w-24 bg-gray-200/80 dark:bg-white/10 rounded"></div><div className="h-8 w-40 bg-gray-300/80 dark:bg-white/20 rounded"></div></div>
+                              <div className="h-10 w-32 bg-accent/30 rounded-full shadow-inner"></div>
+                          </div>
+                          <div className="grid grid-cols-3 gap-6">
+                              <div className="h-40 bg-white/90 dark:bg-primary/90 rounded-2xl border border-gray-200/50 dark:border-white/5 p-5 shadow-sm"><div className="h-4 w-20 bg-gray-200/80 dark:bg-white/10 rounded mb-4"></div><div className="h-10 w-28 bg-gray-300/80 dark:bg-white/20 rounded"></div></div>
+                              <div className="col-span-2 h-40 bg-white/90 dark:bg-primary/90 rounded-2xl border border-gray-200/50 dark:border-white/5 p-5 shadow-sm"><div className="w-full h-full border-b border-gray-100/80 dark:border-white/5 relative"><div className="absolute bottom-0 left-0 w-full h-[60%] bg-gradient-to-t from-accent/30 to-transparent"></div></div></div>
+                          </div>
+                       </div>
+                    </div>
+                </motion.div>
              </motion.div>
 
-             {/* iPhone Frame */}
-             <motion.div 
-                animate={{ y: [10, -10, 10] }} 
-                transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 1 }}
-                className="absolute right-0 top-32 w-[220px] h-[450px] bg-white dark:bg-[#0f172a] rounded-[2.5rem] shadow-2xl border-[8px] border-gray-900 overflow-hidden z-20"
-             >
-                {/* Dynamic Island Mock */}
-                <div className="absolute top-2 left-1/2 -translate-x-1/2 w-20 h-6 bg-gray-900 rounded-full z-30"></div>
-                <div className="h-full w-full bg-gray-50 dark:bg-primary-dark pt-12 p-4 flex flex-col gap-4 relative">
-                    <div className="flex justify-between items-center bg-white dark:bg-primary p-3 rounded-2xl border border-gray-200 dark:border-white/5 shadow-sm">
-                       <div className="h-6 w-16 bg-gray-200 dark:bg-white/10 rounded"></div>
-                       <div className="h-8 w-8 rounded-full bg-accent/20"></div>
+             {/* iPhone Frame Wrapper for Parallax */}
+             <motion.div style={{ y: yIphone }} className="absolute right-0 lg:-right-10 xl:-right-20 top-40 z-20 hidden md:block">
+                <motion.div 
+                    animate={{ y: [12, -12, 12] }} 
+                    transition={{ repeat: Infinity, duration: 5.5, ease: "easeInOut", delay: 1 }}
+                    className="w-[240px] h-[500px] bg-white/40 dark:bg-[#0f172a]/40 backdrop-blur-3xl rounded-[3rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.6)] border-[6px] border-white/60 dark:border-white/10 overflow-hidden relative ring-1 ring-gray-900/5"
+                >
+                    {/* Pomelli Semantic Image Crawler Hook */}
+                    <img src="/vellor-mobile-dashboard.png" alt="Vellor Mobile Application Client Portal" className="sr-only" />
+
+                    {/* iPhone Dynamic Glare */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/50 via-white/10 to-transparent pointer-events-none z-50"></div>
+                    <div className="absolute top-0 right-[-50px] w-[150px] h-[300px] bg-white/30 blur-[40px] rotate-45 transform pointer-events-none z-40"></div>
+                    
+                    {/* Dynamic Island Mock */}
+                    <div className="absolute top-3 left-1/2 -translate-x-1/2 w-24 h-7 bg-black rounded-full z-50 shadow-inner flex items-center justify-between px-2.5 outline outline-1 outline-white/10">
+                        <div className="w-2.5 h-2.5 rounded-full bg-green-500/70 shadow-[0_0_5px_rgba(34,197,94,0.5)]"></div>
+                        <div className="w-2 h-2 rounded-full bg-gray-800"></div>
                     </div>
-                    <div className="grid grid-cols-7 gap-1 mt-2">
-                        {[...Array(7)].map((_, i) => <div key={i} className={`h-8 rounded-lg ${i===3 ? 'bg-accent/80' : 'bg-gray-200 dark:bg-white/10'}`}></div>)}
+
+                    <div className="h-full w-full bg-gray-50/90 dark:bg-primary-dark/90 pt-14 p-5 flex flex-col gap-4 relative z-10">
+                        <div className="flex justify-between items-center bg-white/90 dark:bg-primary/90 p-4 rounded-2xl border border-gray-200/50 dark:border-white/5 shadow-sm backdrop-blur-md">
+                           <div className="h-6 w-20 bg-gray-200/80 dark:bg-white/10 rounded"></div>
+                           <div className="h-10 w-10 rounded-full bg-accent/30 shadow-[0_0_15px_var(--color-accent)] border border-accent/20"></div>
+                        </div>
+                        <div className="grid grid-cols-7 gap-1.5 mt-2">
+                            {[...Array(7)].map((_, i) => <div key={i} className={`h-10 rounded-lg shadow-sm ${i===3 ? 'bg-accent/90 shadow-[0_0_10px_var(--color-accent)]' : 'bg-white/70 dark:bg-white/10'}`}></div>)}
+                        </div>
+                        <div className="flex-1 bg-white/90 dark:bg-primary/90 rounded-2xl border border-gray-200/50 dark:border-white/5 p-4 mt-2 flex flex-col gap-4 backdrop-blur-md shadow-sm">
+                             <div className="h-14 bg-gray-50/80 dark:bg-white/5 rounded-xl border border-gray-100/50 dark:border-transparent"></div>
+                             <div className="h-14 bg-gray-50/80 dark:bg-white/5 rounded-xl border border-gray-100/50 dark:border-transparent"></div>
+                        </div>
                     </div>
-                    <div className="flex-1 bg-white dark:bg-primary rounded-2xl border border-gray-200 dark:border-white/5 p-3 mt-2 flex flex-col gap-3">
-                         <div className="h-12 bg-gray-50 dark:bg-white/5 rounded-xl"></div>
-                         <div className="h-12 bg-gray-50 dark:bg-white/5 rounded-xl"></div>
-                    </div>
-                </div>
+                </motion.div>
              </motion.div>
           </motion.div>
         </div>
+      </section>
+
+      {/* Interactive Before & After Showcase */}
+      <section className="py-16 md:py-24 px-4 bg-white dark:bg-primary-dark/50 relative z-20 overflow-hidden border-t border-gray-100 dark:border-white/5">
+         <div className="max-w-6xl mx-auto">
+            <motion.div 
+               initial={{ opacity: 0, y: 20 }}
+               whileInView={{ opacity: 1, y: 0 }}
+               viewport={{ once: true }}
+               className="text-center mb-12"
+            >
+               <h2 className="text-3xl md:text-5xl font-bold mb-6 font-display text-gray-900 dark:text-white tracking-tight">Stop Wasting Time on Admin</h2>
+               <p className="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-10">Slide to instantly upgrade your workflow from a cluttered mess to a streamlined command center.</p>
+            </motion.div>
+            
+            <motion.div
+               initial={{ opacity: 0, scale: 0.95 }}
+               whileInView={{ opacity: 1, scale: 1 }}
+               viewport={{ once: true }}
+               transition={{ type: 'spring', bounce: 0.2 }}
+            >
+               <BeforeAfterSlider />
+            </motion.div>
+         </div>
       </section>
 
       {/* Why Vellor Section */}
@@ -557,44 +705,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
          </div>
       </section>
 
-      {/* Social Proof Marquee */}
-      <section className="py-24 bg-white dark:bg-primary-dark overflow-hidden border-t border-gray-100 dark:border-white/5 relative z-20">
-         <div className="text-center mb-12 px-4">
-             <h2 className="text-3xl font-bold font-display text-gray-900 dark:text-white">Loved by Tutors Worldwide</h2>
-             <p className="text-gray-500 dark:text-gray-400">Join a community of independent educators taking back control.</p>
-         </div>
-         <div className="relative flex overflow-x-hidden w-full group py-4">
-             <div className="flex animate-marquee w-max">
-                 {/* Double the list to ensure seamless looping */}
-                 {[
-                     "Ditched my messy spreadsheets in 10 minutes. The automated PDFs are a lifesaver.",
-                     "Finally, software that doesn't steal my data or charge $30/mo.",
-                     "The WhatsApp integration saves me 2 hours every week asking for payments.",
-                     "My students love the gamification. They actually want to book more lessons!",
-                     "I feel like a professional business owner now. The client portal is a game changer.",
-                     "Ditched my messy spreadsheets in 10 minutes. The automated PDFs are a lifesaver.",
-                     "Finally, software that doesn't steal my data or charge $30/mo.",
-                     "The WhatsApp integration saves me 2 hours every week asking for payments.",
-                     "My students love the gamification. They actually want to book more lessons!",
-                     "I feel like a professional business owner now. The client portal is a game changer."
-                 ].map((quote, i) => (
-                     <div key={i} className="mx-3 bg-gray-50 dark:bg-primary-light border border-gray-100 dark:border-white/5 p-6 rounded-2xl w-[350px] flex-shrink-0 flex flex-col gap-4 whitespace-normal transition hover:shadow-lg dark:hover:shadow-white/5">
-                         <div className="flex text-yellow-500 gap-1">
-                           <Icon iconName="star" className="w-4 h-4 fill-current"/><Icon iconName="star" className="w-4 h-4 fill-current"/><Icon iconName="star" className="w-4 h-4 fill-current"/><Icon iconName="star" className="w-4 h-4 fill-current"/><Icon iconName="star" className="w-4 h-4 fill-current"/>
-                         </div>
-                         <p className="text-gray-700 dark:text-gray-300 italic font-medium flex-1">"{quote}"</p>
-                         <div className="mt-auto flex items-center gap-3">
-                             <div className="w-10 h-10 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-accent font-bold text-sm">{(i % 5 + 10).toString(36).toUpperCase()}{(i % 5 + 11).toString(36).toUpperCase()}</div>
-                             <div>
-                                 <div className="text-sm font-bold text-gray-900 dark:text-white">Verified Tutor</div>
-                                 <div className="text-xs text-gray-500">Independent Educator</div>
-                             </div>
-                         </div>
-                     </div>
-                 ))}
-             </div>
-         </div>
-      </section>
+
 
       {/* White-Label Customization */}
       <section className="py-24 px-4 bg-gray-50 dark:bg-primary relative z-20 border-t border-gray-100 dark:border-white/5 overflow-hidden">
@@ -687,8 +798,31 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
          </div>
       </section>
 
+      {/* Open Source / Community Section */}
+      <section id="open-source" className="py-24 px-4 bg-gray-900 border-t border-gray-800 relative z-20 overflow-hidden text-center text-white">
+         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
+         <div className="max-w-4xl mx-auto relative z-10">
+             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 mb-8 text-sm font-semibold text-accent-light shadow-lg">
+                <Github className="w-4 h-4" /> Proudly Open-Source
+             </div>
+             <h2 className="text-4xl md:text-6xl font-bold mb-8 font-display tracking-tight text-white">Built by Educators, <br className="hidden md:block"/> for Educators</h2>
+             <p className="text-xl md:text-2xl text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed">
+                 Vellor is open-core and community-driven. Inspect our code, contribute features, and trust that your tool won't unexpectedly disappear or get fully paywalled.
+             </p>
+             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+                 <a href="https://github.com/DhaatuTheGamer/vellor" target="_blank" rel="noreferrer" className="flex items-center gap-4 bg-gray-800 border border-gray-700 px-8 py-5 rounded-2xl hover:bg-gray-700 transition group w-full sm:w-auto shadow-2xl hover:-translate-y-1 duration-300">
+                     <div className="text-left">
+                         <div className="text-sm text-gray-400 font-medium mb-1">Join the Movement</div>
+                         <div className="flex items-center gap-3 text-2xl font-bold text-white group-hover:text-accent-light transition"><Github className="w-7 h-7"/> Star on Github</div>
+                     </div>
+                 </a>
+
+             </div>
+         </div>
+      </section>
+
       {/* Knowledge Base FAQ Section */}
-      <section className="py-24 px-4 bg-gray-50 dark:bg-primary relative z-20 border-t border-gray-200/50 dark:border-white/5">
+      <section id="faq" className="py-24 px-4 bg-gray-50 dark:bg-primary relative z-20 border-t border-gray-200/50 dark:border-white/5">
         <div className="max-w-3xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -703,20 +837,44 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
           <Accordion.Root type="single" collapsible className="space-y-4">
             {[
               {
-                q: "How does 100% offline storage work?",
-                a: "Vellor uses IndexedDB in your browser to store all data locally on your device. Nothing is sent to our servers. You can even install Vellor as a PWA and use it without the internet."
+                q: "I’m currently using a massive, messy Excel spreadsheet. How hard is it to switch?",
+                a: "It takes less than two minutes. Vellor includes a built-in CSV import wizard, allowing you to seamlessly migrate your entire student roster and history without manually typing a thing."
               },
               {
-                q: "Can I use Vellor on my phone?",
-                a: "Absolutely! Vellor is designed to be fully responsive. You can install it on your iOS or Android device by tapping 'Add to Home Screen' in your mobile browser."
+                q: "Do my students or their parents need to download an app or create accounts?",
+                a: "Nope! Vellor is your personal command center. To share updates or request payments, you simply generate a beautiful PDF invoice or a secure, read-only web portal link to send them directly."
               },
               {
-                q: "Is it really free without hidden costs?",
-                a: "Yes. Vellor is an open-source tool built to help solo educators. There are no subscriptions, paywalls, or premium tiers. The complete feature set is free."
+                q: "If everything is stored locally, what happens if I lose my laptop or phone?",
+                a: "Your peace of mind is built-in. Vellor features a one-click backup system that lets you download a highly secure, encrypted file of your entire database. Just upload that file to a new device, and you're instantly back in business."
               },
               {
-                q: "How do the WhatsApp reminders work?",
-                a: "Instead of a complex backend integration, Vellor generates pre-filled links. When you click 'Send Reminder', it instantly opens WhatsApp on your device with the message ready to go."
+                q: "Why is this completely free? What’s the catch?",
+                a: "There is no catch. Vellor is an open-source project built by an independent educator, for independent educators. The goal is to provide enterprise-grade tools to solo tutors without the predatory $30/month subscription fees."
+              },
+              {
+                q: "Do you take a percentage or transaction fee from my student payments?",
+                a: "Absolutely not. Vellor is a management and organizational operating system, not a payment processor. You keep 100% of the money you earn through your preferred payment methods (Cash, Zelle, Venmo, UPI, etc.)."
+              },
+              {
+                q: "I’m not very tech-savvy. Is there a steep learning curve?",
+                a: "Not at all. Vellor was designed to feel as intuitive as your favorite smartphone apps. There are no cluttered enterprise menus or complex database setups—just a clean, simple workflow that makes sense for tutoring."
+              },
+              {
+                q: "Can I use my own tutoring brand’s logo and colors?",
+                a: "Yes! Vellor gets out of your way. Our white-label customization engine lets you change the application's entire color scheme and branding to match your unique academy aesthetic in seconds."
+              },
+              {
+                q: "Will you sell my data or my students' contact info to advertisers?",
+                a: "Never. Because Vellor is an offline-first application, your data literally never touches our servers. We couldn't look at your student data or financial records even if we wanted to."
+              },
+              {
+                q: "Can I manage multiple subjects and different hourly rates?",
+                a: "Yes. Every tutoring business is different. You can set custom hourly rates, specific learning goals, and distinct subjects for every individual student on your roster."
+              },
+              {
+                q: "Does this require a constant internet connection to work?",
+                a: "No. Whether you are tutoring in a cafe with spotty Wi-Fi or in a student's home with no service, Vellor's offline-first architecture means you can log lessons, generate invoices, and manage your business without skipping a beat."
               }
             ].map((faq, i) => (
               <Accordion.Item key={i} value={`item-${i}`} className="bg-white dark:bg-primary-light border border-gray-100 dark:border-white/5 rounded-2xl overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
@@ -777,7 +935,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
                       <h4 className="font-bold text-gray-900 dark:text-white mb-4">Resources</h4>
                       <ul className="space-y-3 text-sm text-gray-500 dark:text-gray-400">
                           <li><a href="https://github.com/DhaatuTheGamer/vellor" target="_blank" rel="noreferrer" className="hover:text-accent transition-colors">Developer API</a></li>
-                          <li><button onClick={() => {}} className="hover:text-accent transition-colors">Tutor Advice Blog</button></li>
+                          <li><button onClick={() => setIsAdviceOpen(true)} className="hover:text-accent transition-colors">Friendly Tutor Advice</button></li>
                           <li><a href="https://github.com/DhaatuTheGamer/vellor" target="_blank" rel="noreferrer" className="hover:text-accent transition-colors">Open Source</a></li>
                       </ul>
                   </div>
@@ -785,8 +943,8 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
                   <div>
                       <h4 className="font-bold text-gray-900 dark:text-white mb-4">Legal</h4>
                       <ul className="space-y-3 text-sm text-gray-500 dark:text-gray-400">
-                          <li><button onClick={() => scrollTo('privacy')} className="hover:text-accent transition-colors">Privacy Policy</button></li>
-                          <li><button onClick={() => {}} className="hover:text-accent transition-colors">Terms of Service</button></li>
+                          <li><button onClick={() => setIsPrivacyOpen(true)} className="hover:text-accent transition-colors">Privacy Policy</button></li>
+                          <li><button onClick={() => setIsTermsOpen(true)} className="hover:text-accent transition-colors">Terms of Service</button></li>
                       </ul>
                   </div>
               </div>
@@ -798,6 +956,211 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
           </footer>
       </section>
 
-    </div>
+      <AnimatePresence>
+        {isPrivacyOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white dark:bg-primary rounded-[2rem] shadow-2xl w-full max-w-3xl max-h-[85vh] overflow-hidden border border-gray-200 dark:border-white/10 flex flex-col"
+            >
+              <div className="bg-gray-50 dark:bg-primary-light p-6 md:p-8 border-b border-gray-100 dark:border-white/5 flex items-center justify-between shrink-0">
+                <h2 className="text-2xl md:text-3xl font-bold font-display text-gray-900 dark:text-white">The "Anti-Spying" Privacy Policy</h2>
+                <button onClick={() => setIsPrivacyOpen(false)} className="p-2 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 rounded-full transition-colors self-start">
+                  <X className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                </button>
+              </div>
+              <div className="p-6 md:p-8 space-y-6 text-gray-600 dark:text-gray-300 text-base md:text-lg overflow-y-auto custom-scrollbar">
+                <p>Most privacy policies are written by corporate lawyers to explain exactly how a company plans to legally harvest and sell your data.</p>
+                <p>Ours is simple: <strong className="text-accent">We don't want your data, and we literally can't see it.</strong></p>
+                
+                <div className="bg-gray-50 dark:bg-primary p-6 rounded-2xl space-y-3 border border-gray-100 dark:border-white/5 shadow-sm">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">1. We Have No Servers</h3>
+                  <p>Vellor is an "offline-first" application. When you add a student, log a lesson, or track a payment, that information is saved locally inside your device's browser using industry-standard encryption. It is never transmitted to our servers, because we don't have any.</p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-primary p-6 rounded-2xl space-y-3 border border-gray-100 dark:border-white/5 shadow-sm">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">2. Zero Third-Party Tracking</h3>
+                  <p>We do not use tracking pixels, behavioral analytics, or ad-targeting scripts. We have no idea how many students you have, how much money you make, or how often you use the app. Your business metrics are none of our business.</p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-primary p-6 rounded-2xl space-y-3 border border-gray-100 dark:border-white/5 shadow-sm">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">3. Total Financial Privacy</h3>
+                  <p>Vellor helps you generate invoices and track your income, but it does not connect to your bank or process payments. Your financial records exist only on your screen.</p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-primary p-6 rounded-2xl space-y-3 border border-gray-100 dark:border-white/5 shadow-sm">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">4. Verifiably Transparent</h3>
+                  <p>Because Vellor is 100% open-source, our entire codebase is public. You (or any software engineer) can inspect the code at any time to verify that your data never leaves your device.</p>
+                </div>
+
+                <div className="pt-8 border-t border-gray-200 dark:border-gray-800 text-center">
+                  <h3 className="text-2xl font-bold font-display text-gray-900 dark:text-white mb-4">The Bottom Line:</h3>
+                  <p className="max-w-md mx-auto italic text-gray-600 dark:text-gray-400">What happens on your device, stays on your device. Run your tutoring business with total peace of mind.</p>
+                  <Button onClick={() => setIsPrivacyOpen(false)} className="mt-8 w-full md:w-auto px-10 py-4 text-lg rounded-full font-bold shadow-lg shadow-accent/20">Understood</Button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {isAdviceOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white dark:bg-primary rounded-[2rem] shadow-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden border border-gray-200 dark:border-white/10 flex flex-col"
+            >
+              <div className="bg-gray-50 dark:bg-primary-light p-6 md:p-8 border-b border-gray-100 dark:border-white/5 flex items-center justify-between shrink-0">
+                <div>
+                  <h2 className="text-2xl md:text-3xl font-bold font-display text-gray-900 dark:text-white">The Modern Educator's Playbook</h2>
+                  <p className="text-accent font-semibold mt-1">15 Golden Rules from Your Friendly Neighborhood Tutor</p>
+                </div>
+                <button onClick={() => setIsAdviceOpen(false)} className="p-2 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 rounded-full transition-colors self-start">
+                  <X className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                </button>
+              </div>
+              <div className="p-6 md:p-8 space-y-6 text-gray-600 dark:text-gray-300 text-base md:text-lg overflow-y-auto custom-scrollbar">
+                <p className="text-lg md:text-xl font-medium text-gray-800 dark:text-gray-200 leading-relaxed mb-8">
+                  Teaching isn't just about transferring information from a textbook to a brain; it's about debugging how a student thinks and helping them upgrade their own mental software. Whether you're teaching advanced calculus, Python, or middle school history, here are 15 rules to elevate your sessions from "just another class" to a transformative experience.
+                </p>
+
+                <div className="space-y-6">
+                  <div className="bg-gray-50 dark:bg-primary p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">1. Don't Be a "Teacher." Be a Friend (and a Mentor).</h3>
+                    <p>The traditional power dynamic of "I speak, you listen" is outdated. Sit beside them, not across from them. When a student views you as an older sibling or a trusted friend rather than a strict authority figure, their defensive walls drop. They become open to making mistakes, which is the exact moment real learning begins.</p>
+                  </div>
+
+                  <div className="bg-gray-50 dark:bg-primary p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">2. Make AI Your Ultimate Teaching Co-Pilot.</h3>
+                    <p>You don't have to build every lesson plan from scratch. Lean into AI tools like Gemini, NotebookLM, Grok, or ChatGPT to act as your brainstorming partners. Use them to generate highly personalized study plans, create interactive quizzes, or find fresh, weird analogies to explain dry topics.</p>
+                  </div>
+
+                  <div className="bg-gray-50 dark:bg-primary p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">3. Optimize for "Why," Not Just "What."</h3>
+                    <p>Memorizing a formula is useless if the student doesn't know <em>why</em> the formula exists. Always push past rote memorization. If they can solve a math problem but can't explain the logic behind the steps, they haven't learned it yet. Make them understand the core mechanics of the concept.</p>
+                  </div>
+
+                  <div className="bg-gray-50 dark:bg-primary p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">4. Read the Room (Understand Their Psychology).</h3>
+                    <p>Every student has a unique psychological baseline. Notice how they handle frustration—do they shut down, get angry, or guess wildly? Pay attention to their body language. Understanding <em>how</em> they deal with difficult situations allows you to tailor your tone and approach to keep them in a productive headspace.</p>
+                  </div>
+
+                  <div className="bg-gray-50 dark:bg-primary p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">5. Enforce Relentless Critical Thinking.</h3>
+                    <p>Stop giving them the answers immediately. When they get stuck, reply with a question: <em>"What do you think our next logical step should be?"</em> Train them to break down massive, intimidating problems into smaller, solvable components.</p>
+                  </div>
+
+                  <div className="bg-gray-50 dark:bg-primary p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">6. Gamify the Wins (Big and Small).</h3>
+                    <p>Human brains are wired for rewards. You don't need to hand out physical prizes, but you should absolutely celebrate their milestones. Call out a brilliant question, acknowledge when they finally grasp a tough concept, and create a system of micro-rewards to keep their dopamine tied to their effort.</p>
+                  </div>
+
+                  <div className="bg-gray-50 dark:bg-primary p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">7. Flip the Script (The Feynman Technique).</h3>
+                    <p>The ultimate test of understanding is the ability to teach it. Once you finish a complex topic, hand them the metaphorical chalk. Ask them to explain the concept back to you as if you were a complete beginner. If they stumble, you instantly know where the gaps are.</p>
+                  </div>
+
+                  <div className="bg-gray-50 dark:bg-primary p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">8. Connect the Abstract to the Real World.</h3>
+                    <p>Nobody wants to learn something that feels useless. If you are teaching physics, talk about how it applies to rocket launches. If you are teaching math, show how it applies to building video games or running a startup. Anchor abstract theories to real, tangible reality.</p>
+                  </div>
+
+                  <div className="bg-gray-50 dark:bg-primary p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">9. Create a Zero-Judgment Zone for "Dumb" Questions.</h3>
+                    <p>A student will only ask the question that unlocks their understanding if they feel 100% safe doing so. Explicitly tell them, <em>"There are zero stupid questions here."</em> Praise them for asking fundamental questions, because those are usually the most important ones.</p>
+                  </div>
+
+                  <div className="bg-gray-50 dark:bg-primary p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">10. Adapt to Their Bandwidth.</h3>
+                    <p>Some days, a student will show up exhausted, distracted, or overwhelmed. Recognize when their cognitive bandwidth is low. On those days, ditch the heavy new material and pivot to reviewing older concepts or doing a fun, interactive exercise. Meet them where their energy is.</p>
+                  </div>
+
+                  <div className="bg-gray-50 dark:bg-primary p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">11. Praise the Process, Not the Intellect.</h3>
+                    <p>Never say, <em>"You're so smart."</em> Say, <em>"I love how hard you worked to figure that out."</em> Praising intellect creates a fear of looking stupid. Praising effort builds a growth mindset, teaching them that resilience is their most valuable asset.</p>
+                  </div>
+
+                  <div className="bg-gray-50 dark:bg-primary p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">12. Treat Failures as Pure Data.</h3>
+                    <p>When a student bombs a mock test or fails an assignment, don't let them spiral. Reframe the failure. A wrong answer isn't a character flaw; it's just raw data pointing exactly to what needs to be optimized next.</p>
+                  </div>
+
+                  <div className="bg-gray-50 dark:bg-primary p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">13. Keep the Feedback Loop Tight and Gentle.</h3>
+                    <p>Don't wait until the end of a month to tell a student they are doing something wrong. Offer micro-corrections constantly, but keep them gentle. <em>"You're on the right track, but let's tweak this one variable..."</em> is much better than <em>"No, that's incorrect."</em></p>
+                  </div>
+
+                  <div className="bg-gray-50 dark:bg-primary p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">14. Innovate the Delivery.</h3>
+                    <p>Textbooks are boring. Innovate how you deliver the knowledge. Build a quick Python script to visualize a math problem, use digital whiteboards, or find an interactive simulation online. Keep the delivery method dynamic so their brain stays engaged.</p>
+                  </div>
+
+                  <div className="bg-gray-50 dark:bg-primary p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">15. Stay Insanely Curious Yourself.</h3>
+                    <p>The best tutors are the ones who are still obsessed with learning. Share your own current learning struggles with them. When they see that you are also a student of the world—figuring things out, making mistakes, and growing—it gives them the permission to do the exact same thing.</p>
+                  </div>
+                </div>
+
+                <div className="pt-8 text-center pb-4">
+                  <Button onClick={() => setIsAdviceOpen(false)} className="px-10 py-4 text-lg rounded-full font-bold shadow-lg shadow-accent/20">Let's Get Back to Teaching</Button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {isTermsOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white dark:bg-primary rounded-[2rem] shadow-2xl w-full max-w-3xl max-h-[85vh] overflow-hidden border border-gray-200 dark:border-white/10 flex flex-col"
+            >
+              <div className="bg-gray-50 dark:bg-primary-light p-6 md:p-8 border-b border-gray-100 dark:border-white/5 flex items-center justify-between shrink-0">
+                <h2 className="text-2xl md:text-3xl font-bold font-display text-gray-900 dark:text-white">The "No-Nonsense" Terms of Service</h2>
+                <button onClick={() => setIsTermsOpen(false)} className="p-2 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 rounded-full transition-colors self-start">
+                  <X className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                </button>
+              </div>
+              <div className="p-6 md:p-8 space-y-6 text-gray-600 dark:text-gray-300 text-base md:text-lg overflow-y-auto custom-scrollbar">
+                <p>Most software companies use this page to bury you in legal jargon, claim ownership of your data, or hide sneaky subscription clauses.</p>
+                <p>Not us. Vellor operates on a strict <strong className="text-accent">"Zero Strings Attached"</strong> policy.</p>
+                
+                <div className="bg-gray-50 dark:bg-primary p-6 rounded-2xl space-y-3 border border-gray-100 dark:border-white/5 shadow-sm">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">1. Your Data is Yours.</h3>
+                  <p>Vellor is an offline-first application. Everything you type, track, and manage lives exclusively on your own device. We do not have cloud servers, we do not monitor your usage, and we couldn't sell your students' information to advertisers even if we tried.</p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-primary p-6 rounded-2xl space-y-3 border border-gray-100 dark:border-white/5 shadow-sm">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">2. Zero Hidden Fees.</h3>
+                  <p>There are no paywalls, no "premium" tiers, and absolutely no transaction cuts. You keep 100% of the money you earn from your hard work.</p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-primary p-6 rounded-2xl space-y-3 border border-gray-100 dark:border-white/5 shadow-sm">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">3. Zero Vendor Lock-in.</h3>
+                  <p>We believe you should stay because the software is great, not because you're trapped. You can export your entire database as a standard CSV file at any time, with one click.</p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-primary p-6 rounded-2xl space-y-3 border border-gray-100 dark:border-white/5 shadow-sm">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">4. Open Source Freedom.</h3>
+                  <p>Vellor is free and open-source software built for independent educators. You are free to use it, modify it, and customize it to fit your academy's exact needs.</p>
+                </div>
+
+                <div className="pt-8 border-t border-gray-200 dark:border-gray-800 text-center">
+                  <h3 className="text-2xl font-bold font-display text-gray-900 dark:text-white mb-4">Our Only "Condition":</h3>
+                  <p className="max-w-md mx-auto italic text-gray-600 dark:text-gray-400">Treat your students well, teach them something valuable, and use this tool to take back your time. That's it. Now get back to growing your business.</p>
+                  <Button onClick={() => setIsTermsOpen(false)} className="mt-8 w-full md:w-auto px-10 py-4 text-lg rounded-full font-bold shadow-lg shadow-accent/20">Got It</Button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+    </main>
   );
 };
