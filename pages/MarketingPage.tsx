@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, Suspense, lazy } from 'react';
 import { Helmet } from 'react-helmet-async';
 import * as Accordion from '@radix-ui/react-accordion';
-import { motion, useInView, useScroll, useTransform, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
-import { Github, Linkedin, X } from 'lucide-react';
+import { motion, useInView, useScroll, useTransform, AnimatePresence, useMotionValue, useSpring, useMotionValueEvent } from 'framer-motion';
+import { Github, Linkedin, X, Menu } from 'lucide-react';
 import { Button, Icon } from '../components/ui';
 
 // Lazy-load heavy chart component for improved Time to Interactive
@@ -81,7 +81,7 @@ const BeforeAfterSlider = () => {
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
       onPointerLeave={handlePointerUp}
-      style={{ touchAction: 'none' }}
+      style={{ touchAction: 'pan-y' }}
     >
       {/* Before Image (Messy Spreadsheet) */}
       <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800 flex items-center justify-center p-4 md:p-8">
@@ -106,7 +106,7 @@ const BeforeAfterSlider = () => {
          style={{ clipPath: `inset(0 0 0 ${sliderPos}%)` }}
       >
          <div className="w-full h-full bg-gray-50 dark:bg-primary border border-gray-200 dark:border-white/10 rounded-xl shadow-xl flex flex-col overflow-hidden">
-             <img src="/dashboard.png" alt="Vellor OS Dashboard" className="w-full h-full object-cover object-left-top" />
+             <img src="/dashboard.png" alt="Vellor OS Dashboard" className="w-full h-full object-cover object-left-top" loading="lazy" decoding="async" />
          </div>
          <div className="absolute top-6 right-6 bg-accent text-white px-4 py-2 rounded-lg shadow-lg font-bold text-sm transform rotate-3 transition-transform group-hover:scale-110">Vellor OS</div>
       </div>
@@ -171,12 +171,53 @@ const MagneticButton: React.FC<{ children: React.ReactNode; onClick: () => void;
   );
 };
 
+// Improvement #7: JSON-LD schema as a maintainable typed object
+const schemaData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      name: "Vellor",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web, iOS, Android (PWA)",
+      offers: {
+        "@type": "Offer",
+        price: "0.00",
+        priceCurrency: "USD",
+      },
+      description: "The ultimate operating system for private educators. Zero subscriptions, zero tracking. 100% yours.",
+      creator: {
+        "@type": "Person",
+        name: "Dhaatrik Chowdhury",
+      },
+    },
+    {
+      "@type": "FAQPage",
+      mainEntity: [
+        { "@type": "Question", name: "I'm currently using a massive, messy Excel spreadsheet. How hard is it to switch?", acceptedAnswer: { "@type": "Answer", text: "It takes less than two minutes. Vellor includes a built-in CSV import wizard, allowing you to seamlessly migrate your entire student roster and history without manually typing a thing." } },
+        { "@type": "Question", name: "Do my students or their parents need to download an app or create accounts?", acceptedAnswer: { "@type": "Answer", text: "Nope! Vellor is your personal command center. To share updates or request payments, you simply generate a beautiful PDF invoice or a secure, read-only web portal link to send them directly." } },
+        { "@type": "Question", name: "If everything is stored locally, what happens if I lose my laptop or phone?", acceptedAnswer: { "@type": "Answer", text: "Your peace of mind is built-in. Vellor features a one-click backup system that lets you download a highly secure, encrypted file of your entire database. Just upload that file to a new device, and you're instantly back in business." } },
+        { "@type": "Question", name: "Why is this completely free? What's the catch?", acceptedAnswer: { "@type": "Answer", text: "There is no catch. Vellor is an open-source project built by an independent educator, for independent educators. The goal is to provide enterprise-grade tools to solo tutors without the predatory $30/month subscription fees." } },
+        { "@type": "Question", name: "Do you take a percentage or transaction fee from my student payments?", acceptedAnswer: { "@type": "Answer", text: "Absolutely not. Vellor is a management and organizational operating system, not a payment processor. You keep 100% of the money you earn through your preferred payment methods (Cash, Zelle, Venmo, UPI, etc.)." } },
+        { "@type": "Question", name: "I'm not very tech-savvy. Is there a steep learning curve?", acceptedAnswer: { "@type": "Answer", text: "Not at all. Vellor was designed to feel as intuitive as your favorite smartphone apps. There are no cluttered enterprise menus or complex database setups—just a clean, simple workflow that makes sense for tutoring." } },
+        { "@type": "Question", name: "Can I use my own tutoring brand's logo and colors?", acceptedAnswer: { "@type": "Answer", text: "Yes! Vellor gets out of your way. Our white-label customization engine lets you change the application's entire color scheme and branding to match your unique academy aesthetic in seconds." } },
+        { "@type": "Question", name: "Will you sell my data or my students' contact info to advertisers?", acceptedAnswer: { "@type": "Answer", text: "Never. Because Vellor is an offline-first application, your data literally never touches our servers. We couldn't look at your student data or financial records even if we wanted to." } },
+        { "@type": "Question", name: "Can I manage multiple subjects and different hourly rates?", acceptedAnswer: { "@type": "Answer", text: "Yes. Every tutoring business is different. You can set custom hourly rates, specific learning goals, and distinct subjects for every individual student on your roster." } },
+        { "@type": "Question", name: "Does this require a constant internet connection to work?", acceptedAnswer: { "@type": "Answer", text: "No. Whether you are tutoring in a cafe with spotty Wi-Fi or in a student's home with no service, Vellor's offline-first architecture means you can log lessons, generate invoices, and manage your business without skipping a beat." } },
+      ],
+    },
+  ],
+};
+
 export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) => {
   const [isTermsOpen, setIsTermsOpen] = React.useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = React.useState(false);
   const [isAdviceOpen, setIsAdviceOpen] = React.useState(false);
   const [monthlyCost, setMonthlyCost] = React.useState(35);
   const [isManifestoExpanded, setIsManifestoExpanded] = React.useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [isMac, setIsMac] = React.useState(false);
+  const [showFab, setShowFab] = React.useState(false);
   const gamificationRef = useRef<HTMLElement>(null);
   const isGamificationInView = useInView(gamificationRef, { once: true, amount: 0.5 });
   const settings = useStore(s => s.settings);
@@ -186,11 +227,21 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
     window.scrollTo(0, 0);
   }, []);
 
+  // Improvement #2: Detect macOS for OS-aware keyboard shortcut
+  useEffect(() => {
+    setIsMac(navigator.platform.toUpperCase().indexOf('MAC') >= 0);
+  }, []);
+
   const { scrollY } = useScroll();
   const yBg1 = useTransform(scrollY, [0, 1000], [0, 250]);
   const yBg2 = useTransform(scrollY, [0, 1000], [0, -250]);
   const yMacBook = useTransform(scrollY, [0, 1000], [0, 150]);
   const yIphone = useTransform(scrollY, [0, 1000], [0, -100]);
+
+  // Improvement #3: Show floating CTA after scrolling past 800px
+  useMotionValueEvent(scrollY, 'change', (latest) => {
+    setShowFab(latest > 800);
+  });
 
   useEffect(() => {
     if (isGamificationInView) {
@@ -227,6 +278,12 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Improvement #1: Mobile menu nav handler
+  const scrollToAndClose = (id: string) => {
+    setIsMobileMenuOpen(false);
+    setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }), 300);
+  };
+
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-primary text-gray-900 dark:text-gray-100 overflow-x-hidden font-sans custom-scrollbar">
       <style>{`
@@ -247,46 +304,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
         <meta property="og:title" content="Vellor - Private Educator Dashboard" />
         <meta property="og:description" content="Manage your tutoring business like a pro with Vellor. Zero subscriptions, offline-first, local storage." />
         <meta property="og:type" content="website" />
-        <script type="application/ld+json">
-          {`
-            {
-              "@context": "https://schema.org",
-              "@graph": [
-                {
-                  "@type": "SoftwareApplication",
-                  "name": "Vellor",
-                  "applicationCategory": "BusinessApplication",
-                  "operatingSystem": "Web, iOS, Android (PWA)",
-                  "offers": {
-                    "@type": "Offer",
-                    "price": "0.00",
-                    "priceCurrency": "USD"
-                  },
-                  "description": "The ultimate operating system for private educators. Zero subscriptions, zero tracking. 100% yours.",
-                  "creator": {
-                    "@type": "Person",
-                    "name": "Dhaatrik Chowdhury"
-                  }
-                },
-                {
-                  "@type": "FAQPage",
-                  "mainEntity": [
-                    {"@type": "Question", "name": "I'm currently using a massive, messy Excel spreadsheet. How hard is it to switch?", "acceptedAnswer": {"@type": "Answer", "text": "It takes less than two minutes. Vellor includes a built-in CSV import wizard, allowing you to seamlessly migrate your entire student roster and history without manually typing a thing."}},
-                    {"@type": "Question", "name": "Do my students or their parents need to download an app or create accounts?", "acceptedAnswer": {"@type": "Answer", "text": "Nope! Vellor is your personal command center. To share updates or request payments, you simply generate a beautiful PDF invoice or a secure, read-only web portal link to send them directly."}},
-                    {"@type": "Question", "name": "If everything is stored locally, what happens if I lose my laptop or phone?", "acceptedAnswer": {"@type": "Answer", "text": "Your peace of mind is built-in. Vellor features a one-click backup system that lets you download a highly secure, encrypted file of your entire database. Just upload that file to a new device, and you're instantly back in business."}},
-                    {"@type": "Question", "name": "Why is this completely free? What's the catch?", "acceptedAnswer": {"@type": "Answer", "text": "There is no catch. Vellor is an open-source project built by an independent educator, for independent educators. The goal is to provide enterprise-grade tools to solo tutors without the predatory $30/month subscription fees."}},
-                    {"@type": "Question", "name": "Do you take a percentage or transaction fee from my student payments?", "acceptedAnswer": {"@type": "Answer", "text": "Absolutely not. Vellor is a management and organizational operating system, not a payment processor. You keep 100% of the money you earn through your preferred payment methods (Cash, Zelle, Venmo, UPI, etc.)."}},
-                    {"@type": "Question", "name": "I'm not very tech-savvy. Is there a steep learning curve?", "acceptedAnswer": {"@type": "Answer", "text": "Not at all. Vellor was designed to feel as intuitive as your favorite smartphone apps. There are no cluttered enterprise menus or complex database setups—just a clean, simple workflow that makes sense for tutoring."}},
-                    {"@type": "Question", "name": "Can I use my own tutoring brand's logo and colors?", "acceptedAnswer": {"@type": "Answer", "text": "Yes! Vellor gets out of your way. Our white-label customization engine lets you change the application's entire color scheme and branding to match your unique academy aesthetic in seconds."}},
-                    {"@type": "Question", "name": "Will you sell my data or my students' contact info to advertisers?", "acceptedAnswer": {"@type": "Answer", "text": "Never. Because Vellor is an offline-first application, your data literally never touches our servers. We couldn't look at your student data or financial records even if we wanted to."}},
-                    {"@type": "Question", "name": "Can I manage multiple subjects and different hourly rates?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Every tutoring business is different. You can set custom hourly rates, specific learning goals, and distinct subjects for every individual student on your roster."}},
-                    {"@type": "Question", "name": "Does this require a constant internet connection to work?", "acceptedAnswer": {"@type": "Answer", "text": "No. Whether you are tutoring in a cafe with spotty Wi-Fi or in a student's home with no service, Vellor's offline-first architecture means you can log lessons, generate invoices, and manage your business without skipping a beat."}}
-                  ]
-                }
-              ]
-            }
-          `}
-        </script>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }} />
       </Helmet>
       {/* Header */}
       <header className="fixed top-0 inset-x-0 h-16 bg-white/70 dark:bg-primary/70 backdrop-blur-lg z-50 flex items-center justify-between px-4 md:px-8 border-b border-gray-200/50 dark:border-white/5">
@@ -329,13 +347,21 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
                     Get Started
                 </Button>
             </div>
+            {/* Improvement #1: Mobile Hamburger Button */}
+            <button
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="md:hidden p-2 text-gray-600 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                aria-label="Open navigation menu"
+            >
+                <Menu className="w-6 h-6" />
+            </button>
          </div>
       </header>
 
       {/* Hero Section */}
       <section data-pomelli-section="hero" data-crawler-intent="awareness" className="relative min-h-screen flex items-center justify-center pt-32 pb-40 px-4 overflow-hidden">
-        <motion.div style={{ y: yBg1 }} className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-accent/20 rounded-full blur-[120px] -z-10 animate-pulse"></motion.div>
-        <motion.div style={{ y: yBg2 }} className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[140px] -z-10 animate-pulse delay-1000"></motion.div>
+        <motion.div style={{ y: yBg1 }} className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-accent/20 rounded-full blur-[120px] -z-10 animate-pulse transform-gpu will-change-transform"></motion.div>
+        <motion.div style={{ y: yBg2 }} className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[140px] -z-10 animate-pulse delay-1000 transform-gpu will-change-transform"></motion.div>
         
         <div className="max-w-4xl mx-auto text-center z-10">
           <motion.div
@@ -382,7 +408,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
                 >
                     {/* Pomelli Semantic Image Crawler Hook */}
                     <figure aria-label="Vellor Student Dashboard Interface">
-                    <img src="/vellor-student-dashboard.png" alt="Vellor Student Dashboard - Premium Tutor Management Interface showing revenue and student metrics" className="sr-only" />
+                    <img src="/vellor-student-dashboard.png" alt="Vellor Student Dashboard - Premium Tutor Management Interface showing revenue and student metrics" className="sr-only" fetchPriority="high" loading="eager" />
                     <figcaption className="sr-only">A highly intuitive dashboard displaying active students, pending invoices, and weekly lesson logs.</figcaption>
                     </figure>
                     
@@ -429,7 +455,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
                 >
                     {/* Pomelli Semantic Image Crawler Hook */}
                     <figure aria-label="Vellor Mobile Dashboard">
-                    <img src="/vellor-mobile-dashboard.png" alt="Vellor Mobile Application Client Portal - schedule and manage lessons on the go" className="sr-only" />
+                    <img src="/vellor-mobile-dashboard.png" alt="Vellor Mobile Application Client Portal - schedule and manage lessons on the go" className="sr-only" fetchPriority="high" loading="eager" />
                     <figcaption className="sr-only">A mobile-first dashboard for tutors to manage schedules, track payments, and communicate with parents on any device.</figcaption>
                     </figure>
 
@@ -752,7 +778,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
                  <div className="flex gap-4 items-center">
                      <span className="text-gray-500">Try it out:</span>
                      <div className="flex gap-2 font-mono">
-                         <kbd className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg shadow-sm text-sm font-bold shadow-black">Ctrl</kbd>
+                         <kbd className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg shadow-sm text-sm font-bold shadow-black">{isMac ? '⌘' : 'Ctrl'}</kbd>
                          <span className="text-gray-500 pt-2">+</span>
                          <kbd className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg shadow-sm text-sm font-bold shadow-black">K</kbd>
                      </div>
@@ -1392,6 +1418,92 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
               </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Improvement #1: Mobile Slide-Out Navigation Menu */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            {/* Slide-out panel */}
+            <motion.nav
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="fixed top-0 right-0 bottom-0 w-80 max-w-[85vw] bg-white dark:bg-primary-dark z-[70] flex flex-col shadow-2xl border-l border-gray-200 dark:border-white/10"
+            >
+              <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-white/5">
+                <div className="flex items-center gap-2 font-display font-bold text-xl">
+                  <div className="w-8 h-8 rounded-xl bg-accent flex items-center justify-center text-primary-dark">
+                    <Icon iconName="academic-cap" className="w-5 h-5" />
+                  </div>
+                  Vellor
+                </div>
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="p-2 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 rounded-full transition-colors"
+                  aria-label="Close navigation menu"
+                >
+                  <X className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                </button>
+              </div>
+              <div className="flex-1 flex flex-col gap-1 p-4 overflow-y-auto">
+                {[
+                  { label: 'Features', id: 'features', icon: 'sparkles' },
+                  { label: 'Gamification', id: 'gamification', icon: 'trophy' },
+                  { label: 'Privacy', id: 'privacy', icon: 'lock-closed' },
+                  { label: 'Open Source', id: 'open-source', icon: 'code' },
+                  { label: 'FAQ', id: 'faq', icon: 'question-mark-circle' },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => scrollToAndClose(item.id)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-left text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 font-semibold transition-colors"
+                  >
+                    <Icon iconName={item.icon as any} className="w-5 h-5 text-gray-400" />
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+              <div className="p-4 border-t border-gray-100 dark:border-white/5">
+                <Button
+                  onClick={() => { setIsMobileMenuOpen(false); onGetStarted(); }}
+                  className="w-full rounded-full py-4 text-base font-bold shadow-lg shadow-accent/20"
+                >
+                  Get Started — It's Free
+                </Button>
+              </div>
+            </motion.nav>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Improvement #3: Scroll-Linked Sticky Mobile CTA */}
+      <AnimatePresence>
+        {showFab && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="fixed bottom-6 left-4 right-4 z-[55] md:hidden"
+          >
+            <Button
+              onClick={onGetStarted}
+              className="w-full rounded-full py-4 text-base font-bold shadow-2xl shadow-accent/40"
+            >
+              Get Started — It's Free
+            </Button>
+          </motion.div>
         )}
       </AnimatePresence>
 
