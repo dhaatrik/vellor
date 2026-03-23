@@ -1,11 +1,33 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, Suspense, lazy } from 'react';
 import { Helmet } from 'react-helmet-async';
 import * as Accordion from '@radix-ui/react-accordion';
-import { motion, useInView, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import confetti from 'canvas-confetti';
-import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis } from 'recharts';
+import { motion, useInView, useScroll, useTransform, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import { Github, Linkedin, X } from 'lucide-react';
 import { Button, Icon } from '../components/ui';
+
+// Lazy-load heavy chart component for improved Time to Interactive
+const LazyRevenueChart = lazy(() =>
+  import('recharts').then((mod) => ({
+    default: ({ data }: { data: { month: string; revenue: number }[] }) => {
+      const { ResponsiveContainer, AreaChart, Area, XAxis, YAxis } = mod;
+      return (
+        <ResponsiveContainer width="100%" height={96} minWidth={0} minHeight={0}>
+          <AreaChart data={data}>
+            <defs>
+              <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="var(--color-accent)" stopOpacity={0.4} />
+                <stop offset="95%" stopColor="var(--color-accent)" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <XAxis dataKey="month" hide />
+            <YAxis hide />
+            <Area type="monotone" dataKey="revenue" stroke="var(--color-accent)" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+          </AreaChart>
+        </ResponsiveContainer>
+      );
+    },
+  }))
+);
 
 const XIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -95,14 +117,57 @@ const BeforeAfterSlider = () => {
         style={{ left: `${sliderPos}%` }}
       >
         <div className="w-1.5 h-full bg-white shadow-[0_0_15px_rgba(0,0,0,0.5)] flex items-center justify-center">
-           <div className="w-12 h-12 bg-white rounded-full shadow-2xl border-2 border-gray-200 flex items-center justify-center text-accent ring-4 ring-white/50 backdrop-blur-md transition-transform active:scale-95 group-hover:scale-110">
+           <div className="w-12 h-12 bg-white rounded-full shadow-2xl border-2 border-gray-200 flex items-center justify-center text-accent ring-4 ring-white/50 backdrop-blur-md transition-transform active:scale-95 group-hover:scale-110 focus-visible:ring-accent">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6 rotate-90 text-gray-800">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
               </svg>
            </div>
         </div>
       </div>
+      {/* Accessible range input for crawlers and touch devices */}
+      <input type="range" min="0" max="100" value={sliderPos} onChange={(e) => setSliderPos(Number(e.target.value))} className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-50 focus:outline-none" aria-label="Compare messy spreadsheet with Vellor dashboard" />
     </div>
+  );
+};
+
+// Magnetic button wrapper - subtly pulls toward cursor on hover
+const MagneticButton: React.FC<{ children: React.ReactNode; onClick: () => void; className?: string; rightIcon?: string }> = ({ children, onClick, className, rightIcon }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const springX = useSpring(x, { stiffness: 300, damping: 20 });
+  const springY = useSpring(y, { stiffness: 300, damping: 20 });
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    x.set((e.clientX - centerX) * 0.15);
+    y.set((e.clientY - centerY) * 0.15);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{ x: springX, y: springY }}
+      className="inline-block"
+    >
+      <Button 
+        onClick={onClick} 
+        className={className}
+        rightIcon={rightIcon as any}
+      >
+        {children}
+      </Button>
+    </motion.div>
   );
 };
 
@@ -110,6 +175,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
   const [isTermsOpen, setIsTermsOpen] = React.useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = React.useState(false);
   const [isAdviceOpen, setIsAdviceOpen] = React.useState(false);
+  const [monthlyCost, setMonthlyCost] = React.useState(35);
   const gamificationRef = useRef<HTMLElement>(null);
   const isGamificationInView = useInView(gamificationRef, { once: true, amount: 0.5 });
   const settings = useStore(s => s.settings);
@@ -127,30 +193,32 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
 
   useEffect(() => {
     if (isGamificationInView) {
-      const duration = 3 * 1000;
-      const end = Date.now() + duration;
+      import('canvas-confetti').then(({ default: confetti }) => {
+        const duration = 3 * 1000;
+        const end = Date.now() + duration;
 
-      const frame = () => {
-        confetti({
-          particleCount: 5,
-          angle: 60,
-          spread: 55,
-          origin: { x: 0 },
-          colors: ['#8b5cf6', '#d8b4fe', '#ffffff']
-        });
-        confetti({
-          particleCount: 5,
-          angle: 120,
-          spread: 55,
-          origin: { x: 1 },
-          colors: ['#8b5cf6', '#d8b4fe', '#ffffff']
-        });
+        const frame = () => {
+          confetti({
+            particleCount: 5,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0 },
+            colors: ['#8b5cf6', '#d8b4fe', '#ffffff']
+          });
+          confetti({
+            particleCount: 5,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1 },
+            colors: ['#8b5cf6', '#d8b4fe', '#ffffff']
+          });
 
-        if (Date.now() < end) {
-          requestAnimationFrame(frame);
-        }
-      };
-      frame();
+          if (Date.now() < end) {
+            requestAnimationFrame(frame);
+          }
+        };
+        frame();
+      });
     }
   }, [isGamificationInView]);
 
@@ -182,20 +250,39 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
           {`
             {
               "@context": "https://schema.org",
-              "@type": "SoftwareApplication",
-              "name": "Vellor",
-              "applicationCategory": "BusinessApplication",
-              "operatingSystem": "Web, iOS, Android (PWA)",
-              "offers": {
-                "@type": "Offer",
-                "price": "0.00",
-                "priceCurrency": "USD"
-              },
-              "description": "The ultimate operating system for private educators. Zero subscriptions, zero tracking. 100% yours.",
-              "creator": {
-                "@type": "Person",
-                "name": "Dhaatrik Chowdhury"
-              }
+              "@graph": [
+                {
+                  "@type": "SoftwareApplication",
+                  "name": "Vellor",
+                  "applicationCategory": "BusinessApplication",
+                  "operatingSystem": "Web, iOS, Android (PWA)",
+                  "offers": {
+                    "@type": "Offer",
+                    "price": "0.00",
+                    "priceCurrency": "USD"
+                  },
+                  "description": "The ultimate operating system for private educators. Zero subscriptions, zero tracking. 100% yours.",
+                  "creator": {
+                    "@type": "Person",
+                    "name": "Dhaatrik Chowdhury"
+                  }
+                },
+                {
+                  "@type": "FAQPage",
+                  "mainEntity": [
+                    {"@type": "Question", "name": "I'm currently using a massive, messy Excel spreadsheet. How hard is it to switch?", "acceptedAnswer": {"@type": "Answer", "text": "It takes less than two minutes. Vellor includes a built-in CSV import wizard, allowing you to seamlessly migrate your entire student roster and history without manually typing a thing."}},
+                    {"@type": "Question", "name": "Do my students or their parents need to download an app or create accounts?", "acceptedAnswer": {"@type": "Answer", "text": "Nope! Vellor is your personal command center. To share updates or request payments, you simply generate a beautiful PDF invoice or a secure, read-only web portal link to send them directly."}},
+                    {"@type": "Question", "name": "If everything is stored locally, what happens if I lose my laptop or phone?", "acceptedAnswer": {"@type": "Answer", "text": "Your peace of mind is built-in. Vellor features a one-click backup system that lets you download a highly secure, encrypted file of your entire database. Just upload that file to a new device, and you're instantly back in business."}},
+                    {"@type": "Question", "name": "Why is this completely free? What's the catch?", "acceptedAnswer": {"@type": "Answer", "text": "There is no catch. Vellor is an open-source project built by an independent educator, for independent educators. The goal is to provide enterprise-grade tools to solo tutors without the predatory $30/month subscription fees."}},
+                    {"@type": "Question", "name": "Do you take a percentage or transaction fee from my student payments?", "acceptedAnswer": {"@type": "Answer", "text": "Absolutely not. Vellor is a management and organizational operating system, not a payment processor. You keep 100% of the money you earn through your preferred payment methods (Cash, Zelle, Venmo, UPI, etc.)."}},
+                    {"@type": "Question", "name": "I'm not very tech-savvy. Is there a steep learning curve?", "acceptedAnswer": {"@type": "Answer", "text": "Not at all. Vellor was designed to feel as intuitive as your favorite smartphone apps. There are no cluttered enterprise menus or complex database setups—just a clean, simple workflow that makes sense for tutoring."}},
+                    {"@type": "Question", "name": "Can I use my own tutoring brand's logo and colors?", "acceptedAnswer": {"@type": "Answer", "text": "Yes! Vellor gets out of your way. Our white-label customization engine lets you change the application's entire color scheme and branding to match your unique academy aesthetic in seconds."}},
+                    {"@type": "Question", "name": "Will you sell my data or my students' contact info to advertisers?", "acceptedAnswer": {"@type": "Answer", "text": "Never. Because Vellor is an offline-first application, your data literally never touches our servers. We couldn't look at your student data or financial records even if we wanted to."}},
+                    {"@type": "Question", "name": "Can I manage multiple subjects and different hourly rates?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Every tutoring business is different. You can set custom hourly rates, specific learning goals, and distinct subjects for every individual student on your roster."}},
+                    {"@type": "Question", "name": "Does this require a constant internet connection to work?", "acceptedAnswer": {"@type": "Answer", "text": "No. Whether you are tutoring in a cafe with spotty Wi-Fi or in a student's home with no service, Vellor's offline-first architecture means you can log lessons, generate invoices, and manage your business without skipping a beat."}}
+                  ]
+                }
+              ]
             }
           `}
         </script>
@@ -210,21 +297,21 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
          </div>
          
          <nav className="hidden md:flex items-center gap-6 text-sm font-semibold text-gray-600 dark:text-gray-300">
-             <button onClick={() => scrollTo('features')} className="hover:text-accent transition-colors">Features</button>
-             <button onClick={() => scrollTo('gamification')} className="hover:text-accent transition-colors">Gamification</button>
-             <button onClick={() => scrollTo('privacy')} className="hover:text-accent transition-colors">Privacy</button>
-             <button onClick={() => scrollTo('open-source')} className="hover:text-accent transition-colors">Open Source</button>
-             <button onClick={() => scrollTo('faq')} className="hover:text-accent transition-colors">FAQ</button>
+             <button onClick={() => scrollTo('features')} className="hover:text-accent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-primary rounded-md">Features</button>
+             <button onClick={() => scrollTo('gamification')} className="hover:text-accent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-primary rounded-md">Gamification</button>
+             <button onClick={() => scrollTo('privacy')} className="hover:text-accent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-primary rounded-md">Privacy</button>
+             <button onClick={() => scrollTo('open-source')} className="hover:text-accent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-primary rounded-md">Open Source</button>
+             <button onClick={() => scrollTo('faq')} className="hover:text-accent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-primary rounded-md">FAQ</button>
          </nav>
 
          <div className="flex items-center gap-4">
-            <a href="https://github.com/DhaatuTheGamer/vellor" target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">
+            <a href="https://github.com/DhaatuTheGamer/vellor" target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-primary rounded-md">
                 <Github className="w-5 h-5" />
             </a>
-            <a href="https://x.com/dhaatrik" target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">
+            <a href="https://x.com/dhaatrik" target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-primary rounded-md">
                 <XIcon className="w-5 h-5" />
             </a>
-            <a href="https://www.linkedin.com/in/dhaatrik-chowdhury" target="_blank" rel="noreferrer" className="text-gray-600 hover:text-[#0A66C2] dark:text-gray-400 dark:hover:text-[#0A66C2] transition-colors">
+            <a href="https://www.linkedin.com/in/dhaatrik-chowdhury" target="_blank" rel="noreferrer" className="text-gray-600 hover:text-[#0A66C2] dark:text-gray-400 dark:hover:text-[#0A66C2] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-primary rounded-md">
                 <Linkedin className="w-5 h-5" />
             </a>
             <div className="w-px h-6 bg-gray-200 dark:bg-white/10 ml-2 mr-1"></div>
@@ -245,7 +332,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
       </header>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center pt-32 pb-40 px-4 overflow-hidden">
+      <section data-pomelli-section="hero" data-crawler-intent="awareness" className="relative min-h-screen flex items-center justify-center pt-32 pb-40 px-4 overflow-hidden">
         <motion.div style={{ y: yBg1 }} className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-accent/20 rounded-full blur-[120px] -z-10 animate-pulse"></motion.div>
         <motion.div style={{ y: yBg2 }} className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[140px] -z-10 animate-pulse delay-1000"></motion.div>
         
@@ -260,22 +347,22 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
               <span>Vellor 4.0 is now live</span>
             </div>
             
-            <h1 className="text-5xl md:text-[4.5rem] lg:text-[6rem] leading-[1.05] font-display font-extrabold tracking-[-0.03em] mb-8 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 dark:from-white dark:via-gray-300 dark:to-gray-500">
+            <h1 className="text-5xl md:text-[4.5rem] lg:text-[6rem] leading-[1.05] font-display font-extrabold tracking-tighter mb-8 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 dark:from-white dark:via-gray-300 dark:to-gray-500">
               Manage Your Tutoring <br className="hidden md:block" />
               Business Like a <span className="bg-clip-text text-transparent bg-gradient-to-r from-accent to-accent-light">Pro.</span>
             </h1>
             
-            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 mb-10 max-w-2xl mx-auto font-medium leading-relaxed tracking-tight">
+            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 mb-10 max-w-2xl mx-auto font-medium leading-relaxed tracking-tight text-pretty">
               The ultimate operating system for private educators. Zero subscriptions, zero tracking. 100% yours.
             </p>
             
-            <Button 
+            <MagneticButton 
                 onClick={onGetStarted} 
-                className="rounded-full shadow-lg shadow-accent/20 text-lg py-4 px-8 transform transition hover:scale-105"
+                className="rounded-full shadow-lg shadow-accent/20 text-lg py-4 px-8 transform transition hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-primary"
                 rightIcon="arrow-right"
             >
               Start for Free
-            </Button>
+            </MagneticButton>
           </motion.div>
 
           {/* Hero Device Mockups */}
@@ -293,7 +380,10 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
                     className="w-[850px] h-[510px] bg-white/40 dark:bg-[#0f172a]/40 backdrop-blur-3xl rounded-t-[2.5rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.4)] border-[8px] border-white/60 dark:border-white/10 border-b-0 overflow-hidden relative"
                 >
                     {/* Pomelli Semantic Image Crawler Hook */}
-                    <img src="/vellor-student-dashboard.png" alt="Vellor Student Dashboard - Premium Tutor Management Interface" className="sr-only" />
+                    <figure aria-label="Vellor Student Dashboard Interface">
+                    <img src="/vellor-student-dashboard.png" alt="Vellor Student Dashboard - Premium Tutor Management Interface showing revenue and student metrics" className="sr-only" />
+                    <figcaption className="sr-only">A highly intuitive dashboard displaying active students, pending invoices, and weekly lesson logs.</figcaption>
+                    </figure>
                     
                     {/* High-end Photorealistic Glare Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-tr from-white/40 via-white/5 to-transparent pointer-events-none z-50"></div>
@@ -337,7 +427,10 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
                     className="w-[240px] h-[500px] bg-white/40 dark:bg-[#0f172a]/40 backdrop-blur-3xl rounded-[3rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.6)] border-[6px] border-white/60 dark:border-white/10 overflow-hidden relative ring-1 ring-gray-900/5"
                 >
                     {/* Pomelli Semantic Image Crawler Hook */}
-                    <img src="/vellor-mobile-dashboard.png" alt="Vellor Mobile Application Client Portal" className="sr-only" />
+                    <figure aria-label="Vellor Mobile Dashboard">
+                    <img src="/vellor-mobile-dashboard.png" alt="Vellor Mobile Application Client Portal - schedule and manage lessons on the go" className="sr-only" />
+                    <figcaption className="sr-only">A mobile-first dashboard for tutors to manage schedules, track payments, and communicate with parents on any device.</figcaption>
+                    </figure>
 
                     {/* iPhone Dynamic Glare */}
                     <div className="absolute inset-0 bg-gradient-to-tr from-white/50 via-white/10 to-transparent pointer-events-none z-50"></div>
@@ -369,7 +462,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
       </section>
 
       {/* Interactive Before & After Showcase */}
-      <section className="py-16 md:py-24 px-4 bg-white dark:bg-primary-dark/50 relative z-20 overflow-hidden border-t border-gray-100 dark:border-white/5">
+      <section data-pomelli-section="before-after" data-crawler-intent="demonstration" className="py-16 md:py-24 px-4 bg-white dark:bg-primary-dark/50 relative z-20 overflow-hidden border-t border-gray-100 dark:border-white/5">
          <div className="max-w-6xl mx-auto">
             <motion.div 
                initial={{ opacity: 0, y: 20 }}
@@ -377,8 +470,8 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
                viewport={{ once: true }}
                className="text-center mb-12"
             >
-               <h2 className="text-3xl md:text-5xl font-bold mb-6 font-display text-gray-900 dark:text-white tracking-tight">Stop Wasting Time on Admin</h2>
-               <p className="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-10">Slide to instantly upgrade your workflow from a cluttered mess to a streamlined command center.</p>
+               <h2 className="text-3xl md:text-5xl font-bold mb-6 font-display text-gray-900 dark:text-white tracking-tighter">Stop Wasting Time on Admin</h2>
+               <p className="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-10 text-pretty">Slide to instantly upgrade your workflow from a cluttered mess to a streamlined command center.</p>
             </motion.div>
             
             <motion.div
@@ -393,7 +486,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
       </section>
 
       {/* Why Vellor Section */}
-      <section id="features" className="py-24 px-4 bg-white dark:bg-primary-dark/50 relative z-20">
+      <section id="features" data-pomelli-section="features" data-crawler-intent="education" className="py-24 px-4 bg-white dark:bg-primary-dark/50 relative z-20">
         <div className="max-w-6xl mx-auto">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -401,8 +494,8 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 font-display text-gray-900 dark:text-white">Built for Solo Educators</h2>
-            <p className="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto text-lg">Leave behind the spreadsheets and expensive subscriptions. Vellor gives you everything you need, completely free.</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 font-display text-gray-900 dark:text-white tracking-tighter">Built for Solo Educators</h2>
+            <p className="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto text-lg text-pretty">Leave behind the spreadsheets and expensive subscriptions. Vellor gives you everything you need, completely free.</p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -431,7 +524,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
       </section>
 
       {/* Edu-preneur Stepper Section */}
-      <section className="py-24 px-4 bg-gray-50 dark:bg-primary relative z-20 border-y border-gray-100 dark:border-white/5">
+      <section data-pomelli-section="edu-preneur-workflow" className="py-24 px-4 bg-gray-50 dark:bg-primary relative z-20 border-y border-gray-100 dark:border-white/5">
         <div className="max-w-5xl mx-auto">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -439,8 +532,8 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 font-display text-gray-900 dark:text-white">Your Business in 4 Steps</h2>
-            <p className="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto text-lg">A simple, seamless workflow designed specifically for independent tutors.</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 font-display text-gray-900 dark:text-white tracking-tighter">Your Business in 4 Steps</h2>
+            <p className="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto text-lg text-pretty">A simple, seamless workflow designed specifically for independent tutors.</p>
           </motion.div>
 
           <div className="relative">
@@ -478,7 +571,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
       </section>
 
       {/* Premium Features Bento Box */}
-      <section className="py-24 px-4 relative z-20">
+      <section data-pomelli-section="premium-features" data-crawler-intent="education" className="py-24 px-4 relative z-20">
         <div className="max-w-6xl mx-auto">
            <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -486,8 +579,8 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 font-display text-gray-900 dark:text-white">Enterprise-Grade Features</h2>
-            <p className="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto text-lg">A powerful toolkit designed directly into one seamless interface.</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 font-display text-gray-900 dark:text-white tracking-tighter">Enterprise-Grade Features</h2>
+            <p className="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto text-lg text-pretty">A powerful toolkit designed directly into one seamless interface.</p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[250px]">
@@ -496,7 +589,8 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
                initial={{ opacity: 0, scale: 0.95 }}
                whileInView={{ opacity: 1, scale: 1 }}
                viewport={{ once: true }}
-               className="lg:col-span-2 row-span-1 rounded-[2rem] p-8 relative overflow-hidden bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20 group hover:border-green-500/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_40px_rgba(34,197,94,0.15)] dark:hover:shadow-[0_0_40px_rgba(34,197,94,0.1)]"
+               className="lg:col-span-2 row-span-1 rounded-[2rem] p-8 relative overflow-hidden bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20 ring-1 ring-inset ring-white/10 group hover:border-green-500/40 transition-all duration-300 hover:-translate-y-1 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_0_40px_rgba(34,197,94,0.15)] dark:hover:shadow-[0_0_40px_rgba(34,197,94,0.1)]"
+               data-pomelli-feature-name="whatsapp-reminders"
              >
                 <div className="relative z-10 w-2/3">
                     <div className="w-12 h-12 rounded-xl bg-green-500/20 text-green-600 dark:text-green-400 flex items-center justify-center mb-4">
@@ -523,7 +617,8 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
                whileInView={{ opacity: 1, scale: 1 }}
                viewport={{ once: true }}
                transition={{ delay: 0.1 }}
-               className="col-span-1 row-span-1 rounded-[2rem] p-8 bg-white dark:bg-primary-light border border-gray-100 dark:border-white/10 relative overflow-hidden group hover:border-accent/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_40px_rgba(139,92,246,0.15)] dark:hover:shadow-[0_0_40px_rgba(139,92,246,0.1)]"
+               className="col-span-1 row-span-1 rounded-[2rem] p-8 bg-white dark:bg-primary-light border border-gray-100 dark:border-white/10 ring-1 ring-inset ring-white/10 relative overflow-hidden group hover:border-accent/40 transition-all duration-300 hover:-translate-y-1 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_0_40px_rgba(139,92,246,0.15)] dark:hover:shadow-[0_0_40px_rgba(139,92,246,0.1)]"
+               data-pomelli-feature-name="auto-invoice"
              >
                 <div className="w-12 h-12 rounded-xl bg-accent/10 text-accent flex items-center justify-center mb-4">
                     <Icon iconName="document-text" className="w-6 h-6" />
@@ -538,7 +633,8 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
                whileInView={{ opacity: 1, scale: 1 }}
                viewport={{ once: true }}
                transition={{ delay: 0.2 }}
-               className="col-span-1 row-span-1 rounded-[2rem] p-8 bg-white dark:bg-primary-light border border-gray-100 dark:border-white/10 relative overflow-hidden group hover:border-accent/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_40px_rgba(139,92,246,0.15)] dark:hover:shadow-[0_0_40px_rgba(139,92,246,0.1)]"
+               className="col-span-1 row-span-1 rounded-[2rem] p-8 bg-white dark:bg-primary-light border border-gray-100 dark:border-white/10 ring-1 ring-inset ring-white/10 relative overflow-hidden group hover:border-accent/40 transition-all duration-300 hover:-translate-y-1 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_0_40px_rgba(139,92,246,0.15)] dark:hover:shadow-[0_0_40px_rgba(139,92,246,0.1)]"
+               data-pomelli-feature-name="secure-portals"
              >
                 <div className="w-12 h-12 rounded-xl bg-accent/10 text-accent flex items-center justify-center mb-4">
                     <Icon iconName="globe" className="w-6 h-6" />
@@ -553,7 +649,8 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
                whileInView={{ opacity: 1, scale: 1 }}
                viewport={{ once: true }}
                transition={{ delay: 0.3 }}
-               className="lg:col-span-2 row-span-1 border border-gray-100 dark:border-white/10 rounded-[2rem] p-8 bg-white dark:bg-primary-light relative overflow-hidden group hover:border-accent/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_40px_rgba(139,92,246,0.15)] dark:hover:shadow-[0_0_40px_rgba(139,92,246,0.1)] flex flex-col justify-between"
+               className="lg:col-span-2 row-span-1 border border-gray-100 dark:border-white/10 ring-1 ring-inset ring-white/10 rounded-[2rem] p-8 bg-white dark:bg-primary-light relative overflow-hidden group hover:border-accent/40 transition-all duration-300 hover:-translate-y-1 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_0_40px_rgba(139,92,246,0.15)] dark:hover:shadow-[0_0_40px_rgba(139,92,246,0.1)] flex flex-col justify-between"
+               data-pomelli-feature-name="financial-forecasting"
              >
                 <div className="flex justify-between items-start relative z-10 mb-4">
                    <div>
@@ -568,19 +665,9 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
                 </div>
                 
                 <div className="h-24 w-full translate-y-4">
-                    <ResponsiveContainer width="100%" height={96} minWidth={0} minHeight={0}>
-                        <AreaChart data={data}>
-                            <defs>
-                                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="var(--color-accent)" stopOpacity={0.4}/>
-                                    <stop offset="95%" stopColor="var(--color-accent)" stopOpacity={0}/>
-                                </linearGradient>
-                            </defs>
-                            <XAxis dataKey="month" hide />
-                            <YAxis hide />
-                            <Area type="monotone" dataKey="revenue" stroke="var(--color-accent)" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
-                        </AreaChart>
-                    </ResponsiveContainer>
+                    <Suspense fallback={<div className="w-full h-full bg-accent/5 rounded-xl animate-pulse" />}>
+                      <LazyRevenueChart data={data} />
+                    </Suspense>
                 </div>
              </motion.div>
           </div>
@@ -588,7 +675,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
       </section>
 
       {/* Gamification Section */}
-      <section id="gamification" ref={gamificationRef} className="py-24 px-4 bg-accent text-primary-dark relative z-20 overflow-hidden">
+      <section id="gamification" ref={gamificationRef} data-pomelli-section="gamification" className="py-24 px-4 bg-accent text-primary-dark relative z-20 overflow-hidden">
          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjZmZmZmZmIiBmaWxsLW9wYWNpdHk9IjAiPjwvcmVjdD4KPHBhdGggZD0iTTAgMEw4IDhaTTAgOEw4IDBaIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiPjwvcGF0aD4KPC9zdmc+')] opacity-50"></div>
          <div className="max-w-4xl mx-auto text-center relative z-10">
             <motion.div
@@ -607,7 +694,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
                         1
                     </motion.div>
                 </div>
-                <h2 className="text-4xl md:text-5xl font-bold mb-6 font-display text-white">Level Up Your Teaching</h2>
+                <h2 className="text-4xl md:text-5xl font-bold mb-6 font-display text-white tracking-tighter">Level Up Your Teaching</h2>
                 <p className="text-xl text-primary-dark/80 mb-10 max-w-2xl mx-auto font-medium">
                     Unlock over 25+ achievements. Progress from Novice Tutor to Scholarly Sensei. Running your business shouldn't be boring.
                 </p>
@@ -650,14 +737,14 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
       </section>
 
       {/* Command Palette Teaser */}
-      <section className="py-24 px-4 bg-gray-900 text-white relative z-20 overflow-hidden border-t border-gray-800">
+      <section data-pomelli-section="command-palette" className="py-24 px-4 bg-gray-900 text-white relative z-20 overflow-hidden border-t border-gray-800">
          <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-transparent opacity-30"></div>
          <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-12 relative z-10">
              <div className="flex-1">
                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 mb-6 text-sm font-semibold text-accent-light">
                     <Icon iconName="sparkles" className="w-4 h-4" /> Power User Tools
                  </div>
-                 <h2 className="text-3xl md:text-5xl font-bold mb-6 font-display">Move at the speed of thought.</h2>
+                 <h2 className="text-3xl md:text-5xl font-bold mb-6 font-display tracking-tighter">Move at the speed of thought.</h2>
                  <p className="text-gray-400 text-lg mb-8 max-w-lg">
                     Never leave the keyboard. The built-in global command palette lets you search students, log lessons, and configure settings instantly.
                  </p>
@@ -708,14 +795,14 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
 
 
       {/* White-Label Customization */}
-      <section className="py-24 px-4 bg-gray-50 dark:bg-primary relative z-20 border-t border-gray-100 dark:border-white/5 overflow-hidden">
+      <section data-pomelli-section="white-label" className="py-24 px-4 bg-gray-50 dark:bg-primary relative z-20 border-t border-gray-100 dark:border-white/5 overflow-hidden">
          <div className="max-w-6xl mx-auto flex flex-col items-center">
              <div className="text-center mb-16">
                  <div className="w-16 h-16 bg-white dark:bg-white/5 rounded-full mx-auto flex items-center justify-center mb-6 shadow-sm border border-gray-100 dark:border-white/10 text-gray-700 dark:text-gray-400">
                      <Icon iconName="brush" className="w-8 h-8" />
                  </div>
-                 <h2 className="text-3xl md:text-4xl font-bold mb-4 font-display text-gray-900 dark:text-white">Your Brand, Your Rules</h2>
-                 <p className="text-gray-500 dark:text-gray-400 text-lg max-w-2xl mx-auto">Vellor gets out of your way. Customize the UI to match your business aesthetic instantly.</p>
+                 <h2 className="text-3xl md:text-4xl font-bold mb-4 font-display text-gray-900 dark:text-white tracking-tighter">Your Brand, Your Rules</h2>
+                 <p className="text-gray-500 dark:text-gray-400 text-lg max-w-2xl mx-auto text-pretty">Vellor gets out of your way. Customize the UI to match your business aesthetic instantly.</p>
              </div>
              
              {/* Demo UI with Custom Color Context */}
@@ -772,8 +859,101 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
          </div>
       </section>
 
+      {/* Interactive Savings Calculator */}
+      <section data-pomelli-section="savings-calculator" data-pomelli-value-prop="lifetime-free-savings" data-crawler-intent="conversion" className="py-24 px-4 bg-white dark:bg-primary-dark/50 relative z-20 border-t border-gray-100 dark:border-white/5">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 font-display text-gray-900 dark:text-white tracking-tighter">The Cost of the Status Quo</h2>
+            <p className="text-gray-500 dark:text-gray-400 text-lg mb-12 text-pretty">See how much you'd save by switching to Vellor from any paid tutoring software.</p>
+          </motion.div>
+
+          <div className="bg-gray-50 dark:bg-primary rounded-3xl p-8 md:p-12 border border-gray-100 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.12)] ring-1 ring-inset ring-white/10">
+            <div className="mb-8">
+              <label className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4 block">What you currently pay per month</label>
+              <motion.div key={monthlyCost} initial={{ scale: 1.1, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-5xl font-bold font-display text-accent mb-6">${monthlyCost}</motion.div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={monthlyCost}
+                onChange={(e) => setMonthlyCost(Number(e.target.value))}
+                className="w-full h-3 bg-gray-200 dark:bg-white/10 rounded-full appearance-none cursor-pointer accent-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-primary"
+                aria-label="Current monthly software cost"
+              />
+              <div className="flex justify-between text-sm text-gray-400 mt-2">
+                <span>$0</span>
+                <span>$100/mo</span>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6 mt-8">
+              {[
+                { label: "1-Year Savings", value: monthlyCost * 12 },
+                { label: "3-Year Savings", value: monthlyCost * 36 },
+                { label: "5-Year Savings", value: monthlyCost * 60 },
+              ].map((item) => (
+                <motion.div
+                  key={item.label}
+                  className="bg-white dark:bg-primary-dark p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm"
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  whileInView={{ scale: 1, opacity: 1 }}
+                  viewport={{ once: true }}
+                >
+                  <div className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">{item.label}</div>
+                  <motion.div
+                    key={item.value}
+                    initial={{ scale: 1.2, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="text-3xl md:text-4xl font-bold font-display text-accent"
+                  >
+                    ${item.value.toLocaleString()}
+                  </motion.div>
+                </motion.div>
+              ))}
+            </div>
+
+            <p className="mt-8 text-gray-500 dark:text-gray-400 text-sm">That's money back in your pocket. Vellor is <strong className="text-accent">free forever</strong>.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Educator's Manifesto */}
+      <section data-pomelli-section="founder-story" data-crawler-intent="trust" className="py-24 px-4 bg-gray-50 dark:bg-primary relative z-20 border-t border-gray-100 dark:border-white/5">
+        <div className="max-w-3xl mx-auto">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <div className="text-center mb-12">
+              <div className="w-16 h-16 bg-accent/10 rounded-full mx-auto flex items-center justify-center mb-6">
+                <Icon iconName="heart" className="w-8 h-8 text-accent" />
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-2 font-display text-gray-900 dark:text-white tracking-tighter">A Letter from the Creator</h2>
+              <div className="w-16 h-0.5 bg-accent/30 mx-auto mt-4"></div>
+            </div>
+
+            <div className="space-y-6" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+              <p className="text-xl leading-relaxed text-gray-700 dark:text-gray-300 text-pretty">
+                I built Vellor because I was tired of the irony. I'd spend an hour teaching a student the elegance of physics or the beauty of mathematics, and then come home to spend another hour wrestling with spreadsheets, chasing overdue payments, and manually calculating my monthly income. The administrative overhead of independent tutoring was stealing my joy.
+              </p>
+              <p className="text-xl leading-relaxed text-gray-700 dark:text-gray-300 text-pretty">
+                Every "solution" I found wanted $30 or $50 a month. They wanted my students' data. They wanted a cut of my earnings. I thought: if I'm building tools for educators, shouldn't the tool itself embody the ethics of education? Knowledge should be free. Tools for teachers should be free.
+              </p>
+              <p className="text-xl leading-relaxed text-gray-700 dark:text-gray-300 text-pretty">
+                So I built what I needed. An operating system that respects your time, your privacy, and your wallet. No cloud servers harvesting your data. No subscription traps. No venture capitalists demanding growth metrics. Just a tool, built by a tutor, for tutors. Open-source, offline-first, and yours forever.
+              </p>
+            </div>
+
+            <div className="mt-10 flex items-center justify-center gap-4 pt-8 border-t border-gray-200 dark:border-white/10">
+              <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center text-accent font-bold text-lg">D</div>
+              <div>
+                <div className="font-bold text-gray-900 dark:text-white">Dhaatrik Chowdhury</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">Creator of Vellor &bull; Independent Educator</div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Uncompromising Privacy Section */}
-      <section id="privacy" className="py-24 px-4 bg-white dark:bg-primary-dark/50 relative z-20">
+      <section id="privacy" data-pomelli-section="privacy" className="py-24 px-4 bg-white dark:bg-primary-dark/50 relative z-20">
          <div className="max-w-4xl mx-auto text-center">
              <motion.div
                initial={{ opacity: 0, y: 20 }}
@@ -783,8 +963,8 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
                 <div className="w-16 h-16 bg-gray-100 dark:bg-white/5 rounded-full mx-auto flex items-center justify-center mb-6 shadow-inner text-gray-700 dark:text-gray-400">
                     <Icon iconName="lock-closed" className="w-8 h-8" />
                 </div>
-                <h2 className="text-3xl md:text-4xl font-bold mb-6 font-display text-gray-900 dark:text-white">Uncompromising Privacy</h2>
-                <p className="text-xl text-gray-500 dark:text-gray-400 mb-8">What happens on your device, stays on your device.</p>
+                <h2 className="text-3xl md:text-4xl font-bold mb-6 font-display text-gray-900 dark:text-white tracking-tighter">Uncompromising Privacy</h2>
+                <p className="text-xl text-gray-500 dark:text-gray-400 mb-8 text-pretty">What happens on your device, stays on your device.</p>
                 <div className="bg-gray-50 dark:bg-primary rounded-3xl p-8 border border-gray-100 dark:border-white/5 text-left flex flex-col md:flex-row gap-8 items-center justify-between">
                     <div className="flex-1">
                         <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Local Storage & Encryption</h4>
@@ -799,13 +979,13 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
       </section>
 
       {/* Open Source / Community Section */}
-      <section id="open-source" className="py-24 px-4 bg-gray-900 border-t border-gray-800 relative z-20 overflow-hidden text-center text-white">
+      <section id="open-source" data-pomelli-section="open-source" className="py-24 px-4 bg-gray-900 border-t border-gray-800 relative z-20 overflow-hidden text-center text-white">
          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
          <div className="max-w-4xl mx-auto relative z-10">
              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 mb-8 text-sm font-semibold text-accent-light shadow-lg">
                 <Github className="w-4 h-4" /> Proudly Open-Source
              </div>
-             <h2 className="text-4xl md:text-6xl font-bold mb-8 font-display tracking-tight text-white">Built by Educators, <br className="hidden md:block"/> for Educators</h2>
+             <h2 className="text-4xl md:text-6xl font-bold mb-8 font-display tracking-tighter text-white">Built by Educators, <br className="hidden md:block"/> for Educators</h2>
              <p className="text-xl md:text-2xl text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed">
                  Vellor is open-core and community-driven. Inspect our code, contribute features, and trust that your tool won't unexpectedly disappear or get fully paywalled.
              </p>
@@ -822,7 +1002,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
       </section>
 
       {/* Knowledge Base FAQ Section */}
-      <section id="faq" className="py-24 px-4 bg-gray-50 dark:bg-primary relative z-20 border-t border-gray-200/50 dark:border-white/5">
+      <section id="faq" data-pomelli-section="faq" data-crawler-intent="support" className="py-24 px-4 bg-gray-50 dark:bg-primary relative z-20 border-t border-gray-200/50 dark:border-white/5">
         <div className="max-w-3xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -830,8 +1010,8 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 font-display text-gray-900 dark:text-white">Frequently Asked Questions</h2>
-            <p className="text-gray-500 dark:text-gray-400 text-lg">Everything you need to know about Vellor.</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 font-display text-gray-900 dark:text-white tracking-tighter">Frequently Asked Questions</h2>
+            <p className="text-gray-500 dark:text-gray-400 text-lg text-pretty">Everything you need to know about Vellor.</p>
           </motion.div>
 
           <Accordion.Root type="single" collapsible className="space-y-4">
@@ -879,7 +1059,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
             ].map((faq, i) => (
               <Accordion.Item key={i} value={`item-${i}`} className="bg-white dark:bg-primary-light border border-gray-100 dark:border-white/5 rounded-2xl overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
                 <Accordion.Header className="flex">
-                  <Accordion.Trigger className="group flex flex-1 items-center justify-between py-5 px-6 font-semibold transition-all hover:bg-gray-50 dark:hover:bg-white/5 text-left w-full outline-none">
+                  <Accordion.Trigger className="group flex flex-1 items-center justify-between py-5 px-6 font-semibold transition-all hover:bg-gray-50 dark:hover:bg-white/5 text-left w-full outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset rounded-2xl">
                     <span className="text-gray-900 dark:text-white text-lg">{faq.q}</span>
                     <Icon iconName="chevron-down" className="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-data-[state=open]:rotate-180" />
                   </Accordion.Trigger>
@@ -896,8 +1076,8 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
       </section>
 
       {/* Footer CTA */}
-      <section className="py-24 px-4 text-center relative z-20 border-t border-gray-100 dark:border-white/5">
-          <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">Ready to take control?</h2>
+      <section data-pomelli-section="footer-cta" data-crawler-intent="conversion" className="py-24 px-4 text-center relative z-20 border-t border-gray-100 dark:border-white/5">
+          <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white tracking-tighter">Ready to take control?</h2>
           <Button onClick={onGetStarted} size="lg" className="rounded-full shadow-lg shadow-accent/20 py-4 px-10 text-lg mb-16">
              Manage Your Business Now
           </Button>
