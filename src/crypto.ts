@@ -50,14 +50,14 @@ export const encryptObject = async (obj: any, key: CryptoKey): Promise<string> =
   return btoa(JSON.stringify({ iv: ivArray, ct: cipherArray }));
 };
 
-export const decryptObject = async <T = any>(encryptedBase64: string, key: CryptoKey, schema?: import('zod').ZodSchema<T>): Promise<T | null> => {
-  const jsonReviver = (key: string, value: any) => {
-    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
-      return undefined;
-    }
-    return value;
-  };
+export const jsonReviver = (key: string, value: any) => {
+  if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+    return undefined;
+  }
+  return value;
+};
 
+export const decryptObject = async <T = any>(encryptedBase64: string, key: CryptoKey, schema?: import('zod').ZodSchema<T>): Promise<T | null> => {
   try {
     const parsed = JSON.parse(atob(encryptedBase64), jsonReviver);
     if (!parsed.iv || !parsed.ct) {
