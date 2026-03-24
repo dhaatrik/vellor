@@ -85,6 +85,7 @@ export const StudentListItem: React.FC<StudentListItemProps> = React.memo(({ stu
                   onClick={(e) => { e.stopPropagation(); onDelete(student); }}
                   className="!p-2 rounded-full text-gray-400 hover:text-danger hover:bg-danger/10"
                   aria-label="Delete student"
+                  title="Delete student"
                 >
                   <Icon iconName="trash" className="w-5 h-5" />
                 </Button>
