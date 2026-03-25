@@ -71,7 +71,9 @@ export const createGamificationSlice: StateCreator<AppState, [], [], Gamificatio
                   if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) {
                       paidThisMonth += amountPaid;
                   }
-              } catch (e) { }
+              } catch (e) {
+                  console.error('Failed to parse transaction date for monthly stats:', e);
+              }
           }
 
           if (status === PaymentStatus.Paid) hasPaid = true;
@@ -85,7 +87,9 @@ export const createGamificationSlice: StateCreator<AppState, [], [], Gamificatio
                       if (!isNaN(txDateMs) && (now - txDateMs) > 24 * 60 * 60 * 1000) {
                           hasOverdue = true;
                       }
-                  } catch (e) { }
+                  } catch (e) {
+                      console.error('Failed to parse transaction date for overdue check:', e);
+                  }
               }
           }
 
@@ -98,7 +102,9 @@ export const createGamificationSlice: StateCreator<AppState, [], [], Gamificatio
                   const count = (dateCounts[dateStr] || 0) + 1;
                   dateCounts[dateStr] = count;
                   if (count >= 3) hasBusyBee = true;
-              } catch (e) { }
+              } catch (e) {
+                  console.error('Failed to parse transaction date for BusyBee check:', e);
+              }
           }
 
           if (!hasLoyalScholar) {
