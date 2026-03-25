@@ -138,7 +138,7 @@ export const CSVImportWizard: React.FC<CSVImportWizardProps> = ({ isOpen, onClos
                    
                    <label className="bg-accent text-white px-8 py-3.5 rounded-full cursor-pointer hover:bg-accent/90 transition-all shadow-lg shadow-accent/20 font-bold inline-block">
                        Choose CSV File
-                       <input type="file" accept=".csv" className="hidden" onClick={(e) => (e.target as any).value = null} onChange={handleFileUpload} />
+                       <input type="file" accept=".csv" className="hidden" onClick={(e) => (e.target as HTMLInputElement).value = ''} onChange={handleFileUpload} />
                    </label>
                    
                    <div className="mt-8 p-4 bg-gray-50 dark:bg-primary/30 rounded-2xl text-left border border-gray-100 dark:border-white/5 text-sm">
