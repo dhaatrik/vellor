@@ -228,8 +228,11 @@ export const generateBulkInvoicePDF = (
     studentMap.get(t.studentId)!.push(t);
   });
 
+  const studentsById = new Map<string, Student>();
+  students.forEach(s => studentsById.set(s.id, s));
+
   studentMap.forEach((studentTransactions, studentId) => {
-    const student = students.find(s => s.id === studentId);
+    const student = studentsById.get(studentId);
     if (!student) return;
     
     // Sort transactions by date
