@@ -87,7 +87,21 @@ export const StudentForm: React.FC<StudentFormProps> = ({ student, onSave, onClo
     const studentToSave: Student = {
       id: student?.id || crypto.randomUUID(),
       createdAt: student?.createdAt || new Date().toISOString(),
-      ...(data as any), // Type assertion since Student interface contains strict ContactInfo types
+      firstName: data.firstName,
+      lastName: data.lastName,
+      country: data.country,
+      parent: data.parent?.name || data.parent?.relationship ? {
+        name: data.parent.name || '',
+        relationship: data.parent.relationship || 'Parent',
+      } : undefined,
+      contact: {
+        studentPhone: data.contact.studentPhone,
+        parentPhone1: data.contact.parentPhone1,
+        parentPhone2: data.contact.parentPhone2,
+        email: data.contact.email,
+      },
+      tuition: data.tuition,
+      notes: data.notes,
     };
     onSave(studentToSave);
   };
