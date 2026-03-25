@@ -82,9 +82,9 @@ export const DashboardPage: React.FC = () => {
       const t = transactions[j];
       // ⚡ Bolt Performance: Check status before creating expensive Date objects
       if (t.status === PaymentStatus.Paid || t.status === PaymentStatus.PartiallyPaid || t.status === PaymentStatus.Overpaid) {
-        const tDate = new Date(t.date);
-        const tYear = tDate.getFullYear();
-        const tMonth = tDate.getMonth();
+        // ⚡ Bolt Performance: Use string parsing for ISO dates to avoid expensive Date objects
+        const tYear = +t.date.substring(0, 4);
+        const tMonth = +t.date.substring(5, 7) - 1;
         for (let k = 0; k < 6; k++) {
           if (targetMonths[k].year === tYear && targetMonths[k].month === tMonth) {
             monthIncomes[k] += t.amountPaid;
@@ -98,7 +98,8 @@ export const DashboardPage: React.FC = () => {
     const studentTimes = new Float64Array(students.length);
     for (let j = 0; j < students.length; j++) {
       const s = students[j];
-      studentTimes[j] = s.createdAt ? new Date(s.createdAt).getTime() : fallbackDate;
+      // ⚡ Bolt Performance: Use Date.parse() instead of new Date().getTime()
+      studentTimes[j] = s.createdAt ? Date.parse(s.createdAt) : fallbackDate;
     }
 
     for (let i = 5; i >= 0; i--) {
