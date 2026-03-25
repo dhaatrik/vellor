@@ -57,7 +57,12 @@ export const jsonReviver = (key: string, value: any) => {
   return value;
 };
 
-export const decryptObject = async <T = any>(encryptedBase64: string, key: CryptoKey, schema?: import('zod').ZodSchema<T>): Promise<T | null> => {
+export const decryptObject = async <T = any>(
+  encryptedBase64: string,
+  key: CryptoKey,
+  schema?: import('zod').ZodSchema<T>,
+  onLegacyData?: (data: T) => void | Promise<void>
+): Promise<T | null> => {
   try {
     const parsed = JSON.parse(atob(encryptedBase64), jsonReviver);
     if (!parsed.iv || !parsed.ct) {
@@ -83,7 +88,12 @@ export const decryptObject = async <T = any>(encryptedBase64: string, key: Crypt
       }
       const decodedData = new TextDecoder().decode(bytes);
       const parsedData = JSON.parse(decodedData, jsonReviver);
-      return schema ? schema.parse(parsedData) : parsedData;
+      const result = schema ? schema.parse(parsedData) : parsedData;
+      if (onLegacyData && result) {
+        // Run asynchronously without awaiting to prevent migration errors from failing the decryption
+        Promise.resolve(onLegacyData(result)).catch(e => console.error("Legacy migration failed:", e));
+      }
+      return result;
     } catch (oldError) {
       return null;
     }

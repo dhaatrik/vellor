@@ -14,3 +14,7 @@
 **Vulnerability:** Found `JSON.parse` usage in `src/crypto.ts` and `store.ts` that did not utilize a reviver function to protect against prototype pollution. If malicious data was ingested, it could have potentially modified the global object prototype.
 **Learning:** Even when data is decrypted, we shouldn't fully trust its structure until validated, and the initial object instantiation via `JSON.parse` is vulnerable to prototype pollution if it includes malicious keys like `__proto__`.
 **Prevention:** Always use a secure reviver function with `JSON.parse` when parsing external or persisted data that strips `__proto__`, `constructor`, and `prototype` keys.
+## 2024-06-12 - Insecure Legacy Data Migration
+**Vulnerability:** The application was decrypting stored legacy unencrypted fallback data and returning it without migrating it to the secure encryption standard, meaning old data would persist in an insecure format indefinitely.
+**Learning:** Fixing insecure storage formats (like legacy plain-text fallback parsing) requires a robust migration strategy upon read to automatically upgrade the data to the secure standard.
+**Prevention:** Implement a non-blocking `onLegacyData` callback that asynchronously re-encrypts and saves the secure payload without risking data loss if the storage write fails.

@@ -53,7 +53,16 @@ export const storageEngine = {
     
     if (globalMasterKey) {
       try {
-        const obj = await decryptObject(raw, globalMasterKey, persistSchema);
+        const obj = await decryptObject(
+          raw,
+          globalMasterKey,
+          persistSchema,
+          async (data) => {
+            // Re-encrypt insecure legacy data into ciphertext
+            const encrypted = await encryptObject(data, globalMasterKey as CryptoKey);
+            await localforage.setItem(name, encrypted);
+          }
+        );
         return JSON.stringify(obj);
       } catch (error) {
         console.error("Decryption failed", error);
