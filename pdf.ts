@@ -3,6 +3,12 @@ import { DEFAULT_VELLOR_LOGO_BASE64 } from './src/defaultLogo';
 import autoTable from 'jspdf-autotable';
 import { Transaction, Student, AppSettings, PaymentStatus } from './types';
 
+interface jsPDFWithAutoTable extends jsPDF {
+  lastAutoTable: {
+    finalY: number;
+  };
+}
+
 export const generateInvoicePDF = (
   transaction: Transaction,
   student: Student,
@@ -81,7 +87,7 @@ export const generateInvoicePDF = (
     headStyles: template === 'modern' ? { fillColor: brandAccent } : (template === 'classic' ? { fillColor: [0, 0, 0] } : { fillColor: [200, 200, 200], textColor: 0 }),
   });
 
-  const finalY = (doc as any).lastAutoTable.finalY + 15;
+  const finalY = (doc as jsPDFWithAutoTable).lastAutoTable.finalY + 15;
   
   doc.setFontSize(10);
   doc.setTextColor(0);
@@ -315,7 +321,7 @@ export const generateBulkInvoicePDF = (
       headStyles: template === 'modern' ? { fillColor: brandAccent } : (template === 'classic' ? { fillColor: [0, 0, 0] } : { fillColor: [200, 200, 200], textColor: 0 }),
     });
 
-    const finalY = (doc as any).lastAutoTable.finalY + 15;
+    const finalY = (doc as jsPDFWithAutoTable).lastAutoTable.finalY + 15;
     
     doc.setFontSize(12);
     if (template === 'modern') doc.setFont('helvetica', 'bold');
