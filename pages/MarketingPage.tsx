@@ -309,9 +309,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
       {/* Header */}
       <header className="fixed top-0 inset-x-0 h-16 bg-white/70 dark:bg-primary/70 backdrop-blur-lg z-50 flex items-center justify-between px-4 md:px-8 border-b border-gray-200/50 dark:border-white/5">
          <div className="flex items-center gap-2 font-display font-bold text-xl cursor-pointer" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
-            <div className="w-8 h-8 rounded-xl bg-accent flex items-center justify-center text-primary-dark">
-                <Icon iconName="academic-cap" className="w-5 h-5" />
-            </div>
+            <img src="/logo.png" alt="Vellor" className="w-10 h-10 object-contain dark:bg-white/90 dark:rounded-xl dark:p-1" />
             Vellor
          </div>
          
@@ -1167,9 +1165,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
                   <div className="col-span-2 md:col-span-1">
                       <div className="flex items-center gap-2 mb-4">
-                          <div className="w-8 h-8 rounded-xl bg-accent text-white flex items-center justify-center">
-                              <Icon iconName="academic-cap" className="w-5 h-5" />
-                          </div>
+                          <img src="/logo.png" alt="Vellor" className="w-10 h-10 object-contain dark:bg-white/90 dark:rounded-xl dark:p-1" />
                           <span className="font-bold text-gray-900 dark:text-white text-xl">Vellor</span>
                       </div>
                       <p className="text-gray-500 dark:text-gray-400 text-sm mb-6 max-w-xs">
@@ -1210,7 +1206,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
               </div>
               
               <div className="pt-8 border-t border-gray-100 dark:border-white/5 flex flex-col md:flex-row items-center justify-between text-sm text-gray-400 dark:text-gray-500">
-                  <p>&copy; {new Date().getFullYear()} Vellor. All rights reserved.</p>
+                  <p className="flex items-center gap-2"><img src="/logo.png" alt="Vellor" className="w-6 h-6 object-contain rounded dark:bg-white/90 dark:p-0.5" style={{ filter: 'grayscale(1) opacity(0.5)' }} />&copy; {new Date().getFullYear()} Vellor. All rights reserved.</p>
                   <p className="mt-2 md:mt-0 flex items-center gap-1">Built with <Icon iconName="heart" className="w-4 h-4 text-red-500" /> for educators.</p>
               </div>
           </footer>
@@ -1443,9 +1439,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
             >
               <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-white/5">
                 <div className="flex items-center gap-2 font-display font-bold text-xl">
-                  <div className="w-8 h-8 rounded-xl bg-accent flex items-center justify-center text-primary-dark">
-                    <Icon iconName="academic-cap" className="w-5 h-5" />
-                  </div>
+                  <img src="/logo.png" alt="Vellor" className="w-10 h-10 object-contain dark:bg-white/90 dark:rounded-xl dark:p-1" />
                   Vellor
                 </div>
                 <button

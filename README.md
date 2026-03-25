@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="public/logo.png" alt="Vellor Logo" width="120" />
+
 # Vellor 🎓
 
 **Manage your tutoring business like a pro.**

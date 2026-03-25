@@ -137,9 +137,7 @@ const AppLayout: React.FC = () => {
                   <img src={settings.brandLogoBase64} alt="Brand Logo" className="w-full h-full object-cover" />
                 </div>
               ) : (
-                <div className="w-10 h-10 rounded-2xl bg-accent flex items-center justify-center text-primary-dark group-hover:scale-105 transition-transform">
-                  <Icon iconName="academic-cap" className="w-6 h-6" />
-                </div>
+                <img src="/logo.png" alt="Vellor" className="w-12 h-12 object-contain group-hover:scale-105 transition-transform dark:bg-white/90 dark:rounded-xl dark:p-1" />
               )}
               {settings.userName.split(' ')[0] || 'Vellor'}
             </Link>
@@ -167,7 +165,8 @@ const AppLayout: React.FC = () => {
             {/* Badge for number of achieved achievements */}
             {achievedCount > 0 && <span className="ml-auto inline-block py-0.5 px-2 leading-none text-xs font-bold bg-accent text-primary-dark rounded-full">{achievedCount}</span>}
           </NavbarLink>
-          <NavbarLink to="/profile" iconName="user-circle" onClick={handleNavLinkClick}>Profile & Settings</NavbarLink>
+          <NavbarLink to="/profile" iconName="user-circle" onClick={handleNavLinkClick}>Profile</NavbarLink>
+          <NavbarLink to="/settings" iconName="cog" onClick={handleNavLinkClick}>Settings</NavbarLink>
           <NavbarLink to="/tutor-advice" iconName="book-open" onClick={handleNavLinkClick}>Tutor Advice</NavbarLink>
         </nav>
 
@@ -202,6 +201,9 @@ const AppLayout: React.FC = () => {
         )}
 
         {/* Sidebar Footer: Legal Links */}
+        <div className="flex justify-center mb-3">
+          <img src="/logo.png" alt="Vellor" className="w-8 h-8 object-contain rounded-md dark:p-1 dark:bg-white/90" style={{ filter: 'grayscale(1) opacity(0.4)' }} />
+        </div>
         <div className="px-6 pb-6 text-xs text-center text-gray-500 dark:text-gray-400 space-x-3">
           <button onClick={() => setAboutOpen(true)} className="hover:text-accent transition-colors">About</button>
           <span>&middot;</span>

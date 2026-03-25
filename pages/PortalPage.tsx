@@ -47,8 +47,8 @@ export const PortalPage: React.FC = () => {
         
         {/* Header */}
         <div className="text-center mb-8">
-           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-100 text-indigo-600 mb-4 shadow-sm">
-             <Icon iconName="academic-cap" className="w-8 h-8" />
+           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white shadow-sm mb-4 overflow-hidden border border-gray-100">
+             <img src="/logo.png" alt="Vellor" className="w-16 h-16 object-contain dark:bg-white/90 dark:rounded-2xl dark:p-2" />
            </div>
            <h1 className="text-3xl font-bold text-gray-900 mb-1">{student.firstName} {student.lastName}'s Dashboard</h1>
            <p className="text-gray-500 font-medium">Prepared by {tutorName}</p>
@@ -123,9 +123,9 @@ export const PortalPage: React.FC = () => {
            )}
         </Card>
         
-        <div className="text-center text-xs text-gray-400 mt-8">
-           Powered by Vellor
-        </div>
+        <div className="text-center text-xs text-gray-400 mt-8 flex items-center justify-center gap-2">
+             <img src="/logo.png" alt="Vellor" className="w-5 h-5 object-contain rounded dark:bg-white/90 dark:p-0.5" style={{ filter: 'grayscale(1) opacity(0.5)' }} />Powered by Vellor
+           </div>
       </div>
     </div>
   );

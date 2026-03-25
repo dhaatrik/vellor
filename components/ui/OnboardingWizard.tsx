@@ -75,7 +75,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ isOpen, onCl
                 className="text-center w-full"
               >
                 <div className="w-20 h-20 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-accent/20">
-                  <Icon iconName="academic-cap" className="w-10 h-10 text-accent" />
+                  <img src="/logo.png" alt="Vellor" className="w-12 h-12 object-contain dark:bg-white/90 dark:rounded-xl dark:p-1" />
                 </div>
                 <h2 className="text-3xl font-display font-bold text-gray-900 dark:text-white mb-4">
                   Welcome to Vellor!

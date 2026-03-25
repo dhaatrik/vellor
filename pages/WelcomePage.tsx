@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import { AppSettings, PhoneNumber } from '../types';
 import { CURRENCY_OPTIONS, DEFAULT_USER_NAME, COUNTRIES } from '../constants';
-import { Button, Input, Select, Card, Icon, PhoneInput } from '../components/ui';
+import { Button, Input, Select, Card, PhoneInput } from '../components/ui';
 import { motion } from 'framer-motion';
 
 /**
@@ -78,7 +78,7 @@ export const WelcomePage: React.FC = () => {
                             animate={{ rotate: 3, scale: 1 }}
                             transition={{ delay: 0.2, type: 'spring' }}
                         >
-                            <Icon iconName="academic-cap" className="w-10 h-10 text-accent" />
+                            <img src="/logo.png" alt="Vellor" className="w-12 h-12 object-contain dark:bg-white/90 dark:rounded-xl dark:p-1" />
                         </motion.div>
                         <h1 className="text-4xl font-display font-bold text-gray-900 dark:text-white tracking-tight">Welcome to Vellor</h1>
                         <p className="text-gray-500 dark:text-gray-400 mt-3 text-lg">Let's get your profile set up to personalize your experience.</p>

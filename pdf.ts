@@ -1,4 +1,5 @@
 import jsPDF from 'jspdf';
+import { DEFAULT_VELLOR_LOGO_BASE64 } from './src/defaultLogo';
 import autoTable from 'jspdf-autotable';
 import { Transaction, Student, AppSettings, PaymentStatus } from './types';
 
@@ -13,7 +14,7 @@ export const generateInvoicePDF = (
   
   let currentY = 20;
   const brandAccent = settings.brandColor || '#8b5cf6';
-  const logoToUse = settings.invoiceLogoBase64 || settings.brandLogoBase64;
+  const logoToUse = settings.invoiceLogoBase64 || settings.brandLogoBase64 || DEFAULT_VELLOR_LOGO_BASE64;
   
   if (logoToUse) {
     try {
@@ -135,7 +136,7 @@ export const generateProgressReportPDF = (
   const template = settings.invoiceTemplate || 'modern';
   let currentY = 20;
   const brandAccent = settings.brandColor || '#8b5cf6';
-  const logoToUse = settings.invoiceLogoBase64 || settings.brandLogoBase64;
+  const logoToUse = settings.invoiceLogoBase64 || settings.brandLogoBase64 || DEFAULT_VELLOR_LOGO_BASE64;
 
   if (logoToUse) {
     try { doc.addImage(logoToUse, 'JPEG', 14, 10, 30, 30, undefined, 'FAST'); currentY = 45; } catch (e) {}
@@ -206,7 +207,7 @@ export const generateBulkInvoicePDF = (
   const doc = new jsPDF();
   const template = settings.invoiceTemplate || 'modern';
   const brandAccent = settings.brandColor || '#8b5cf6';
-  const logoToUse = settings.invoiceLogoBase64 || settings.brandLogoBase64;
+  const logoToUse = settings.invoiceLogoBase64 || settings.brandLogoBase64 || DEFAULT_VELLOR_LOGO_BASE64;
   let hasContent = false;
   let isFirstPage = true;
 
