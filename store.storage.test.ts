@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { storageEngine, setGlobalMasterKey } from './store';
 import localforage from 'localforage';
-import { encryptObject } from './src/crypto';
+import { encryptObject, decryptObject } from './src/crypto';
 
 // Polyfill webcrypto if necessary
 if (typeof globalThis.crypto === 'undefined') {
@@ -21,6 +21,14 @@ vi.mock('localforage', () => ({
     removeItem: vi.fn()
   }
 }));
+
+vi.mock('./src/crypto', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('./src/crypto')>();
+  return {
+    ...actual,
+    decryptObject: vi.fn(actual.decryptObject),
+  };
+});
 
 describe('store.ts - storageEngine', () => {
   let mockKey: CryptoKey;
@@ -69,6 +77,19 @@ describe('store.ts - storageEngine', () => {
 
       const result = await storageEngine.getItem('test-key');
       expect(result).toBe("null");
+    });
+
+    it('throws error and logs to console if decryption fails', async () => {
+      setGlobalMasterKey(mockKey);
+      vi.mocked(localforage.getItem).mockResolvedValueOnce('some-encrypted-data');
+
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.mocked(decryptObject).mockRejectedValueOnce(new Error('Decryption Error'));
+
+      await expect(storageEngine.getItem('test-key')).rejects.toThrow('Decryption Error');
+      expect(consoleSpy).toHaveBeenCalledWith('Decryption failed', expect.any(Error));
+
+      consoleSpy.mockRestore();
     });
   });
 

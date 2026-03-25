@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { formatCurrency, formatPhoneNumber, getPaymentStatusColor, formatRelativeTime } from './helpers';
-import { PaymentStatus } from './types';
+import { formatCurrency, formatPhoneNumber, getPaymentStatusColor, formatRelativeTime, generatePortalLink } from './helpers';
+import { PaymentStatus, Student, Transaction, AppSettings, Theme } from './types';
 
 describe('Helpers', () => {
     it('formats currency correctly', () => {
@@ -26,5 +26,105 @@ describe('Helpers', () => {
         const now = new Date();
         const thirtySecondsAgo = new Date(now.getTime() - 30 * 1000);
         expect(formatRelativeTime(thirtySecondsAgo.toISOString())).toBe('30s ago');
+    });
+});
+
+describe('generatePortalLink', () => {
+    const mockStudent: Student = {
+        id: 'student-1',
+        firstName: 'John',
+        lastName: 'Doe',
+        contact: {
+            email: 'john.doe@example.com'
+        },
+        tuition: {
+            subjects: ['Math', 'Science'],
+            defaultRate: 50,
+            rateType: 'hourly',
+            typicalLessonDuration: 60
+        },
+        createdAt: '2023-01-01T00:00:00Z'
+    };
+
+    const mockTransactions: Transaction[] = [
+        {
+            id: 'tx-1',
+            studentId: 'student-1',
+            date: '2023-10-01T10:00:00Z',
+            lessonDuration: 60,
+            lessonFee: 50,
+            amountPaid: 50,
+            status: PaymentStatus.Paid,
+            createdAt: '2023-10-01T10:00:00Z'
+        },
+        {
+            id: 'tx-2',
+            studentId: 'student-1',
+            date: '2023-10-15T10:00:00Z',
+            lessonDuration: 60,
+            lessonFee: 50,
+            amountPaid: 0,
+            status: PaymentStatus.Due,
+            createdAt: '2023-10-15T10:00:00Z'
+        }
+    ];
+
+    const mockSettings: AppSettings = {
+        theme: Theme.Light,
+        currencySymbol: '$',
+        userName: 'Tutor Tom'
+    };
+
+    it('generates a valid portal link with encoded payload', () => {
+        const link = generatePortalLink(mockStudent, mockTransactions, mockSettings);
+
+        const baseUrl = window.location.href.split('#')[0];
+        expect(link.startsWith(baseUrl)).toBe(true);
+        expect(link).toContain('#/portal?data=');
+
+        const base64Data = link.split('?data=')[1];
+        const jsonPayload = decodeURIComponent(atob(base64Data));
+        const payload = JSON.parse(jsonPayload);
+
+        expect(payload).toMatchObject({
+            tutorName: 'Tutor Tom',
+            currencySymbol: '$',
+            student: {
+                firstName: 'John',
+                lastName: 'Doe',
+                subjects: ['Math', 'Science']
+            }
+        });
+
+        // Transactions should be sorted by date descending (tx-2, then tx-1)
+        expect(payload.transactions).toHaveLength(2);
+        expect(payload.transactions[0].id).toBe('tx-2');
+        expect(payload.transactions[1].id).toBe('tx-1');
+    });
+
+    it('sorts transactions by date descending', () => {
+        // Unordered transactions
+        const unorderedTransactions: Transaction[] = [
+            { ...mockTransactions[0], id: 'old', date: '2023-01-01T00:00:00Z' },
+            { ...mockTransactions[0], id: 'new', date: '2023-12-31T00:00:00Z' },
+            { ...mockTransactions[0], id: 'middle', date: '2023-06-15T00:00:00Z' },
+        ];
+
+        const link = generatePortalLink(mockStudent, unorderedTransactions, mockSettings);
+        const base64Data = link.split('?data=')[1];
+        const payload = JSON.parse(decodeURIComponent(atob(base64Data)));
+
+        expect(payload.transactions[0].id).toBe('new');
+        expect(payload.transactions[1].id).toBe('middle');
+        expect(payload.transactions[2].id).toBe('old');
+    });
+
+    it('handles empty transactions array', () => {
+        const link = generatePortalLink(mockStudent, [], mockSettings);
+        const base64Data = link.split('?data=')[1];
+        const payload = JSON.parse(decodeURIComponent(atob(base64Data)));
+
+        expect(payload.transactions).toHaveLength(0);
+        expect(payload.transactions).toEqual([]);
     });
 });
