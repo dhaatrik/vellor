@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatCurrency, formatPhoneNumber, getPaymentStatusColor, formatRelativeTime } from './helpers';
+import { formatCurrency, formatPhoneNumber, getPaymentStatusColor, formatRelativeTime, generateWhatsAppLink } from './helpers';
 import { PaymentStatus } from './types';
 
 describe('Helpers', () => {
@@ -26,5 +26,13 @@ describe('Helpers', () => {
         const now = new Date();
         const thirtySecondsAgo = new Date(now.getTime() - 30 * 1000);
         expect(formatRelativeTime(thirtySecondsAgo.toISOString())).toBe('30s ago');
+    });
+
+    it('generates WhatsApp link correctly', () => {
+        expect(generateWhatsAppLink(undefined)).toBe('#');
+        expect(generateWhatsAppLink({ countryCode: '+1', number: '' })).toBe('#');
+        expect(generateWhatsAppLink({ countryCode: '+1', number: '1234567890' })).toBe('https://wa.me/11234567890');
+        expect(generateWhatsAppLink({ countryCode: '+44', number: '07123456789' }, 'Hello world')).toBe('https://wa.me/4407123456789?text=Hello%20world');
+        expect(generateWhatsAppLink({ countryCode: '+1-800', number: '(123) 456-7890' })).toBe('https://wa.me/18001234567890');
     });
 });
