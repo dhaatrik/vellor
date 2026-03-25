@@ -139,7 +139,12 @@ export const generateProgressReportPDF = (
   const logoToUse = settings.invoiceLogoBase64 || settings.brandLogoBase64 || DEFAULT_VELLOR_LOGO_BASE64;
 
   if (logoToUse) {
-    try { doc.addImage(logoToUse, 'JPEG', 14, 10, 30, 30, undefined, 'FAST'); currentY = 45; } catch (e) {}
+    try {
+      doc.addImage(logoToUse, 'JPEG', 14, 10, 30, 30, undefined, 'FAST');
+      currentY = 45;
+    } catch (e) {
+      console.warn("Logo injection failed", e);
+    }
   }
 
   doc.setFontSize(22);
@@ -239,7 +244,12 @@ export const generateBulkInvoicePDF = (
     let currentY = 20;
 
     if (logoToUse) {
-      try { doc.addImage(logoToUse, 'JPEG', 14, 10, 30, 30, undefined, 'FAST'); currentY = 45; } catch (e) {}
+      try {
+        doc.addImage(logoToUse, 'JPEG', 14, 10, 30, 30, undefined, 'FAST');
+        currentY = 45;
+      } catch (e) {
+        console.warn("Logo injection failed", e);
+      }
     }
 
     if (template === 'minimal') {
