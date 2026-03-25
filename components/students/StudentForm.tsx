@@ -33,7 +33,8 @@ const studentSchema = z.object({
   notes: z.string().optional()
 });
 
-export type StudentFormValues = z.input<typeof studentSchema>;
+type StudentFormValues = z.infer<typeof studentSchema>;
+type StudentFormInput = z.input<typeof studentSchema>;
 
 /**
  * Props for the StudentForm component.
@@ -52,7 +53,7 @@ interface StudentFormProps {
  * validated with react-hook-form and zod.
  */
 export const StudentForm: React.FC<StudentFormProps> = ({ student, onSave, onClose }) => {
-  const { register, handleSubmit, control, setValue, getValues, formState: { errors } } = useForm<StudentFormValues>({
+  const { register, handleSubmit, control, setValue, getValues, formState: { errors } } = useForm<StudentFormInput, any, StudentFormValues>({
     resolver: zodResolver(studentSchema),
     defaultValues: student ? {
       firstName: student.firstName,

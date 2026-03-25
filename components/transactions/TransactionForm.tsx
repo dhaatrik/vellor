@@ -3,7 +3,7 @@ import { useStore } from '../../store';
 import { Transaction, Student, PaymentStatus, AttendanceStatus } from '../../types';
 import { Button, Input, Select, Textarea, Icon } from '../ui';
 import { z } from 'zod';
-import { useForm } from 'react-hook-form';
+import { useForm, DefaultValues } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 const transactionSchema = z.object({
@@ -20,6 +20,7 @@ const transactionSchema = z.object({
 });
 
 type TransactionFormValues = z.infer<typeof transactionSchema>;
+type TransactionFormInput = z.input<typeof transactionSchema>;
 
 /**
  * Props for the TransactionForm component.
@@ -46,7 +47,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({ transaction, s
   const getStudentById = useStore(s => s.getStudentById);
   
   // Resolve default values
-  let defaultFormValues: TransactionFormValues = {
+  let defaultFormValues: DefaultValues<TransactionFormInput> = {
       studentId: defaultStudentId || (students.length > 0 ? students[0].id : ''),
       date: new Date().toISOString().split('T')[0],
       lessonDuration: 60,
@@ -80,7 +81,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({ transaction, s
               defaultFormValues.lessonFee = student.tuition.defaultRate;
               if (student.tuition.rateType === 'monthly') defaultFormValues.lessonDuration = 1;
           } else {
-              defaultFormValues.lessonFee = student.tuition.defaultRate * (defaultFormValues.lessonDuration / 60);
+              defaultFormValues.lessonFee = student.tuition.defaultRate * (Number(defaultFormValues.lessonDuration) / 60);
           }
           defaultFormValues.amountPaid = defaultFormValues.lessonFee;
       }
@@ -93,14 +94,14 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({ transaction, s
               defaultFormValues.lessonFee = student.tuition.defaultRate;
               if (student.tuition.rateType === 'monthly') defaultFormValues.lessonDuration = 1;
           } else {
-              defaultFormValues.lessonFee = student.tuition.defaultRate * (defaultFormValues.lessonDuration / 60);
+              defaultFormValues.lessonFee = student.tuition.defaultRate * (Number(defaultFormValues.lessonDuration) / 60);
           }
           defaultFormValues.amountPaid = defaultFormValues.lessonFee;
       }
   }
 
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<TransactionFormValues>({
-    resolver: zodResolver(transactionSchema) as any,
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<TransactionFormInput, any, TransactionFormValues>({
+    resolver: zodResolver(transactionSchema),
     defaultValues: defaultFormValues
   });
 
