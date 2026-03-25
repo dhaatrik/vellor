@@ -304,7 +304,9 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
         <meta property="og:title" content="Vellor - Private Educator Dashboard" />
         <meta property="og:description" content="Manage your tutoring business like a pro with Vellor. Zero subscriptions, offline-first, local storage." />
         <meta property="og:type" content="website" />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }} />
+        <script type="application/ld+json">
+          {JSON.stringify(schemaData).replace(/</g, '\\u003c')}
+        </script>
       </Helmet>
       {/* Header */}
       <header className="fixed top-0 inset-x-0 h-16 bg-white/70 dark:bg-primary/70 backdrop-blur-lg z-50 flex items-center justify-between px-4 md:px-8 border-b border-gray-200/50 dark:border-white/5">
