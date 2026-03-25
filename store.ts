@@ -134,30 +134,35 @@ export const useDerivedData = () => {
 
       if (t.status === PaymentStatus.Due) {
         unpaid += t.lessonFee;
-        if (new Date(t.date).getTime() < todayTime) {
+        // ⚡ Bolt Performance: Use Date.parse() instead of new Date().getTime()
+        if (Date.parse(t.date) < todayTime) {
           overdue.push(t);
         }
       } else if (t.status === PaymentStatus.PartiallyPaid) {
         unpaid += (t.lessonFee - t.amountPaid);
-        const transactionDate = new Date(t.date);
-        const tTime = transactionDate.getTime();
+        // ⚡ Bolt Performance: Use Date.parse() for time comparison and string parsing for year/month
+        const tTime = Date.parse(t.date);
 
         if (t.amountPaid < t.lessonFee && tTime < todayTime) {
           overdue.push(t);
         }
 
-        if (transactionDate.getFullYear() === currentYear && transactionDate.getMonth() === currentMonth) {
+        const tYear = +t.date.substring(0, 4);
+        const tMonth = +t.date.substring(5, 7) - 1;
+        if (tYear === currentYear && tMonth === currentMonth) {
           paidThisMonth += t.amountPaid;
         }
       } else if (t.status === PaymentStatus.Paid || t.status === PaymentStatus.Overpaid) {
-        const transactionDate = new Date(t.date);
-        if (transactionDate.getFullYear() === currentYear && transactionDate.getMonth() === currentMonth) {
+        const tYear = +t.date.substring(0, 4);
+        const tMonth = +t.date.substring(5, 7) - 1;
+        if (tYear === currentYear && tMonth === currentMonth) {
           paidThisMonth += t.amountPaid;
         }
       }
     }
 
-    overdue.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    // ⚡ Bolt Performance: Use Date.parse() in sort function
+    overdue.sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
 
     return { totalUnpaid: unpaid, totalPaidThisMonth: paidThisMonth, overduePayments: overdue };
   }, [transactions]);
