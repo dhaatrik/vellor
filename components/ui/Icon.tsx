@@ -10,7 +10,7 @@ import * as LucideIcons from 'lucide-react';
 /**
  * Props for the Icon component.
  */
-export interface IconProps extends React.SVGProps<SVGSVGElement> {
+export interface IconProps extends LucideIcons.LucideProps {
   /** Name of the icon to display. Must match a key in the `icons` record. */
   iconName: IconName;
   /** Optional CSS classes to apply to the SVG element. */
@@ -87,5 +87,5 @@ export const Icon: React.FC<IconProps> = ({ iconName, className = 'w-6 h-6', ...
 
   const LucideIcon = iconMap[iconName] || LucideIcons.HelpCircle;
 
-  return <LucideIcon className={className} {...(props as any)} />;
+  return <LucideIcon className={className} {...props} />;
 };
