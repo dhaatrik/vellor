@@ -144,28 +144,60 @@ export const StudentsPage: React.FC = () => {
   const updateTransaction = useStore(s => s.updateTransaction);
   const handleBulkMarkPaid = () => {
      let count = 0;
-     selectedStudentIds.forEach(id => {
-         const unpaid = transactions.filter(t => t.studentId === id && t.status !== PaymentStatus.Paid && t.status !== PaymentStatus.Overpaid && t.status !== PaymentStatus.Scheduled);
-         unpaid.forEach(t => {
+     // Optimization: use a Set for O(1) lookup and a single loop through transactions
+     const selectedSet = new Set(selectedStudentIds);
+     for (let i = 0; i < transactions.length; i++) {
+         const t = transactions[i];
+         if (
+             selectedSet.has(t.studentId) &&
+             t.status !== PaymentStatus.Paid &&
+             t.status !== PaymentStatus.Overpaid &&
+             t.status !== PaymentStatus.Scheduled
+         ) {
              updateTransaction(t.id, { amountPaid: t.lessonFee });
              count++;
-         });
-     });
+         }
+     }
      addToast(`Marked ${count} lessons as paid!`, 'success');
      setSelectedStudentIds([]);
   }
 
   const handleBulkExport = () => {
       let count = 0;
-      selectedStudentIds.forEach(id => {
-          const student = students.find(s => s.id === id);
-          if (!student) return;
-          const unpaid = transactions.filter(t => t.studentId === id && t.status !== PaymentStatus.Paid && t.status !== PaymentStatus.Overpaid && t.status !== PaymentStatus.Scheduled);
-          if (unpaid.length > 0) {
-              generateInvoicePDF(unpaid[0], student, settings);
+      // Optimization: use maps for O(1) lookups and single loop through transactions
+      const selectedStudentMap = new Map();
+      for (let i = 0; i < students.length; i++) {
+          const student = students[i];
+          selectedStudentMap.set(student.id, student);
+      }
+
+      const selectedSet = new Set(selectedStudentIds);
+      const firstUnpaidMap = new Map();
+
+      for (let i = 0; i < transactions.length; i++) {
+          const t = transactions[i];
+          if (
+              selectedSet.has(t.studentId) &&
+              !firstUnpaidMap.has(t.studentId) &&
+              t.status !== PaymentStatus.Paid &&
+              t.status !== PaymentStatus.Overpaid &&
+              t.status !== PaymentStatus.Scheduled
+          ) {
+              firstUnpaidMap.set(t.studentId, t);
+              if (firstUnpaidMap.size === selectedSet.size) {
+                  break; // found one unpaid transaction for each selected student
+              }
+          }
+      }
+
+      firstUnpaidMap.forEach((t, studentId) => {
+          const student = selectedStudentMap.get(studentId);
+          if (student) {
+              generateInvoicePDF(t, student, settings);
               count++;
           }
       });
+
       addToast(count > 0 ? `Exported ${count} invoices!` : 'No unpaid lessons to export for selected students.', count > 0 ? 'success' : 'info');
       setSelectedStudentIds([]);
   }

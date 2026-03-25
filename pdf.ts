@@ -145,7 +145,12 @@ export const generateProgressReportPDF = (
   const logoToUse = settings.invoiceLogoBase64 || settings.brandLogoBase64 || DEFAULT_VELLOR_LOGO_BASE64;
 
   if (logoToUse) {
-    try { doc.addImage(logoToUse, 'JPEG', 14, 10, 30, 30, undefined, 'FAST'); currentY = 45; } catch (e) {}
+    try {
+      doc.addImage(logoToUse, 'JPEG', 14, 10, 30, 30, undefined, 'FAST');
+      currentY = 45;
+    } catch (e) {
+      console.warn("Logo injection failed", e);
+    }
   }
 
   doc.setFontSize(22);
@@ -229,8 +234,11 @@ export const generateBulkInvoicePDF = (
     studentMap.get(t.studentId)!.push(t);
   });
 
+  const studentsById = new Map<string, Student>();
+  students.forEach(s => studentsById.set(s.id, s));
+
   studentMap.forEach((studentTransactions, studentId) => {
-    const student = students.find(s => s.id === studentId);
+    const student = studentsById.get(studentId);
     if (!student) return;
     
     // Sort transactions by date
@@ -245,7 +253,12 @@ export const generateBulkInvoicePDF = (
     let currentY = 20;
 
     if (logoToUse) {
-      try { doc.addImage(logoToUse, 'JPEG', 14, 10, 30, 30, undefined, 'FAST'); currentY = 45; } catch (e) {}
+      try {
+        doc.addImage(logoToUse, 'JPEG', 14, 10, 30, 30, undefined, 'FAST');
+        currentY = 45;
+      } catch (e) {
+        console.warn("Logo injection failed", e);
+      }
     }
 
     if (template === 'minimal') {

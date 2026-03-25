@@ -304,7 +304,9 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
         <meta property="og:title" content="Vellor - Private Educator Dashboard" />
         <meta property="og:description" content="Manage your tutoring business like a pro with Vellor. Zero subscriptions, offline-first, local storage." />
         <meta property="og:type" content="website" />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }} />
+        <script type="application/ld+json">
+          {JSON.stringify(schemaData).replace(/</g, '\\u003c')}
+        </script>
       </Helmet>
       {/* Header */}
       <header className="fixed top-0 inset-x-0 h-16 bg-white/70 dark:bg-primary/70 backdrop-blur-lg z-50 flex items-center justify-between px-4 md:px-8 border-b border-gray-200/50 dark:border-white/5">
@@ -322,13 +324,13 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
          </nav>
 
          <div className="flex items-center gap-4">
-            <a href="https://github.com/DhaatuTheGamer/vellor" target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-primary rounded-md">
+            <a href="https://github.com/DhaatuTheGamer/vellor" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-primary rounded-md">
                 <Github className="w-5 h-5" />
             </a>
-            <a href="https://x.com/dhaatrik" target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-primary rounded-md">
+            <a href="https://x.com/dhaatrik" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-primary rounded-md">
                 <XIcon className="w-5 h-5" />
             </a>
-            <a href="https://www.linkedin.com/in/dhaatrik-chowdhury" target="_blank" rel="noreferrer" className="text-gray-600 hover:text-[#0A66C2] dark:text-gray-400 dark:hover:text-[#0A66C2] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-primary rounded-md">
+            <a href="https://www.linkedin.com/in/dhaatrik-chowdhury" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-[#0A66C2] dark:text-gray-400 dark:hover:text-[#0A66C2] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-primary rounded-md">
                 <Linkedin className="w-5 h-5" />
             </a>
             <div className="w-px h-6 bg-gray-200 dark:bg-white/10 ml-2 mr-1"></div>
@@ -1068,7 +1070,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
                  Vellor is open-core and community-driven. Inspect our code, contribute features, and trust that your tool won't unexpectedly disappear or get fully paywalled.
              </p>
              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                 <a href="https://github.com/DhaatuTheGamer/vellor" target="_blank" rel="noreferrer" className="flex items-center gap-4 bg-gray-800 border border-gray-700 px-8 py-5 rounded-2xl hover:bg-gray-700 transition group w-full sm:w-auto shadow-2xl hover:-translate-y-1 duration-300">
+                 <a href="https://github.com/DhaatuTheGamer/vellor" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 bg-gray-800 border border-gray-700 px-8 py-5 rounded-2xl hover:bg-gray-700 transition group w-full sm:w-auto shadow-2xl hover:-translate-y-1 duration-300">
                      <div className="text-left">
                          <div className="text-sm text-gray-400 font-medium mb-1">Join the Movement</div>
                          <div className="flex items-center gap-3 text-2xl font-bold text-white group-hover:text-accent-light transition"><Github className="w-7 h-7"/> Star on Github</div>
@@ -1172,9 +1174,9 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
                           The powerful, offline-first operating system designed exclusively for independent tutors.
                       </p>
                       <div className="flex items-center gap-4">
-                          <a href="https://github.com/DhaatuTheGamer/vellor" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"><Github className="w-5 h-5" /></a>
-                          <a href="https://x.com/dhaatrik" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"><XIcon className="w-5 h-5" /></a>
-                          <a href="https://www.linkedin.com/in/dhaatrik-chowdhury" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#0A66C2] transition-colors"><Linkedin className="w-5 h-5" /></a>
+                          <a href="https://github.com/DhaatuTheGamer/vellor" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"><Github className="w-5 h-5" /></a>
+                          <a href="https://x.com/dhaatrik" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"><XIcon className="w-5 h-5" /></a>
+                          <a href="https://www.linkedin.com/in/dhaatrik-chowdhury" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#0A66C2] transition-colors"><Linkedin className="w-5 h-5" /></a>
                       </div>
                   </div>
                   
@@ -1183,16 +1185,16 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
                       <ul className="space-y-3 text-sm text-gray-500 dark:text-gray-400">
                           <li><button onClick={() => scrollTo('features')} className="hover:text-accent transition-colors">Features</button></li>
                           <li><button onClick={() => {}} className="hover:text-accent transition-colors">Download PWA</button></li>
-                          <li><a href="https://github.com/DhaatuTheGamer/vellor/releases" target="_blank" rel="noreferrer" className="hover:text-accent transition-colors">Changelog (v4.0)</a></li>
+                          <li><a href="https://github.com/DhaatuTheGamer/vellor/releases" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors">Changelog (v4.0)</a></li>
                       </ul>
                   </div>
 
                   <div>
                       <h4 className="font-bold text-gray-900 dark:text-white mb-4">Resources</h4>
                       <ul className="space-y-3 text-sm text-gray-500 dark:text-gray-400">
-                          <li><a href="https://github.com/DhaatuTheGamer/vellor" target="_blank" rel="noreferrer" className="hover:text-accent transition-colors">Developer API</a></li>
+                          <li><a href="https://github.com/DhaatuTheGamer/vellor" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors">Developer API</a></li>
                           <li><button onClick={() => setIsAdviceOpen(true)} className="hover:text-accent transition-colors">Friendly Tutor Advice</button></li>
-                          <li><a href="https://github.com/DhaatuTheGamer/vellor" target="_blank" rel="noreferrer" className="hover:text-accent transition-colors">Open Source</a></li>
+                          <li><a href="https://github.com/DhaatuTheGamer/vellor" target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors">Open Source</a></li>
                       </ul>
                   </div>
 

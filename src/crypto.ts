@@ -95,6 +95,7 @@ export const decryptObject = async <T = any>(
       }
       return result;
     } catch (oldError) {
+      console.error("Fallback deserialization failed:", { originalError: error, fallbackError: oldError });
       return null;
     }
   }

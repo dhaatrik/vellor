@@ -1,5 +1,17 @@
 import { describe, it, expect } from 'vitest';
-import { backupSchema } from './validation';
+import {
+  backupSchema,
+  phoneNumberSchema,
+  parentSchema,
+  contactInfoSchema,
+  tuitionDetailsSchema,
+  studentSchema,
+  transactionSchema,
+  appSettingsSchema,
+  gamificationStatsSchema,
+  achievementSchema,
+  activitySchema
+} from './validation';
 import { Theme, PaymentStatus, AchievementId } from '../types';
 
 describe('Zod Validation - Data Management Import', () => {
@@ -115,5 +127,167 @@ describe('Zod Validation - Data Management Import', () => {
         };
 
         expect(() => backupSchema.parse(invalidData)).toThrowError();
+    });
+});
+
+describe('Zod Validation - Individual Schemas', () => {
+    it('should validate phoneNumberSchema', () => {
+        const valid = { countryCode: '+1', number: '1234567890' };
+        expect(() => phoneNumberSchema.parse(valid)).not.toThrow();
+
+        expect(() => phoneNumberSchema.parse({ countryCode: '+1' })).toThrow();
+        expect(() => phoneNumberSchema.parse({ number: '1234567890' })).toThrow();
+        expect(() => phoneNumberSchema.parse({ countryCode: 1, number: '1234567890' })).toThrow();
+    });
+
+    it('should validate parentSchema', () => {
+        const valid = { name: 'Jane Doe', relationship: 'Mother' };
+        expect(() => parentSchema.parse(valid)).not.toThrow();
+
+        expect(() => parentSchema.parse({ name: 'Jane Doe' })).toThrow();
+        expect(() => parentSchema.parse({ relationship: 'Mother' })).toThrow();
+    });
+
+    it('should validate contactInfoSchema', () => {
+        const validFull = {
+            studentPhone: { countryCode: '+1', number: '123' },
+            parentPhone1: { countryCode: '+2', number: '456' },
+            parentPhone2: { countryCode: '+3', number: '789' },
+            email: 'test@example.com'
+        };
+        const validEmpty = {};
+
+        expect(() => contactInfoSchema.parse(validFull)).not.toThrow();
+        expect(() => contactInfoSchema.parse(validEmpty)).not.toThrow();
+
+        expect(() => contactInfoSchema.parse({ studentPhone: { number: '123' } })).toThrow();
+    });
+
+    it('should validate tuitionDetailsSchema', () => {
+        const valid = {
+            subjects: ['Math', 'Science'],
+            defaultRate: 50,
+            rateType: 'hourly',
+            typicalLessonDuration: 60,
+            preferredPaymentMethod: 'Cash'
+        };
+        expect(() => tuitionDetailsSchema.parse(valid)).not.toThrow();
+
+        const validMinimal = {
+            subjects: [],
+            defaultRate: 0,
+            rateType: 'monthly',
+            typicalLessonDuration: 0
+        };
+        expect(() => tuitionDetailsSchema.parse(validMinimal)).not.toThrow();
+
+        expect(() => tuitionDetailsSchema.parse({ ...valid, rateType: 'yearly' })).toThrow();
+        expect(() => tuitionDetailsSchema.parse({ ...valid, defaultRate: '50' })).toThrow();
+    });
+
+    it('should validate studentSchema', () => {
+        const valid = {
+            id: '1',
+            firstName: 'John',
+            lastName: 'Doe',
+            country: 'US',
+            parent: { name: 'Jane', relationship: 'Mother' },
+            contact: { email: 'john@example.com' },
+            tuition: { subjects: ['Math'], defaultRate: 50, rateType: 'hourly', typicalLessonDuration: 60 },
+            notes: 'Good student',
+            createdAt: new Date().toISOString()
+        };
+        expect(() => studentSchema.parse(valid)).not.toThrow();
+
+        // Missing required field 'firstName'
+        const invalid = { ...valid };
+        delete (invalid as any).firstName;
+        expect(() => studentSchema.parse(invalid)).toThrow();
+    });
+
+    it('should validate transactionSchema', () => {
+        const valid = {
+            id: 't1',
+            studentId: 's1',
+            date: new Date().toISOString(),
+            lessonDuration: 60,
+            lessonFee: 50,
+            amountPaid: 50,
+            paymentMethod: 'Card',
+            status: PaymentStatus.Paid,
+            notes: 'Paid on time',
+            createdAt: new Date().toISOString()
+        };
+        expect(() => transactionSchema.parse(valid)).not.toThrow();
+
+        // Invalid status enum
+        expect(() => transactionSchema.parse({ ...valid, status: 'UNKNOWN' })).toThrow();
+    });
+
+    it('should validate appSettingsSchema', () => {
+        const valid = {
+            theme: Theme.Light,
+            currencySymbol: '$',
+            userName: 'Tutor',
+            country: 'US',
+            phone: { countryCode: '+1', number: '1234567890' },
+            email: 'tutor@example.com',
+            monthlyGoal: 1000
+        };
+        expect(() => appSettingsSchema.parse(valid)).not.toThrow();
+
+        // Missing currencySymbol
+        const invalid = { ...valid };
+        delete (invalid as any).currencySymbol;
+        expect(() => appSettingsSchema.parse(invalid)).toThrow();
+    });
+
+    it('should validate gamificationStatsSchema', () => {
+        const valid = {
+            points: 100,
+            level: 1,
+            levelName: 'Novice',
+            streak: 2,
+            lastActiveDate: new Date().toISOString()
+        };
+        expect(() => gamificationStatsSchema.parse(valid)).not.toThrow();
+
+        // Nullable lastActiveDate
+        expect(() => gamificationStatsSchema.parse({ ...valid, lastActiveDate: null })).not.toThrow();
+
+        // Missing streak
+        const invalid = { ...valid };
+        delete (invalid as any).streak;
+        expect(() => gamificationStatsSchema.parse(invalid)).toThrow();
+    });
+
+    it('should validate achievementSchema', () => {
+        const valid = {
+            id: AchievementId.FirstStudentAdded,
+            name: 'First Student Added',
+            description: 'You added your first student',
+            achieved: true,
+            dateAchieved: new Date().toISOString(),
+            icon: 'user'
+        };
+        expect(() => achievementSchema.parse(valid)).not.toThrow();
+
+        // Invalid id
+        expect(() => achievementSchema.parse({ ...valid, id: 'INVALID_ID' })).toThrow();
+    });
+
+    it('should validate activitySchema', () => {
+        const valid = {
+            id: 'a1',
+            message: 'User logged in',
+            icon: 'user', // IconName
+            timestamp: new Date().toISOString()
+        };
+        expect(() => activitySchema.parse(valid)).not.toThrow();
+
+        // Missing timestamp
+        const invalid = { ...valid };
+        delete (invalid as any).timestamp;
+        expect(() => activitySchema.parse(invalid)).toThrow();
     });
 });

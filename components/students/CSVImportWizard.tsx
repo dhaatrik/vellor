@@ -11,7 +11,7 @@ interface CSVImportWizardProps {
 export const CSVImportWizard: React.FC<CSVImportWizardProps> = ({ isOpen, onClose }) => {
     const [step, setStep] = useState<1 | 2>(1);
     const [originalHeaders, setOriginalHeaders] = useState<string[]>([]);
-    const [csvData, setCsvData] = useState<any[]>([]);
+    const [csvData, setCsvData] = useState<Record<string, string>[]>([]);
     const [mapping, setMapping] = useState<{ [key: string]: string }>({});
     const addStudent = useStore(s => s.addStudent);
     const addToast = useStore(s => s.addToast);
@@ -51,7 +51,7 @@ export const CSVImportWizard: React.FC<CSVImportWizardProps> = ({ isOpen, onClos
              const data = [];
              for (let i = 1; i < lines.length; i++) {
                  const row = parseLine(lines[i]);
-                 let obj: any = {};
+                 let obj: Record<string, string> = {};
                  headers.forEach((h, idx) => obj[h] = row[idx] || '');
                  data.push(obj);
              }
@@ -138,7 +138,7 @@ export const CSVImportWizard: React.FC<CSVImportWizardProps> = ({ isOpen, onClos
                    
                    <label className="bg-accent text-white px-8 py-3.5 rounded-full cursor-pointer hover:bg-accent/90 transition-all shadow-lg shadow-accent/20 font-bold inline-block">
                        Choose CSV File
-                       <input type="file" accept=".csv" className="hidden" onClick={(e) => (e.target as any).value = null} onChange={handleFileUpload} />
+                       <input type="file" accept=".csv" className="hidden" onClick={(e) => (e.target as HTMLInputElement).value = ''} onChange={handleFileUpload} />
                    </label>
                    
                    <div className="mt-8 p-4 bg-gray-50 dark:bg-primary/30 rounded-2xl text-left border border-gray-100 dark:border-white/5 text-sm">
