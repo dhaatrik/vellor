@@ -212,7 +212,7 @@ export const StudentsPage: React.FC = () => {
               lessonFee: bulkLogData.fee,
               amountPaid: 0,
               notes: bulkLogData.notes
-          } as any);
+          } as Omit<Transaction, 'status'>);
           count++;
       });
       addToast(`Logged same lesson for ${count} students!`, 'success');
