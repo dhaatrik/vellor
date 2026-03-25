@@ -31,9 +31,15 @@ export const useReminders = () => {
 
       let newNotified = false;
 
+      // Build an O(1) lookup map for students to optimize the O(N*M) loop below
+      const studentMap = new Map();
+      for (let i = 0; i < students.length; i++) {
+        studentMap.set(students[i].id, students[i]);
+      }
+
       transactions.forEach(t => {
         if (notified.has(t.id)) return;
-        const student = students.find(s => s.id === t.studentId);
+        const student = studentMap.get(t.studentId);
         if (!student) return;
 
         const tDate = new Date(t.date);
