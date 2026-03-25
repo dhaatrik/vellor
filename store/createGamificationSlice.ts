@@ -72,7 +72,7 @@ export const createGamificationSlice: StateCreator<AppState, [], [], Gamificatio
                       paidThisMonth += amountPaid;
                   }
               } catch (e) {
-                  console.error('Failed to parse transaction date for monthly total:', t.date, e);
+                  console.error('Failed to parse transaction date for monthly stats:', e);
               }
           }
 
@@ -88,7 +88,7 @@ export const createGamificationSlice: StateCreator<AppState, [], [], Gamificatio
                           hasOverdue = true;
                       }
                   } catch (e) {
-                      console.error('Failed to parse transaction date for overdue check:', t.date, e);
+                      console.error('Failed to parse transaction date for overdue check:', e);
                   }
               }
           }
@@ -103,7 +103,7 @@ export const createGamificationSlice: StateCreator<AppState, [], [], Gamificatio
                   dateCounts[dateStr] = count;
                   if (count >= 3) hasBusyBee = true;
               } catch (e) {
-                  console.error('Failed to parse transaction date for busy bee check:', t.date, e);
+                  console.error('Failed to parse transaction date for BusyBee check:', e);
               }
           }
 
