@@ -47,9 +47,17 @@ export const AchievementsPage: React.FC = () => {
 
   const totalAchievements = achievements.length + (settings?.customAchievement ? 1 : 0);
 
-  const totalEarned = useMemo(() => transactions
-      .filter(t => t.status === PaymentStatus.Paid || t.status === PaymentStatus.Overpaid || t.status === PaymentStatus.PartiallyPaid)
-      .reduce((sum, t) => sum + (t.amountPaid || 0), 0), [transactions]);
+  const totalEarned = useMemo(() => {
+    // ⚡ Bolt Performance: Replace .filter().reduce() chain with a single for-loop pass to eliminate intermediate allocations
+    let sum = 0;
+    for (let i = 0; i < transactions.length; i++) {
+      const t = transactions[i];
+      if (t.status === PaymentStatus.Paid || t.status === PaymentStatus.Overpaid || t.status === PaymentStatus.PartiallyPaid) {
+        sum += (t.amountPaid || 0);
+      }
+    }
+    return sum;
+  }, [transactions]);
 
   const getAchievementHint = (id: AchievementId): string => {
     switch (id) {
