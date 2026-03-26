@@ -44,14 +44,26 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
 
     const student = get().getStudentById(newTransaction.studentId);
     if(student && (status === PaymentStatus.Paid || status === PaymentStatus.Overpaid)){
-        const studentTransactions = get().transactions.filter(t => t.studentId === newTransaction.studentId && t.id !== newTransaction.id);
-        const wasOverdue = studentTransactions.some(t => t.status === PaymentStatus.Due || t.status === PaymentStatus.PartiallyPaid);
+        // ⚡ Bolt Performance: Consolidate multiple passes (.filter, .some, .reduce) over the transactions array
+        // into a single O(N) for loop to reduce intermediate allocations and iteration overhead.
+        const allTransactions = get().transactions;
+        let wasOverdue = false;
+        let totalDueForStudent = 0;
+
+        for (let i = 0; i < allTransactions.length; i++) {
+             const t = allTransactions[i];
+             if (t.studentId === newTransaction.studentId && t.id !== newTransaction.id) {
+                 if (t.status === PaymentStatus.Due) {
+                     wasOverdue = true;
+                     totalDueForStudent += t.lessonFee;
+                 } else if (t.status === PaymentStatus.PartiallyPaid) {
+                     wasOverdue = true;
+                     totalDueForStudent += (t.lessonFee - t.amountPaid);
+                 }
+             }
+        }
+
         if(wasOverdue){
-            const totalDueForStudent = studentTransactions.reduce((acc, t) => {
-                 if (t.status === PaymentStatus.Due) return acc + t.lessonFee;
-                 if (t.status === PaymentStatus.PartiallyPaid) return acc + (t.lessonFee - t.amountPaid);
-                 return acc;
-            }, 0);
             if (totalDueForStudent - newTransaction.amountPaid <= 0) {
                 get().addPoints(POINTS_ALLOCATION.CLEAR_OVERDUE, `Cleared overdue payment for ${student.firstName}`);
             }
@@ -121,7 +133,8 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
   },
 
   getTransactionsByStudent: (studentId) => {
-    return get().transactions.filter(t => t.studentId === studentId).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    // ⚡ Bolt Performance: Use Date.parse() instead of new Date().getTime() to avoid object allocation overhead during sorting
+    return get().transactions.filter(t => t.studentId === studentId).sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
   },
 
   exportTransactionsCSV: () => {
