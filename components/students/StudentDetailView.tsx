@@ -50,17 +50,36 @@ const getGradient = (name: string) => {
  */
 export const StudentDetailView: React.FC<StudentDetailViewProps> = ({ student, onClose, onEdit, onLogPayment, transactions, currencySymbol }) => {
   // Filter and sort transactions for the current student
-  const studentTransactions = transactions
-    .filter(t => t.studentId === student.id)
-    .sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Newest first
-  
-  // Calculate total owed and total paid for this student
-  const totalOwed = studentTransactions.reduce((sum, t) => {
-    if (t.status === PaymentStatus.Due) return sum + t.lessonFee;
-    if (t.status === PaymentStatus.PartiallyPaid) return sum + (t.lessonFee - t.amountPaid);
-    return sum;
-  }, 0);
-  const totalPaidForStudent = studentTransactions.reduce((sum, t) => sum + t.amountPaid, 0);
+  // ⚡ Bolt Performance: Consolidate multiple passes (.filter, .reduce) over the transactions array
+  // into a single O(N) loop to eliminate intermediate allocations and iteration overhead.
+  const { studentTransactions, totalOwed, totalPaidForStudent } = useMemo(() => {
+    const matchingTransactions: Transaction[] = [];
+    let owed = 0;
+    let paid = 0;
+
+    for (let i = 0; i < transactions.length; i++) {
+      const t = transactions[i];
+      if (t.studentId === student.id) {
+        matchingTransactions.push(t);
+        paid += (t.amountPaid || 0);
+
+        if (t.status === PaymentStatus.Due) {
+          owed += (t.lessonFee || 0);
+        } else if (t.status === PaymentStatus.PartiallyPaid) {
+          owed += ((t.lessonFee || 0) - (t.amountPaid || 0));
+        }
+      }
+    }
+
+    // ⚡ Bolt Performance: Use Date.parse() instead of new Date().getTime() to avoid object allocation overhead during sorting
+    matchingTransactions.sort((a, b) => Date.parse(b.date) - Date.parse(a.date)); // Newest first
+
+    return {
+      studentTransactions: matchingTransactions,
+      totalOwed: owed,
+      totalPaidForStudent: paid
+    };
+  }, [transactions, student.id]);
 
   const [activeTab, setActiveTab] = useState<'history' | 'progress'>('history');
   const [showReportModal, setShowReportModal] = useState(false);
