@@ -252,6 +252,7 @@ export const DashboardPage: React.FC = () => {
                 <button 
                   role="tab"
                   aria-selected={activeChart === 'income'}
+                  aria-label="View Income Overview"
                   onClick={() => setActiveChart('income')}
                   className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${activeChart === 'income' ? 'bg-white dark:bg-primary-light text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
                 >
@@ -260,6 +261,7 @@ export const DashboardPage: React.FC = () => {
                 <button 
                   role="tab"
                   aria-selected={activeChart === 'students'}
+                  aria-label="View Student Growth"
                   onClick={() => setActiveChart('students')}
                   className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${activeChart === 'students' ? 'bg-white dark:bg-primary-light text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
                 >
@@ -313,6 +315,7 @@ export const DashboardPage: React.FC = () => {
                         <span className="text-gray-500">/</span>
                         <input 
                             type="number" 
+                            aria-label="Monthly goal"
                             className="w-20 px-2 py-1 bg-white/50 dark:bg-primary-dark/50 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white outline-none" 
                             value={goalInput} 
                             onChange={e => setGoalInput(e.target.value)} 

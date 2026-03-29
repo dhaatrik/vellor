@@ -1,3 +1,6 @@
 ## 2024-03-20 - Adding Confirmation to Destructive Actions
 **Learning:** Instantly executing destructive actions like "Clear All Activity" can lead to accidental data loss. Providing a confirmation modal before proceeding creates a safer and more confident user experience.
 **Action:** Whenever implementing a button that deletes multiple items or clears history, introduce a confirmation modal using the `ConfirmationModal` component to explicitly ask the user for confirmation.
+## 2024-06-25 - Contextual Accessibility in Complex Dashboards
+**Learning:** Reusable input components (`Input.tsx`) might correctly label standard inputs, but customized or inline inputs (like the inline Monthly Target edit field on the Dashboard) and icon/text tabs (like the Chart view options) often slip through generic a11y checks because they omit `id`/`htmlFor` associations or lack `aria-label`s for screen readers when contextual clues aren't programmatically linked.
+**Action:** When auditing custom or inline dashboard controls for accessibility, proactively search for unlabelled `<input>` elements, `<button role="tab">` elements without `aria-label`s, and ensure that custom form implementations fully associate `<label>` with `<input>` using matching `htmlFor` and `id` tags.

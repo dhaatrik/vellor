@@ -166,10 +166,11 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ isOpen, onCl
                 </p>
                 
                 <div className="max-w-xs mx-auto text-left">
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ml-1">
+                  <label htmlFor="monthly-target" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ml-1">
                     Monthly Target ({settings.currencySymbol})
                   </label>
                   <input
+                    id="monthly-target"
                     type="number"
                     value={goal}
                     onChange={(e) => setGoal(e.target.value)}
