@@ -34,8 +34,9 @@ describe('useDerivedData Hook', () => {
 
   it('calculates total paid this month correctly', () => {
     const today = new Date();
-    const lastMonth = new Date();
-    lastMonth.setMonth(today.getMonth() - 1);
+    const lastMonth = new Date(today);
+    // Use setDate to safely subtract a month without overflowing to the same month (e.g. Mar 31 -> Feb 28 -> Mar 3)
+    lastMonth.setDate(0);
 
     useStore.setState({
       transactions: [
