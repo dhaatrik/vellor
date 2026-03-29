@@ -90,13 +90,19 @@ export const decryptObject = async <T = any>(
       const parsedData = JSON.parse(decodedData, jsonReviver);
       const result = schema ? schema.parse(parsedData) : parsedData;
       if (onLegacyData && result) {
-        // Run asynchronously without awaiting to prevent migration errors from failing the decryption
-        Promise.resolve(onLegacyData(result)).catch(e => console.error("Legacy migration failed:", e));
+        // We await the migration here so the new state is saved
+        // before we return the legacy data for this initial load
+        await Promise.resolve(onLegacyData(result)).catch(e => console.error("Legacy migration failed:", e));
       }
+
+      // We return the legacy data so the app does not load an empty state,
+      // but only if it's valid JSON that matches the schema
       return result;
     } catch (oldError) {
       console.error("Fallback deserialization failed:", { originalError: error, fallbackError: oldError });
-      return null;
+      // Throw the *original* error on failure to decrypt so that we do not fail open
+      // to arbitrary unencrypted data
+      throw error;
     }
   }
 };
