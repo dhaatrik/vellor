@@ -138,10 +138,11 @@ export const TransactionsPage: React.FC = () => {
   };
   
   const sortedTransactions = useMemo(() => {
-    // Pre-compute timestamps for faster sorting (Schwartzian transform)
+    // ⚡ Bolt Performance: Pre-compute timestamps for faster sorting (Schwartzian transform)
+    // using Date.parse() to avoid expensive Date object allocations during sorting
     const withTimestamps = transactions.map(t => ({
       t,
-      timestamp: new Date(t.date).getTime()
+      timestamp: Date.parse(t.date)
     }));
     return withTimestamps
       .sort((a, b) => b.timestamp - a.timestamp)
