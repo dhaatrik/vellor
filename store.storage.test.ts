@@ -67,16 +67,15 @@ describe('store.ts - storageEngine', () => {
       expect(result).toBe(JSON.stringify(testData));
     });
 
-    it('handles decryption fallback correctly', async () => {
+    it('throws error when invalid encrypted payload is given', async () => {
       setGlobalMasterKey(mockKey);
 
-      // Invalid JSON or format will cause decryptObject to throw or return null based on fallback
-      // In src/crypto.ts, decryptObject fallback might catch it and return null.
-      // So if it returns null, JSON.stringify(null) will be "null".
+      // Invalid JSON or format will cause decryptObject to throw
       vi.mocked(localforage.getItem).mockResolvedValueOnce('invalid-encrypted-data');
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-      const result = await storageEngine.getItem('test-key');
-      expect(result).toBe("null");
+      await expect(storageEngine.getItem('test-key')).rejects.toThrow();
+      consoleSpy.mockRestore();
     });
 
     it('throws error and logs to console if decryption fails', async () => {
