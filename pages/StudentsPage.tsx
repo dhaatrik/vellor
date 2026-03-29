@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../store';
 import { Student, Transaction, PaymentStatus } from '../types';
@@ -25,6 +25,7 @@ export const StudentsPage: React.FC = () => {
   const transactions = useStore(s => s.transactions);
   const addTransaction = useStore(s => s.addTransaction);
   const addToast = useStore(s => s.addToast);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [selectedStudent, setSelectedStudent] = useState<Student | undefined>(undefined);
   const [showStudentForm, setShowStudentForm] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | undefined>(undefined);
@@ -312,13 +313,17 @@ export const StudentsPage: React.FC = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-11 pr-11 py-3 rounded-full bg-white dark:bg-primary-light border-gray-200 dark:border-white/10 focus:ring-accent"
+            ref={searchInputRef}
           />
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
             <Icon iconName="search" className="w-5 h-5 text-gray-400" />
           </div>
           {searchTerm && (
             <button
-              onClick={() => setSearchTerm('')}
+              onClick={() => {
+                setSearchTerm('');
+                searchInputRef.current?.focus();
+              }}
               className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
               aria-label="Clear search"
             >

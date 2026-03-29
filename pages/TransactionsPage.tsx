@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useStore } from '../store';
 import { Transaction, PaymentStatus } from '../types';
@@ -22,6 +22,7 @@ export const TransactionsPage: React.FC = () => {
   const deleteTransaction = useStore(s => s.deleteTransaction);
   const addToast = useStore(s => s.addToast);
   const settings = useStore(s => s.settings);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | undefined>(undefined);
   const [confirmingDelete, setConfirmingDelete] = useState<Transaction | null>(null);
@@ -261,10 +262,14 @@ export const TransactionsPage: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-10 py-2 border border-gray-200 dark:border-white/10 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent sm:text-sm bg-white dark:bg-primary-light transition-all duration-200"
+              ref={searchInputRef}
            />
            {searchQuery && (
              <button
-               onClick={() => setSearchQuery('')}
+               onClick={() => {
+                 setSearchQuery('');
+                 searchInputRef.current?.focus();
+               }}
                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
                aria-label="Clear search"
              >
