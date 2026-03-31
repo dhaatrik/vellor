@@ -3,6 +3,7 @@ import { AppState, DataManagementSlice } from './types';
 import { Theme } from '../types';
 import { DEFAULT_CURRENCY_SYMBOL, DEFAULT_USER_NAME, INITIAL_GAMIFICATION_STATS, ACHIEVEMENTS_DEFINITIONS } from '../constants';
 import { backupSchema } from './validation';
+import { jsonReviver } from '../src/crypto';
 
 export const createDataManagementSlice: StateCreator<AppState, [], [], DataManagementSlice> = (set, get) => ({
   exportData: () => {
@@ -43,12 +44,7 @@ export const createDataManagementSlice: StateCreator<AppState, [], [], DataManag
         try {
             const result = event.target?.result;
             if (typeof result !== 'string') { throw new Error('File could not be read.'); }
-            const rawData = JSON.parse(result, (key, value) => {
-                if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
-                    return undefined;
-                }
-                return value;
-            });
+            const rawData = JSON.parse(result, jsonReviver);
 
             const parsedData = backupSchema.parse(rawData);
 

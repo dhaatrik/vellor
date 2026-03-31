@@ -7,7 +7,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import localforage from 'localforage';
 import { useMemo } from 'react';
-import { encryptObject, decryptObject } from './src/crypto';
+import { encryptObject, decryptObject, jsonReviver } from './src/crypto';
 import { PaymentStatus } from './types';
 import { z } from 'zod';
 
@@ -73,12 +73,7 @@ export const storageEngine = {
   },
   setItem: async (name: string, value: string): Promise<void> => {
     if (globalMasterKey) {
-      const obj = JSON.parse(value, (k, v) => {
-        if (k === '__proto__' || k === 'constructor' || k === 'prototype') {
-          return undefined;
-        }
-        return v;
-      });
+      const obj = JSON.parse(value, jsonReviver);
       const encrypted = await encryptObject(obj, globalMasterKey);
       await localforage.setItem(name, encrypted);
     } else {
