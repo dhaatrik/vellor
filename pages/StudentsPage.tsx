@@ -222,8 +222,11 @@ export const StudentsPage: React.FC = () => {
   };
 
   const filteredStudents = useMemo(() => {
+    // ⚡ Bolt Performance: Hoist searchTerm.toLowerCase() outside the filter loop
+    // to avoid redundant O(N) recalculations on every render where search occurs.
+    const lowerSearchTerm = searchTerm.toLowerCase();
     return students.filter(student =>
-      `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
+      `${student.firstName} ${student.lastName}`.toLowerCase().includes(lowerSearchTerm)
     );
   }, [students, searchTerm]);
 
