@@ -188,8 +188,10 @@ export const generateProgressReportPDF = (
 
   const reportTransactions = transactions
      .filter(t => t.studentId === student.id && (t.grade || t.progressRemark))
-     // ⚡ Bolt Performance: Use Date.parse() instead of new Date().getTime()
-     .sort((a,b) => Date.parse(b.date) - Date.parse(a.date));
+     // ⚡ Bolt Performance: Avoid Date.parse() overhead during O(N log N) sorting
+     .map(t => ({ t, time: Date.parse(t.date) }))
+     .sort((a,b) => b.time - a.time)
+     .map(obj => obj.t);
 
   if (reportTransactions.length > 0) {
       autoTable(doc, {
@@ -243,8 +245,12 @@ export const generateBulkInvoicePDF = (
     if (!student) return;
     
     // Sort transactions by date
-    // ⚡ Bolt Performance: Use Date.parse() instead of new Date().getTime()
-    studentTransactions.sort((a,b) => Date.parse(a.date) - Date.parse(b.date));
+    // ⚡ Bolt Performance: Avoid Date.parse() overhead during O(N log N) sorting
+    const timeMap = new Map<any, number>();
+    for (let i = 0; i < studentTransactions.length; i++) {
+      timeMap.set(studentTransactions[i], Date.parse(studentTransactions[i].date));
+    }
+    studentTransactions.sort((a,b) => timeMap.get(a)! - timeMap.get(b)!);
 
     if (!isFirstPage) {
       doc.addPage();

@@ -141,8 +141,12 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
   },
 
   getTransactionsByStudent: (studentId) => {
-    // ⚡ Bolt Performance: Use Date.parse() instead of new Date().getTime() to avoid object allocation overhead during sorting
-    return get().transactions.filter(t => t.studentId === studentId).sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+    // ⚡ Bolt Performance: Avoid Date.parse() overhead during O(N log N) sorting
+    return get().transactions
+      .filter(t => t.studentId === studentId)
+      .map(t => ({ t, time: Date.parse(t.date) }))
+      .sort((a, b) => b.time - a.time)
+      .map(obj => obj.t);
   },
 
   exportTransactionsCSV: () => {

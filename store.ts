@@ -151,8 +151,12 @@ export const useDerivedData = () => {
       }
     }
 
-    // ⚡ Bolt Performance: Avoid Date instantiation in sort comparisons
-    overdue.sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+    // ⚡ Bolt Performance: Avoid Date.parse() overhead during O(N log N) sorting
+    const overdueTimeMap = new Map<any, number>();
+    for (let i = 0; i < overdue.length; i++) {
+      overdueTimeMap.set(overdue[i], Date.parse(overdue[i].date));
+    }
+    overdue.sort((a, b) => overdueTimeMap.get(a)! - overdueTimeMap.get(b)!);
 
     return { totalUnpaid: unpaid, totalPaidThisMonth: paidThisMonth, overduePayments: overdue };
   }, [transactions]);
