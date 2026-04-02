@@ -101,6 +101,17 @@ export const SettingsPage: React.FC = () => {
     }
   };
 
+  const handleBrandLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setFormData(prev => ({ ...prev, brandLogoBase64: reader.result as string }));
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveBrandLogo = () => setFormData(prev => ({ ...prev, brandLogoBase64: undefined }));
+
   const handleRemoveLogo = () => setFormData(prev => ({ ...prev, invoiceLogoBase64: undefined }));
 
   return (
@@ -139,21 +150,14 @@ export const SettingsPage: React.FC = () => {
                    {formData.brandLogoBase64 ? (
                      <div className="relative w-16 h-16 rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden bg-white shadow-sm">
                        <img src={formData.brandLogoBase64} alt="App Logo" className="w-full h-full object-cover" />
-                       <button onClick={() => setFormData(prev => ({ ...prev, brandLogoBase64: undefined }))} className="absolute top-0 right-0 bg-danger text-white rounded-bl-xl p-1 hover:bg-danger/80" aria-label="Remove app logo">
+                       <button onClick={handleRemoveBrandLogo} className="absolute top-0 right-0 bg-danger text-white rounded-bl-xl p-1 hover:bg-danger/80" aria-label="Remove app logo">
                          <Icon iconName="x-mark" className="w-3 h-3" />
                        </button>
                      </div>
                    ) : (
                      <label className="cursor-pointer px-4 py-2 border border-dashed border-gray-300 dark:border-white/20 rounded-xl text-sm font-medium hover:border-accent hover:text-accent transition-colors">
                         Upload Logo
-                        <input type="file" accept="image/*" className="hidden" onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => setFormData(prev => ({ ...prev, brandLogoBase64: reader.result as string }));
-                            reader.readAsDataURL(file);
-                          }
-                        }} />
+                        <input type="file" accept="image/*" className="hidden" onChange={handleBrandLogoUpload} />
                      </label>
                    )}
                  </div>
