@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { importKeyFromBase64 } from './crypto';
+import { importKeyFromBase64, decryptObject, generateSalt, deriveKey } from './crypto';
 
 // Polyfill for crypto.subtle in jsdom environment if needed, but vitest globals=true with jsdom usually provides it, or we can use Node's crypto
 import { webcrypto } from 'crypto';
@@ -43,5 +43,26 @@ describe('importKeyFromBase64', () => {
 
     // importKey should throw when expecting a 256-bit AES key but given different length
     await expect(importKeyFromBase64(shortBase64)).rejects.toThrow();
+  });
+});
+
+describe('decryptObject', () => {
+  let key: CryptoKey;
+
+  beforeAll(async () => {
+    if (typeof globalThis.crypto === 'undefined' || !globalThis.crypto.subtle) {
+      Object.defineProperty(globalThis, 'crypto', {
+        value: webcrypto,
+      });
+    }
+
+    const salt = generateSalt();
+    key = await deriveKey('test-password', salt);
+  });
+
+  it('throws an error when decrypting malformed base64', async () => {
+    const invalidBase64 = 'invalid-base64-string!@#';
+
+    await expect(decryptObject(invalidBase64, key)).rejects.toThrow();
   });
 });
