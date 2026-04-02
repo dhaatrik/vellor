@@ -16,8 +16,11 @@ export const SearchModal: React.FC<{ isOpen: boolean; onClose: () => void }> = (
     }
   }, [isOpen]);
 
+  // ⚡ Bolt Performance: Hoist query.toLowerCase() outside the filter loop
+  // to prevent unnecessary string operations during the O(N) array search.
+  const lowerQuery = query.toLowerCase();
   const filteredStudents = students.filter(s => 
-    (s.firstName + ' ' + s.lastName).toLowerCase().includes(query.toLowerCase())
+    (s.firstName + ' ' + s.lastName).toLowerCase().includes(lowerQuery)
   ).slice(0, 5);
 
   const handleSelectStudent = (id: string) => {
