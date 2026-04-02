@@ -26,8 +26,8 @@ export const generateInvoicePDF = (
     try {
       doc.addImage(logoToUse, 'JPEG', 14, 10, 30, 30, undefined, 'FAST');
       currentY = 45;
-    } catch (e) {
-      console.warn("Logo injection failed", e);
+    } catch {
+      // Logo injection failed silently
     }
   }
 
@@ -148,8 +148,8 @@ export const generateProgressReportPDF = (
     try {
       doc.addImage(logoToUse, 'JPEG', 14, 10, 30, 30, undefined, 'FAST');
       currentY = 45;
-    } catch (e) {
-      console.warn("Logo injection failed", e);
+    } catch {
+      // Logo injection failed silently
     }
   }
 
@@ -258,8 +258,8 @@ export const generateBulkInvoicePDF = (
       try {
         doc.addImage(logoToUse, 'JPEG', 14, 10, 30, 30, undefined, 'FAST');
         currentY = 45;
-      } catch (e) {
-        console.warn("Logo injection failed", e);
+      } catch {
+        // Logo injection failed silently
       }
     }
 
