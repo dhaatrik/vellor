@@ -59,7 +59,6 @@ export const ProfilePage: React.FC = () => {
             await navigator.share({ title: `${settings.userName}'s Contact`, text: shareText });
             addToast('Contact shared successfully!', 'success');
         } catch (error) {
-            console.error('Error sharing:', error);
             addToast('Could not share contact.', 'error');
         }
     } else {
