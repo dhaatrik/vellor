@@ -36,6 +36,9 @@ export const formatPhoneNumber = (phone: PhoneNumber | undefined): string => {
   if (!phone || !phone.number) {
     return 'N/A';
   }
+  if (!phone.countryCode) {
+    return phone.number;
+  }
   return `${phone.countryCode} ${phone.number}`;
 };
 

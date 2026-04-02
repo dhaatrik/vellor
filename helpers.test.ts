@@ -13,6 +13,8 @@ describe('Helpers', () => {
         expect(formatPhoneNumber(undefined)).toBe('N/A');
         expect(formatPhoneNumber({ countryCode: '+1', number: '1234567890' })).toBe('+1 1234567890');
         expect(formatPhoneNumber({ countryCode: '+44', number: '' })).toBe('N/A');
+        expect(formatPhoneNumber({ countryCode: '', number: '1234567890' })).toBe('1234567890');
+        expect(formatPhoneNumber({ countryCode: '', number: '' })).toBe('N/A');
     });
 
     it('gets correct payment status colors', () => {
