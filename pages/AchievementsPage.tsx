@@ -28,8 +28,12 @@ export const AchievementsPage: React.FC = () => {
         dateAchieved: new Date().toISOString() // Assuming earned today for sorting purposes if not stored
       });
     }
-    // ⚡ Bolt Performance: Use Date.parse() instead of new Date().getTime()
-    return list.sort((a,b) => Date.parse(b.dateAchieved || "1970-01-01T00:00:00Z") - Date.parse(a.dateAchieved || "1970-01-01T00:00:00Z"));
+    // ⚡ Bolt Performance: Cache parsed dates to avoid redundant parsing during sort comparisons
+    const timeMap = new Map<any, number>();
+    for (let i = 0; i < list.length; i++) {
+      timeMap.set(list[i], Date.parse(list[i].dateAchieved || "1970-01-01T00:00:00Z"));
+    }
+    return list.sort((a, b) => (timeMap.get(b) || 0) - (timeMap.get(a) || 0));
   }, [achievements, settings?.customAchievement, settings?.customAchievementEarned]);
 
   const pendingList = useMemo(() => {
