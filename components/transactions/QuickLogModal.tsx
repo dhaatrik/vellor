@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Icon, Button, Input, Select } from '../ui';
 import { useStore } from '../../store';
@@ -34,11 +34,20 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ isOpen, onClose, d
 
   const activeStudents = students;
 
+  const studentMap = useMemo(() => {
+    return new Map(students.map(s => [s.id, s]));
+  }, [students]);
+
+  const studentOptions = useMemo(() => [
+    { value: '', label: 'Select a student...' },
+    ...activeStudents.map(s => ({ value: s.id, label: `${s.firstName} ${s.lastName}` }))
+  ], [activeStudents]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!studentId || !duration || !amountPaid) return;
 
-    const student = students.find(s => s.id === studentId);
+    const student = studentMap.get(studentId);
     if (!student) return;
 
     // Calculate lesson fee based on duration and student's default rate
@@ -110,15 +119,12 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ isOpen, onClose, d
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                     setStudentId(e.target.value);
                     // Auto-fill duration if student has a typical duration
-                    const student = students.find(s => s.id === e.target.value);
+                    const student = studentMap.get(e.target.value);
                     if (student && student.tuition.typicalLessonDuration) {
                       setDuration(student.tuition.typicalLessonDuration.toString());
                     }
                   }}
-                  options={[
-                    { value: '', label: 'Select a student...' },
-                    ...activeStudents.map(s => ({ value: s.id, label: `${s.firstName} ${s.lastName}` }))
-                  ]}
+                  options={studentOptions}
                   required
                 />
 
