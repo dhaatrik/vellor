@@ -110,14 +110,18 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({ student, o
   }, [studentTransactions]);
 
   const gradeChartData = useMemo(() => {
-     return [...progressTransactions]
-        .reverse()
-        .filter(t => t.grade && ['A','B','C','D','F'].includes(t.grade))
-        .map(t => ({
-           date: formatDate(t.date),
-           val: gradeToNumber(t.grade as string),
-           grade: t.grade
-        }));
+     const result = [];
+     for (let i = progressTransactions.length - 1; i >= 0; i--) {
+        const t = progressTransactions[i];
+        if (t.grade === 'A' || t.grade === 'B' || t.grade === 'C' || t.grade === 'D' || t.grade === 'F') {
+           result.push({
+              date: formatDate(t.date),
+              val: gradeToNumber(t.grade as string),
+              grade: t.grade
+           });
+        }
+     }
+     return result;
   }, [progressTransactions]);
 
   const handleExportReport = () => {
