@@ -120,7 +120,6 @@ export const TransactionsPage: React.FC = () => {
          window.open(generateWhatsAppLink(phoneToUse, message), '_blank');
       }
     } catch (e) {
-      console.error(e);
       // user likely cancelled sharing
     }
   };

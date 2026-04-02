@@ -5,6 +5,39 @@ import { Button, Input, Card, Icon, Select, ConfirmationModal } from '../compone
 import { TUTOR_RANK_LEVELS } from '../constants';
 import { motion } from 'framer-motion';
 
+const CustomAchievementSettings: React.FC<{
+  formData: AppSettings;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  setFormData: React.Dispatch<React.SetStateAction<AppSettings>>;
+}> = ({ formData, handleChange, setFormData }) => (
+  <div className="mt-6">
+    <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Custom Personal Achievement</h4>
+    <div className="flex items-end gap-4">
+      <div className="flex-1">
+        <Input
+          label="My Custom Achievement"
+          name="customAchievement"
+          placeholder="e.g. Save $5,000 for a new laptop"
+          value={formData.customAchievement || ''}
+          onChange={handleChange}
+        />
+      </div>
+      <label className="flex items-center gap-2 mb-2 cursor-pointer">
+        <input
+          type="checkbox"
+          name="customAchievementEarned"
+          checked={formData.customAchievementEarned || false}
+          onChange={(e) => setFormData(prev => ({...prev, customAchievementEarned: e.target.checked}))}
+          className="w-5 h-5 text-accent rounded border-gray-300 focus:ring-accent bg-transparent"
+        />
+        <span className="text-sm font-medium text-gray-700 dark:text-gray-300 border py-2 px-3 rounded-xl hover:bg-gray-50 dark:border-white/10 dark:hover:bg-primary-light transition-colors">
+          Mark as Earned
+        </span>
+      </label>
+    </div>
+  </div>
+);
+
 export const SettingsPage: React.FC = () => {
   const settings = useStore(s => s.settings);
   const updateSettings = useStore(s => s.updateSettings);
@@ -205,24 +238,11 @@ export const SettingsPage: React.FC = () => {
                      ))}
                   </div>
                </div>
-               <div className="mt-6">
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Custom Personal Achievement</h4>
-                  <div className="flex items-end gap-4">
-                     <div className="flex-1">
-                        <Input 
-                           label="My Custom Achievement" 
-                           name="customAchievement"
-                           placeholder="e.g. Save $5,000 for a new laptop"
-                           value={formData.customAchievement || ''} 
-                           onChange={handleChange} 
-                        />
-                     </div>
-                     <label className="flex items-center gap-2 mb-2 cursor-pointer">
-                        <input type="checkbox" name="customAchievementEarned" checked={formData.customAchievementEarned || false} onChange={(e) => setFormData(prev => ({...prev, customAchievementEarned: e.target.checked}))} className="w-5 h-5 text-accent rounded border-gray-300 focus:ring-accent bg-transparent" />
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300 border py-2 px-3 rounded-xl hover:bg-gray-50 dark:border-white/10 dark:hover:bg-primary-light transition-colors">Mark as Earned</span>
-                     </label>
-                  </div>
-               </div>
+               <CustomAchievementSettings
+                 formData={formData}
+                 handleChange={handleChange}
+                 setFormData={setFormData}
+               />
              </>
            )}
            <div className="pt-4 flex justify-end">
