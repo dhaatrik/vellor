@@ -32,7 +32,7 @@ export const StudentsPage: React.FC = () => {
   const [showTransactionFormForStudent, setShowTransactionFormForStudent] = useState<string | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState('');
   const [confirmingDelete, setConfirmingDelete] = useState<Student | null>(null);
-  const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
+  const [selectedStudentIds, setSelectedStudentIds] = useState<Set<string>>(new Set());
   const [showBulkLogModal, setShowBulkLogModal] = useState(false);
   const [showImportWizard, setShowImportWizard] = useState(false);
   const [bulkLogData, setBulkLogData] = useState({ date: new Date().toISOString().split('T')[0], duration: 60, fee: 50, notes: 'Bulk logged lesson' });
@@ -137,16 +137,22 @@ export const StudentsPage: React.FC = () => {
   }
 
   const toggleStudentSelection = (student: Student) => {
-    setSelectedStudentIds(prev => 
-      prev.includes(student.id) ? prev.filter(id => id !== student.id) : [...prev, student.id]
-    );
+    setSelectedStudentIds(prev => {
+      const next = new Set(prev);
+      if (next.has(student.id)) {
+        next.delete(student.id);
+      } else {
+        next.add(student.id);
+      }
+      return next;
+    });
   };
 
   const updateTransaction = useStore(s => s.updateTransaction);
   const handleBulkMarkPaid = () => {
      let count = 0;
      // Optimization: use a Set for O(1) lookup and a single loop through transactions
-     const selectedSet = new Set(selectedStudentIds);
+     const selectedSet = selectedStudentIds;
      for (let i = 0; i < transactions.length; i++) {
          const t = transactions[i];
          if (
@@ -160,7 +166,7 @@ export const StudentsPage: React.FC = () => {
          }
      }
      addToast(`Marked ${count} lessons as paid!`, 'success');
-     setSelectedStudentIds([]);
+     setSelectedStudentIds(new Set());
   }
 
   const handleBulkExport = () => {
@@ -172,7 +178,7 @@ export const StudentsPage: React.FC = () => {
           selectedStudentMap.set(student.id, student);
       }
 
-      const selectedSet = new Set(selectedStudentIds);
+      const selectedSet = selectedStudentIds;
       const firstUnpaidMap = new Map();
 
       for (let i = 0; i < transactions.length; i++) {
@@ -200,7 +206,7 @@ export const StudentsPage: React.FC = () => {
       });
 
       addToast(count > 0 ? `Exported ${count} invoices!` : 'No unpaid lessons to export for selected students.', count > 0 ? 'success' : 'info');
-      setSelectedStudentIds([]);
+      setSelectedStudentIds(new Set());
   }
 
   const submitBulkLog = () => {
@@ -218,7 +224,7 @@ export const StudentsPage: React.FC = () => {
       });
       addToast(`Logged same lesson for ${count} students!`, 'success');
       setShowBulkLogModal(false);
-      setSelectedStudentIds([]);
+      setSelectedStudentIds(new Set());
   };
 
   const filteredStudents = useMemo(() => {
@@ -369,7 +375,7 @@ export const StudentsPage: React.FC = () => {
                   onDelete={handleDeleteRequest} 
                   currencySymbol={settings.currencySymbol}
                   outstandingBalance={outstandingBalances[s.id] || 0}
-                  isSelected={selectedStudentIds.includes(s.id)}
+                  isSelected={selectedStudentIds.has(s.id)}
                   onToggleSelect={toggleStudentSelection}
                 />
               </motion.div>
@@ -411,28 +417,28 @@ export const StudentsPage: React.FC = () => {
 
       {/* Floating Action Bar for Bulk Actions */}
       <AnimatePresence>
-        {selectedStudentIds.length > 0 && (
+        {selectedStudentIds.size > 0 && (
           <motion.div 
             initial={{ y: 100, opacity: 0 }} 
             animate={{ y: 0, opacity: 1 }} 
             exit={{ y: 100, opacity: 0 }} 
             className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-4 rounded-full shadow-2xl z-50 flex items-center justify-center gap-4 transition-colors"
           >
-            <span className="font-bold text-sm whitespace-nowrap">{selectedStudentIds.length} Selected</span>
+            <span className="font-bold text-sm whitespace-nowrap">{selectedStudentIds.size} Selected</span>
             <div className="h-6 w-px bg-white/20 dark:bg-black/20 hidden sm:block"></div>
             <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar no-scrollbar">
                 <Button size="sm" variant="ghost" className="!text-white dark:!text-gray-900 hover:bg-white/10 dark:hover:bg-black/10 whitespace-nowrap" onClick={() => setShowBulkLogModal(true)}>Log Same</Button>
                 <Button size="sm" variant="ghost" className="!text-white dark:!text-gray-900 hover:bg-white/10 dark:hover:bg-black/10 whitespace-nowrap" onClick={handleBulkMarkPaid}>Mark Paid</Button>
                 <Button size="sm" variant="primary" className="shadow-none rounded-full whitespace-nowrap" onClick={handleBulkExport}>Export Invoices</Button>
             </div>
-            <button onClick={() => setSelectedStudentIds([])} className="ml-2 p-2 rounded-full hover:bg-white/10 dark:hover:bg-black/10 flex-shrink-0" aria-label="Clear selected students">
+            <button onClick={() => setSelectedStudentIds(new Set())} className="ml-2 p-2 rounded-full hover:bg-white/10 dark:hover:bg-black/10 flex-shrink-0" aria-label="Clear selected students">
                 <Icon iconName="x-mark" className="w-5 h-5"/>
             </button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <Modal isOpen={showBulkLogModal} onClose={() => setShowBulkLogModal(false)} title={`Bulk Log Lesson (${selectedStudentIds.length} Students)`}>
+      <Modal isOpen={showBulkLogModal} onClose={() => setShowBulkLogModal(false)} title={`Bulk Log Lesson (${selectedStudentIds.size} Students)`}>
          <div className="space-y-4 p-2">
             <div>
                <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Date</label>
