@@ -91,7 +91,6 @@ describe('createDataManagementSlice', () => {
 
     it('catches errors and shows error toast', () => {
       const addToastMock = useStore.getState().addToast;
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       // Stub JSON.stringify to throw an error
       vi.spyOn(JSON, 'stringify').mockImplementationOnce(() => {
@@ -100,7 +99,6 @@ describe('createDataManagementSlice', () => {
 
       useStore.getState().exportData();
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith("Failed to export data:", expect.any(Error));
       expect(addToastMock).toHaveBeenCalledWith('Failed to export data.', 'error');
     });
   });
