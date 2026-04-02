@@ -59,6 +59,15 @@ export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> 
     if (newSettings.currencySymbol) {
         newSettings.currencySymbol = sanitizeString(newSettings.currencySymbol);
     }
+
+    // Validate that image data URIs start with data:image/ to prevent XSS via javascript: or other schemes
+    if (newSettings.brandLogoBase64 !== undefined && newSettings.brandLogoBase64 !== '' && !newSettings.brandLogoBase64.startsWith('data:image/')) {
+        delete newSettings.brandLogoBase64;
+    }
+    if (newSettings.invoiceLogoBase64 !== undefined && newSettings.invoiceLogoBase64 !== '' && !newSettings.invoiceLogoBase64.startsWith('data:image/')) {
+        delete newSettings.invoiceLogoBase64;
+    }
+
     set(s => ({ settings: { ...s.settings, ...newSettings } }));
     get().addToast('Settings saved successfully.', 'success');
     get().checkAndAwardAchievements();
