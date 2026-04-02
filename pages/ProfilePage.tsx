@@ -3,7 +3,7 @@ import { useStore } from '../store';
 import { AppSettings, PhoneNumber } from '../types';
 import { Button, Input, Card, PhoneInput, Modal, Icon, Select } from '../components/ui';
 import { formatPhoneNumber } from '../helpers';
-import { CURRENCY_OPTIONS, COUNTRIES } from '../constants';
+import { CURRENCY_OPTIONS, COUNTRIES, COUNTRY_CODE_MAP } from '../constants';
 import { motion } from 'framer-motion';
 
 /**
@@ -31,8 +31,8 @@ export const ProfilePage: React.FC = () => {
 
   const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const countryName = e.target.value;
-    const selectedCountry = COUNTRIES.find(c => c.name === countryName);
-    const newCountryCode = selectedCountry ? selectedCountry.code : '+1';
+    const countryCode = COUNTRY_CODE_MAP[countryName];
+    const newCountryCode = countryCode || '+1';
     setFormData(prev => ({
         ...prev,
         country: countryName,

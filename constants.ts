@@ -23,6 +23,8 @@ export const CURRENCY_OPTIONS = [
 /**
  * Array of countries with their corresponding phone country codes.
  */
+export const COUNTRY_CODE_MAP: Record<string, string> = {};
+
 export const COUNTRIES = [
     { name: 'Afghanistan', code: '+93' },
     { name: 'Albania', code: '+355' },
@@ -220,6 +222,10 @@ export const COUNTRIES = [
     { name: 'Zambia', code: '+260' },
     { name: 'Zimbabwe', code: '+263' }
 ];
+
+COUNTRIES.forEach(c => {
+    COUNTRY_CODE_MAP[c.name] = c.code;
+});
 
 /**
  * Default currency symbol used if no currency is set by the user.

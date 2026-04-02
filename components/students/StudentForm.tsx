@@ -1,7 +1,7 @@
 import React from 'react';
 import { Student, PhoneNumber } from '../../types';
 import { Button, Input, Select, Textarea, PhoneInput, Icon } from '../ui';
-import { COUNTRIES } from '../../constants';
+import { COUNTRIES, COUNTRY_CODE_MAP } from '../../constants';
 import { z } from 'zod';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -137,14 +137,14 @@ export const StudentForm: React.FC<StudentFormProps> = ({ student, onSave, onClo
             {...register('country', {
               onChange: (e) => {
                 const countryName = e.target.value;
-                const selectedCountry = COUNTRIES.find(c => c.name === countryName);
-                if (selectedCountry) {
+                const countryCode = COUNTRY_CODE_MAP[countryName];
+                if (countryCode) {
                   const sPhone = getValues('contact.studentPhone');
-                  setValue('contact.studentPhone', { ...sPhone, countryCode: selectedCountry.code, number: sPhone?.number || '' });
+                  setValue('contact.studentPhone', { ...sPhone, countryCode, number: sPhone?.number || '' });
                   const pPhone1 = getValues('contact.parentPhone1');
-                  setValue('contact.parentPhone1', { ...pPhone1, countryCode: selectedCountry.code, number: pPhone1?.number || '' });
+                  setValue('contact.parentPhone1', { ...pPhone1, countryCode, number: pPhone1?.number || '' });
                   const pPhone2 = getValues('contact.parentPhone2');
-                  setValue('contact.parentPhone2', { ...pPhone2, countryCode: selectedCountry.code, number: pPhone2?.number || '' });
+                  setValue('contact.parentPhone2', { ...pPhone2, countryCode, number: pPhone2?.number || '' });
                 }
               }
             })} 

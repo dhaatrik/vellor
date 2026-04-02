@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import { AppSettings, PhoneNumber } from '../types';
-import { CURRENCY_OPTIONS, DEFAULT_USER_NAME, COUNTRIES } from '../constants';
+import { CURRENCY_OPTIONS, DEFAULT_USER_NAME, COUNTRIES, COUNTRY_CODE_MAP } from '../constants';
 import { Button, Input, Select, Card, PhoneInput } from '../components/ui';
 import { motion } from 'framer-motion';
 
@@ -29,8 +29,8 @@ export const WelcomePage: React.FC = () => {
 
     const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const countryName = e.target.value;
-        const selectedCountry = COUNTRIES.find(c => c.name === countryName);
-        const newCountryCode = selectedCountry ? selectedCountry.code : '+1';
+        const countryCode = COUNTRY_CODE_MAP[countryName];
+        const newCountryCode = countryCode || '+1';
 
         setFormData(prev => ({
             ...prev,
