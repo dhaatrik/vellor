@@ -23,7 +23,12 @@ export const CSVImportWizard: React.FC<CSVImportWizardProps> = ({ isOpen, onClos
         const reader = new FileReader();
         reader.onload = (event) => {
              const text = event.target?.result as string;
-             const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+             const rawLines = text.split('\n');
+             const lines: string[] = [];
+             for (let i = 0; i < rawLines.length; i++) {
+                 const trimmed = rawLines[i].trim();
+                 if (trimmed) lines.push(trimmed);
+             }
              if (lines.length < 2) { 
                  addToast("Invalid CSV format or not enough data rows.", "error"); 
                  return; 
