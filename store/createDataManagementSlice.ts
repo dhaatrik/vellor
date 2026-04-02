@@ -59,7 +59,6 @@ export const createDataManagementSlice: StateCreator<AppState, [], [], DataManag
             get().addToast('Data imported successfully! The app will reload.', 'success');
             setTimeout(() => window.location.reload(), 2000);
         } catch (error) {
-            console.error("Failed to import data:", error);
             get().addToast(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
         }
     };
