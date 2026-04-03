@@ -114,10 +114,8 @@ export const generatePortalLink = (student: Student, transactions: Transaction[]
       grade: t.grade,
       progressRemark: t.progressRemark,
     }))
-    // ⚡ Bolt Performance: Avoid Date.parse() overhead during O(N log N) sorting
-    .map(t => ({ t, time: Date.parse(t.date) }))
-    .sort((a,b) => b.time - a.time)
-    .map(obj => obj.t)
+    // ⚡ Bolt Performance: Avoid Date.parse() overhead during O(N log N) sorting by using direct ISO string comparison
+    .sort((a, b) => b.date < a.date ? -1 : (b.date > a.date ? 1 : 0))
   };
   
   const base64 = btoa(encodeURIComponent(JSON.stringify(payload)));
