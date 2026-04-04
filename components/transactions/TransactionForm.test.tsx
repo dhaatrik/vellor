@@ -15,6 +15,8 @@ const mockStudents = [
     id: 'student-1',
     firstName: 'John',
     lastName: 'Doe',
+    contact: { email: '', phone: '' },
+    createdAt: new Date().toISOString(),
     tuition: {
       rateType: 'hourly',
       defaultRate: 50,
@@ -25,13 +27,15 @@ const mockStudents = [
     id: 'student-2',
     firstName: 'Jane',
     lastName: 'Smith',
+    contact: { email: '', phone: '' },
+    createdAt: new Date().toISOString(),
     tuition: {
       rateType: 'per_lesson',
       defaultRate: 75,
       typicalLessonDuration: 45,
     },
   },
-];
+] as any;
 
 describe('TransactionForm', () => {
   const mockOnSave = vi.fn();
@@ -43,7 +47,7 @@ describe('TransactionForm', () => {
     // Setup default mock implementation for useStore
     (useStore as any).mockImplementation((selector: any) => {
       const state = {
-        getStudentById: (id: string) => mockStudents.find((s) => s.id === id),
+        getStudentById: (id: string) => mockStudents.find((s: any) => s.id === id),
       };
       return selector(state);
     });
