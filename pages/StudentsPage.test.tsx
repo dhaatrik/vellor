@@ -5,7 +5,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import { StudentsPage } from './StudentsPage';
 import { useStore } from '../store';
-import { Student } from '../types';
+import { Student, Theme } from '../types';
 
 // Mock confetti to prevent errors in Node environment
 vi.mock('canvas-confetti', () => {
@@ -34,7 +34,8 @@ const mockStudents: Student[] = [
     contact: { email: 'john@example.com' },
     tuition: { subjects: ['Math'], defaultRate: 50, rateType: 'hourly', typicalLessonDuration: 60 },
     notes: '',
-    searchName: 'john doe'
+    searchName: 'john doe',
+    createdAt: new Date().toISOString()
   },
   {
     id: '2',
@@ -45,7 +46,8 @@ const mockStudents: Student[] = [
     contact: { email: 'jane@example.com' },
     tuition: { subjects: ['English'], defaultRate: 40, rateType: 'hourly', typicalLessonDuration: 45 },
     notes: '',
-    searchName: 'jane smith'
+    searchName: 'jane smith',
+    createdAt: new Date().toISOString()
   }
 ];
 
@@ -59,7 +61,7 @@ describe('StudentsPage', () => {
       students: [],
       transactions: [],
       activityLog: [],
-      settings: { currencySymbol: '$', theme: 'system', language: 'en', notifications: true },
+      settings: { currencySymbol: '$', theme: Theme.Light, userName: 'Tutor' },
     });
   });
 
