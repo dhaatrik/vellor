@@ -8,7 +8,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import localforage from 'localforage';
 import { useMemo } from 'react';
 import { encryptObject, decryptObject, jsonReviver } from './src/crypto';
-import { PaymentStatus } from './types';
+import { PaymentStatus, Theme, AttendanceStatus, AchievementId } from './types';
 import { z } from 'zod';
 
 // Slice Imports
@@ -30,17 +30,112 @@ export const setGlobalMasterKey = (key: CryptoKey | null) => {
   globalMasterKey = key;
 };
 
+// --- Zod Schemas for State Slices ---
+const studentSchema = z.object({
+  id: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
+  searchName: z.string().optional(),
+  country: z.string().optional(),
+  parent: z.object({
+    name: z.string(),
+    relationship: z.string()
+  }).optional(),
+  contact: z.object({
+    studentPhone: z.object({ countryCode: z.string(), number: z.string() }).optional(),
+    parentPhone1: z.object({ countryCode: z.string(), number: z.string() }).optional(),
+    parentPhone2: z.object({ countryCode: z.string(), number: z.string() }).optional(),
+    email: z.string().optional(),
+  }),
+  tuition: z.object({
+    subjects: z.array(z.string()),
+    defaultRate: z.number(),
+    rateType: z.enum(['hourly', 'per_lesson', 'monthly']),
+    typicalLessonDuration: z.number(),
+    preferredPaymentMethod: z.string().optional()
+  }),
+  notes: z.string().optional(),
+  createdAt: z.string(),
+}).catchall(z.any());
+
+const transactionSchema = z.object({
+  id: z.string(),
+  studentId: z.string(),
+  date: z.string(),
+  lessonDuration: z.number(),
+  lessonFee: z.number(),
+  amountPaid: z.number(),
+  paymentMethod: z.string().optional(),
+  status: z.nativeEnum(PaymentStatus),
+  attendance: z.nativeEnum(AttendanceStatus).optional(),
+  grade: z.string().optional(),
+  progressRemark: z.string().optional(),
+  notes: z.string().optional(),
+  createdAt: z.string(),
+}).catchall(z.any());
+
+const gamificationStatsSchema = z.object({
+  points: z.number(),
+  level: z.number(),
+  levelName: z.string(),
+  streak: z.number(),
+  lastActiveDate: z.string().nullable(),
+}).catchall(z.any());
+
+const achievementSchema = z.object({
+  id: z.nativeEnum(AchievementId),
+  name: z.string(),
+  description: z.string(),
+  achieved: z.boolean(),
+  dateAchieved: z.string().optional(),
+  icon: z.string()
+}).catchall(z.any());
+
+const appSettingsSchema = z.object({
+  theme: z.nativeEnum(Theme),
+  currencySymbol: z.string(),
+  userName: z.string(),
+  country: z.string().optional(),
+  phone: z.object({ countryCode: z.string(), number: z.string() }).optional(),
+  email: z.string().optional(),
+  monthlyGoal: z.number().optional(),
+  hasCompletedOnboarding: z.boolean().optional(),
+  enableReminders: z.boolean().optional(),
+  invoiceLogoBase64: z.string().optional(),
+  invoiceTemplate: z.enum(['modern', 'classic', 'minimal']).optional(),
+  gamificationEnabled: z.boolean().optional(),
+  customRankTitles: z.array(z.string()).optional(),
+  customAchievement: z.string().optional(),
+  customAchievementEarned: z.boolean().optional(),
+  brandColor: z.string().optional(),
+  brandLogoBase64: z.string().optional(),
+}).catchall(z.any());
+
+const toastMessageSchema = z.object({
+  id: z.string(),
+  message: z.string(),
+  type: z.enum(['success', 'error', 'info'])
+}).catchall(z.any());
+
+const activitySchema = z.object({
+  id: z.string(),
+  message: z.string(),
+  icon: z.string(),
+  timestamp: z.string()
+}).catchall(z.any());
+
+
 // Zustand Persist State Schema for Vellor
 // We validate the structure to ensure data integrity after decryption
 const persistSchema = z.object({
   state: z.object({
-    students: z.array(z.any()).optional(),
-    transactions: z.array(z.any()).optional(),
-    gamification: z.any().optional(),
-    achievements: z.array(z.any()).optional(),
-    settings: z.any().optional(),
-    toasts: z.array(z.any()).optional(),
-    activityLog: z.array(z.any()).optional(),
+    students: z.array(studentSchema).optional(),
+    transactions: z.array(transactionSchema).optional(),
+    gamification: gamificationStatsSchema.optional(),
+    achievements: z.array(achievementSchema).optional(),
+    settings: appSettingsSchema.optional(),
+    toasts: z.array(toastMessageSchema).optional(),
+    activityLog: z.array(activitySchema).optional(),
   }).catchall(z.any()),
   version: z.number().optional()
 }).catchall(z.any());
