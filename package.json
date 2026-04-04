@@ -48,7 +48,6 @@
     "@types/react-big-calendar": "^1.16.3",
     "@types/react-dom": "^19.1.0",
     "@types/recharts": "^1.8.29",
-    "@vitest/coverage-v8": "^4.1.2",
     "autoprefixer": "^10.4.27",
     "jsdom": "^29.0.0",
     "postcss": "^8.5.8",
