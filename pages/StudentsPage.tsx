@@ -320,6 +320,7 @@ export const StudentsPage: React.FC = () => {
           <Input 
             type="text"
             placeholder="Search students..."
+            aria-label="Search students by name"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-11 pr-11 py-3 rounded-full bg-white dark:bg-primary-light border-gray-200 dark:border-white/10 focus:ring-accent"
@@ -335,6 +336,7 @@ export const StudentsPage: React.FC = () => {
                 searchInputRef.current?.focus();
               }}
               className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+              title="Clear search"
               aria-label="Clear search"
             >
               <Icon iconName="x-mark" className="w-5 h-5" />
@@ -431,7 +433,7 @@ export const StudentsPage: React.FC = () => {
                 <Button size="sm" variant="ghost" className="!text-white dark:!text-gray-900 hover:bg-white/10 dark:hover:bg-black/10 whitespace-nowrap" onClick={handleBulkMarkPaid}>Mark Paid</Button>
                 <Button size="sm" variant="primary" className="shadow-none rounded-full whitespace-nowrap" onClick={handleBulkExport}>Export Invoices</Button>
             </div>
-            <button onClick={() => setSelectedStudentIds(new Set())} className="ml-2 p-2 rounded-full hover:bg-white/10 dark:hover:bg-black/10 flex-shrink-0" aria-label="Clear selected students">
+            <button onClick={() => setSelectedStudentIds(new Set())} className="ml-2 p-2 rounded-full hover:bg-white/10 dark:hover:bg-black/10 flex-shrink-0" title="Clear selected students" aria-label="Clear selected students">
                 <Icon iconName="x-mark" className="w-5 h-5"/>
             </button>
           </motion.div>
