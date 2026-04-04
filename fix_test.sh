@@ -1,3 +1,5 @@
+#!/bin/bash
+cat << 'INNER_EOF' > src/crypto.test.ts
 import { describe, it, expect, beforeAll } from 'vitest';
 import { importKeyFromBase64, generateSalt, decryptObject, encryptObject } from './crypto';
 
@@ -133,3 +135,4 @@ describe('decryptObject', () => {
     await expect(decryptObject(encrypted, anotherKey)).rejects.toThrow();
   });
 });
+INNER_EOF
