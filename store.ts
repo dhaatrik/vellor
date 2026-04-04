@@ -56,12 +56,7 @@ export const storageEngine = {
         const obj = await decryptObject(
           raw,
           globalMasterKey,
-          persistSchema,
-          async (data) => {
-            // Re-encrypt insecure legacy data into ciphertext
-            const encrypted = await encryptObject(data, globalMasterKey as CryptoKey);
-            await localforage.setItem(name, encrypted);
-          }
+          persistSchema
         );
         return JSON.stringify(obj);
       } catch (error) {
