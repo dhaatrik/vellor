@@ -57,9 +57,10 @@ export const AchievementsPage: React.FC = () => {
   const totalEarned = useMemo(() => {
     // ⚡ Bolt Performance: Replace .filter().reduce() chain with a single for-loop pass to eliminate intermediate allocations
     let sum = 0;
-    for (let i = 0; i < transactions.length; i++) {
+    for (let i = 0, len = transactions.length; i < len; i++) {
       const t = transactions[i];
-      if (t.status === PaymentStatus.Paid || t.status === PaymentStatus.Overpaid || t.status === PaymentStatus.PartiallyPaid) {
+      const status = t.status;
+      if (status === PaymentStatus.Paid || status === PaymentStatus.Overpaid || status === PaymentStatus.PartiallyPaid) {
         sum += (t.amountPaid || 0);
       }
     }

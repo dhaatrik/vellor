@@ -34,7 +34,7 @@ const filteredStudentsOptimized = studentsWithSearchableName.filter(s =>
 const endOptimizedFilter = performance.now();
 const filterTime = endOptimizedFilter - startOptimizedFilter;
 
-console.log(`Baseline filter time: ${baselineTime} ms`);
-console.log(`Optimized pre-compute time: ${preTime} ms`);
-console.log(`Optimized filter time: ${filterTime} ms`);
-console.log(`Improvement in filter: ${baselineTime / filterTime}x`);
+// console.log(`Baseline filter time: ${baselineTime} ms`);
+// console.log(`Optimized pre-compute time: ${preTime} ms`);
+// console.log(`Optimized filter time: ${filterTime} ms`);
+// console.log(`Improvement in filter: ${baselineTime / filterTime}x`);

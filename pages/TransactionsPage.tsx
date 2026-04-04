@@ -77,10 +77,10 @@ export const TransactionsPage: React.FC = () => {
   
   const studentsMap = useMemo(() => {
     // ⚡ Bolt Performance: Pre-compute searchName for faster filtering
-    const map = new Map<string, typeof students[0] & { searchName: string }>();
+    const map = new Map<string, { student: typeof students[0], searchName: string }>();
     for (const student of students) {
       map.set(student.id, {
-        ...student,
+        student,
         searchName: `${student.firstName} ${student.lastName}`.toLowerCase()
       });
     }
@@ -88,9 +88,9 @@ export const TransactionsPage: React.FC = () => {
   }, [students]);
 
   const handleGenerateInvoice = (transaction: Transaction) => {
-    const student = studentsMap.get(transaction.studentId);
-    if (student) {
-      generateInvoicePDF(transaction, student, settings);
+    const entry = studentsMap.get(transaction.studentId);
+    if (entry) {
+      generateInvoicePDF(transaction, entry.student, settings);
       addToast('Invoice generated successfully.', 'success');
     } else {
       addToast('Student not found.', 'error');
@@ -98,8 +98,9 @@ export const TransactionsPage: React.FC = () => {
   };
 
   const handleShareWhatsApp = async (transaction: Transaction) => {
-    const student = studentsMap.get(transaction.studentId);
-    if (!student) return addToast('Student not found.', 'error');
+    const entry = studentsMap.get(transaction.studentId);
+    if (!entry) return addToast('Student not found.', 'error');
+    const student = entry.student;
 
     try {
       if (navigator.share) {
@@ -179,9 +180,9 @@ export const TransactionsPage: React.FC = () => {
 
       // Apply search filter
       if (query) {
-        const student = studentsMap.get(t.studentId);
-        if (!student) return false;
-        if (!student.searchName.includes(query)) return false;
+        const entry = studentsMap.get(t.studentId);
+        if (!entry) return false;
+        if (!entry.searchName.includes(query)) return false;
       }
 
       return true;
@@ -339,7 +340,8 @@ export const TransactionsPage: React.FC = () => {
           >
             {rowVirtualizer.getVirtualItems().map((virtualRow) => {
               const t = filteredTransactions[virtualRow.index];
-              const student = studentsMap.get(t.studentId);
+              const entry = studentsMap.get(t.studentId);
+              const student = entry?.student;
               return (
                 <div
                   key={t.id}

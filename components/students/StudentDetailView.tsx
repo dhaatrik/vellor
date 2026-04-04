@@ -56,11 +56,13 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({ student, o
     const matchingTransactions: Transaction[] = [];
     let owed = 0;
     let paid = 0;
+    const parsedDates = new Map<Transaction, number>();
 
     for (let i = 0; i < transactions.length; i++) {
       const t = transactions[i];
       if (t.studentId === student.id) {
         matchingTransactions.push(t);
+        parsedDates.set(t, Date.parse(t.date));
         paid += (t.amountPaid || 0);
 
         if (t.status === PaymentStatus.Due) {

@@ -71,13 +71,15 @@ export const createDataManagementSlice: StateCreator<AppState, [], [], DataManag
                 const { deriveKey, decryptObject } = await import('../src/crypto');
                 const salt = new Uint8Array(rawData.salt);
                 const key = await deriveKey(password, salt);
+                let decrypted;
                 try {
-                    const decrypted = await decryptObject(rawData.data, key);
-                    if (!decrypted) throw new Error("Decryption failed");
-                    rawData = decrypted;
-                } catch (e) {
+                    decrypted = await decryptObject(rawData.data, key);
+                } catch {
                     throw new Error("Incorrect password or corrupted encrypted data.");
                 }
+
+                if (!decrypted) throw new Error("Decryption failed");
+                rawData = decrypted;
             }
 
             const parsedData = backupSchema.parse(rawData);
