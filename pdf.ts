@@ -189,7 +189,7 @@ export const generateProgressReportPDF = (
   const reportTransactions = transactions
      .filter(t => t.studentId === student.id && (t.grade || t.progressRemark))
      // ⚡ Bolt Performance: Avoid Date.parse() overhead during O(N log N) sorting
-     .map(t => ({ t, time: Date.parse(t.date) }))
+     .map(t => ({ t, time: typeof t.date === 'string' ? new Date(t.date).getTime() : (t.date as unknown as Date).getTime() }))
      .sort((a,b) => b.time - a.time)
      .map(obj => obj.t);
 
@@ -246,11 +246,15 @@ export const generateBulkInvoicePDF = (
     
     // Sort transactions by date
     // ⚡ Bolt Performance: Avoid Date.parse() overhead during O(N log N) sorting
-    const timeMap = new Map<any, number>();
+    const mapped = new Array(studentTransactions.length);
     for (let i = 0; i < studentTransactions.length; i++) {
-      timeMap.set(studentTransactions[i], Date.parse(studentTransactions[i].date));
+      const t = studentTransactions[i];
+      mapped[i] = { t, time: typeof t.date === 'string' ? new Date(t.date).getTime() : (t.date as unknown as Date).getTime() };
     }
-    studentTransactions.sort((a,b) => timeMap.get(a)! - timeMap.get(b)!);
+    mapped.sort((a, b) => a.time - b.time);
+    for (let i = 0; i < mapped.length; i++) {
+      studentTransactions[i] = mapped[i].t;
+    }
 
     if (!isFirstPage) {
       doc.addPage();
