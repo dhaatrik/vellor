@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatCurrency, formatPhoneNumber, getPaymentStatusColor, formatRelativeTime, generatePortalLink } from './helpers';
+import { formatCurrency, formatPhoneNumber, getPaymentStatusColor, formatRelativeTime, generatePortalLink, generateWhatsAppLink } from './helpers';
 import { PaymentStatus, Student, Transaction, AppSettings, Theme } from './types';
 
 describe('Helpers', () => {
@@ -128,5 +128,30 @@ describe('generatePortalLink', () => {
 
         expect(payload.transactions).toHaveLength(0);
         expect(payload.transactions).toEqual([]);
+    });
+});
+
+describe('generateWhatsAppLink', () => {
+    it('returns "#" for undefined phone', () => {
+        expect(generateWhatsAppLink(undefined)).toBe('#');
+    });
+
+    it('returns "#" for phone without a number', () => {
+        expect(generateWhatsAppLink({ countryCode: '+1', number: '' })).toBe('#');
+    });
+
+    it('generates correct link for valid phone without message', () => {
+        expect(generateWhatsAppLink({ countryCode: '+1', number: '1234567890' })).toBe('https://wa.me/11234567890');
+    });
+
+    it('generates correct link for valid phone with message', () => {
+        const message = 'Hello, this is a test!';
+        const expectedLink = `https://wa.me/11234567890?text=${encodeURIComponent(message)}`;
+        expect(generateWhatsAppLink({ countryCode: '+1', number: '1234567890' }, message)).toBe(expectedLink);
+    });
+
+    it('strips non-numeric characters from country code and phone number', () => {
+        expect(generateWhatsAppLink({ countryCode: '+1 (US)', number: '123-456-7890 ext. 12' })).toBe('https://wa.me/1123456789012');
+        expect(generateWhatsAppLink({ countryCode: '++44', number: '07 123 456 789' })).toBe('https://wa.me/4407123456789');
     });
 });
