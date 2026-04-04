@@ -14,7 +14,7 @@ export const deriveKey = async (password: string, salt: Uint8Array): Promise<Cry
   return crypto.subtle.deriveKey(
     {
       name: "PBKDF2",
-      salt: salt.buffer as ArrayBuffer,
+      salt: salt,
       iterations: 100000,
       hash: "SHA-256"
     },

@@ -69,8 +69,11 @@ export const createDataManagementSlice: StateCreator<AppState, [], [], DataManag
                 if (password === null) return; // User cancelled
 
                 const { deriveKey, decryptObject } = await import('../src/crypto');
-                const salt = new Uint8Array(rawData.salt);
-                const key = await deriveKey(password, salt);
+                // Ensure salt is properly initialized. When rawData.salt is parsed from JSON,
+                // it is a plain array. We MUST convert it properly and ensuring .buffer works.
+                // Creating Uint8Array from regular array creates a new ArrayBuffer inside it.
+                const saltArray = new Uint8Array(rawData.salt);
+                const key = await deriveKey(password, saltArray);
                 try {
                     const decrypted = await decryptObject(rawData.data, key);
                     if (!decrypted) throw new Error("Decryption failed");

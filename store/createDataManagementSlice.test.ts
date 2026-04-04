@@ -114,10 +114,15 @@ describe('createDataManagementSlice', () => {
     });
 
     it('exports encrypted data if password is provided', async () => {
+      vi.useRealTimers();
       const addToastMock = useStore.getState().addToast;
       promptSpy.mockReturnValue('my-secret-password');
 
-      await useStore.getState().exportData();
+      const promise = useStore.getState().exportData();
+
+      // Let promises related to crypto resolve natively
+      await new Promise(resolve => setTimeout(resolve, 50));
+      await promise;
 
       expect(createObjectURLMock).toHaveBeenCalled();
       const blobArg = createObjectURLMock.mock.calls[0][0];
@@ -128,6 +133,8 @@ describe('createDataManagementSlice', () => {
       expect(parsed.salt).toBeDefined();
       expect(parsed.data).toBeDefined();
       expect(addToastMock).toHaveBeenCalledWith('Data exported successfully!', 'success');
+
+      vi.useFakeTimers();
     });
   });
 
