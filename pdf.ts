@@ -128,8 +128,7 @@ export const generateInvoicePDF = (
   if (returnBlob) {
     return doc.output('blob');
   } else {
-    const dateStr = typeof transaction.date === 'string' ? transaction.date : transaction.date.toISOString();
-    doc.save(`Invoice_${student.firstName}_${dateStr.split('T')[0]}.pdf`);
+    doc.save(`Invoice_${student.firstName}_${transaction.date.split('T')[0]}.pdf`);
   }
 };
 
@@ -189,8 +188,8 @@ export const generateProgressReportPDF = (
 
   const reportTransactions = transactions
      .filter(t => t.studentId === student.id && (t.grade || t.progressRemark))
-     // ⚡ Bolt Performance: Ensure dates are handled correctly during O(N log N) sorting
-     .map(t => ({ t, time: typeof t.date === 'string' ? Date.parse(t.date) : t.date.getTime() }))
+     // ⚡ Bolt Performance: Avoid Date.parse() overhead during O(N log N) sorting
+     .map(t => ({ t, time: Date.parse(t.date) }))
      .sort((a,b) => b.time - a.time)
      .map(obj => obj.t);
 
@@ -246,12 +245,12 @@ export const generateBulkInvoicePDF = (
     if (!student) return;
     
     // Sort transactions by date
-    // ⚡ Bolt Performance: Avoid overhead during O(N log N) sorting
+    // ⚡ Bolt Performance: Avoid Date.parse() overhead during O(N log N) sorting
     const timeMap = new Map<any, number>();
     for (let i = 0; i < studentTransactions.length; i++) {
-      const d = studentTransactions[i].date;
-      timeMap.set(studentTransactions[i], typeof d === 'string' ? Date.parse(d) : d.getTime());
+      timeMap.set(studentTransactions[i], Date.parse(studentTransactions[i].date));
     }
+    studentTransactions.sort((a,b) => timeMap.get(a)! - timeMap.get(b)!);
 
     if (!isFirstPage) {
       doc.addPage();

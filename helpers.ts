@@ -23,10 +23,10 @@ export const formatCurrency = (amount: number, currencySymbol: string): string =
 };
 
 /**
- * Formats a date into a human-readable local date format.
+ * Formats an ISO date string into a human-readable local date format.
  */
-export const formatDate = (date: string | Date): string => {
-  return new Date(date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+export const formatDate = (dateString: string): string => {
+  return new Date(dateString).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 };
 
 /**
@@ -57,12 +57,12 @@ export const getPaymentStatusColor = (status: PaymentStatus): 'green' | 'yellow'
 };
 
 /**
- * Formats a date into a relative time string (e.g., "5m ago").
- * @param {string | Date} dateValue The date to format.
+ * Formats an ISO date string into a relative time string (e.g., "5m ago").
+ * @param {string} dateString The ISO date string to format.
  * @returns {string} The formatted relative time string.
  */
-export const formatRelativeTime = (dateValue: string | Date): string => {
-    const date = new Date(dateValue);
+export const formatRelativeTime = (dateString: string): string => {
+    const date = new Date(dateString);
     const now = new Date();
     const seconds = Math.round((now.getTime() - date.getTime()) / 1000);
     const minutes = Math.round(seconds / 60);
@@ -114,8 +114,8 @@ export const generatePortalLink = (student: Student, transactions: Transaction[]
       grade: t.grade,
       progressRemark: t.progressRemark,
     }))
-    // ⚡ Bolt Performance: Direct date comparison is efficient for O(N log N) sorting
-    .sort((a, b) => (new Date(b.date).getTime()) - (new Date(a.date).getTime()))
+    // ⚡ Bolt Performance: Avoid Date.parse() overhead during O(N log N) sorting by using direct ISO string comparison
+    .sort((a, b) => b.date < a.date ? -1 : (b.date > a.date ? 1 : 0))
   };
   
   const base64 = btoa(encodeURIComponent(JSON.stringify(payload)));

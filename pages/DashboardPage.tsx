@@ -24,14 +24,11 @@ export const DashboardPage: React.FC = () => {
   const { totalUnpaid, totalPaidThisMonth, activeStudentsCount, overduePayments } = useData.derived();
   
   const predictedIncome = useMemo(() => {
-    let sum = 0;
-    for (let i = 0; i < students.length; i++) {
-      const student = students[i];
+    return students.reduce((sum, student) => {
       let monthlyMultiplier = 4;
       if (student.tuition.rateType === 'monthly') monthlyMultiplier = 1;
-      sum += (student.tuition.defaultRate * monthlyMultiplier);
-    }
-    return sum;
+      return sum + (student.tuition.defaultRate * monthlyMultiplier);
+    }, 0);
   }, [students]);
 
   const navigate = useNavigate();
@@ -73,32 +70,22 @@ export const DashboardPage: React.FC = () => {
     // ⚡ Bolt Performance: Pre-compute the fallback date outside the loop
     const fallbackDate = Date.now();
 
-    // ⚡ Bolt Performance: Pre-calculate target months and related data
-    const monthIncomes = new Float64Array(6);
-    const targetMonths: { name: string, thresholdDate: number }[] = [];
-    const monthLookup = new Map<string, number>();
-
+    // ⚡ Bolt Performance: Pre-calculate target months to avoid O(6*N) loop inside map
+    const monthIncomes = new Array(6).fill(0);
+    const targetMonths: {year: number, month: number}[] = [];
     for (let i = 5; i >= 0; i--) {
       const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-      const year = d.getFullYear();
-      const month = d.getMonth();
-      const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
-
-      const thresholdDate = new Date(year, month + 1, 0).getTime();
-      const monthName = d.toLocaleString('default', { month: 'short' });
-
-      monthLookup.set(monthKey, 5 - i);
-      targetMonths.push({ name: monthName, thresholdDate });
+      targetMonths.push({ year: d.getFullYear(), month: d.getMonth() });
     }
 
-    // ⚡ Bolt Performance: Single pass over transactions with O(1) month lookup
+    // ⚡ Bolt Performance: Single pass over transactions
     for (let j = 0; j < transactions.length; j++) {
       const t = transactions[j];
+      // ⚡ Bolt Performance: Check status before creating expensive Date objects
       if (t.status === PaymentStatus.Paid || t.status === PaymentStatus.PartiallyPaid || t.status === PaymentStatus.Overpaid) {
         // ⚡ Bolt Performance: Use string parsing for ISO dates to avoid expensive Date objects
-        const tDateStr = typeof t.date === 'string' ? t.date : t.date.toISOString();
-        const tYear = +tDateStr.substring(0, 4);
-        const tMonth = +tDateStr.substring(5, 7) - 1;
+        const tYear = +t.date.substring(0, 4);
+        const tMonth = +t.date.substring(5, 7) - 1;
         for (let k = 0; k < 6; k++) {
           if (targetMonths[k].year === tYear && targetMonths[k].month === tMonth) {
             monthIncomes[k] += t.amountPaid;
@@ -112,17 +99,25 @@ export const DashboardPage: React.FC = () => {
     const studentTimes = new Float64Array(students.length);
     for (let j = 0; j < students.length; j++) {
       const s = students[j];
-      // ⚡ Bolt Performance: Ensure createdAt is handled as string or Date before parsing
-      studentTimes[j] = s.createdAt ? (typeof s.createdAt === 'string' ? Date.parse(s.createdAt) : s.createdAt.getTime()) : fallbackDate;
+      // ⚡ Bolt Performance: Use Date.parse() instead of new Date().getTime()
+      studentTimes[j] = s.createdAt ? Date.parse(s.createdAt) : fallbackDate;
     }
 
-    for (let i = 0; i < 6; i++) {
-      const { name, thresholdDate } = targetMonths[i];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const monthName = d.toLocaleString('default', { month: 'short' });
+
+      const income = monthIncomes[5 - i];
+
+      // ⚡ Bolt Performance: Hoist loop-invariant threshold Date creation
+      const thresholdDate = new Date(today.getFullYear(), today.getMonth() - i + 1, 0).getTime();
+
       let studentsCount = 0;
       for (let j = 0; j < studentTimes.length; j++) {
           if (studentTimes[j] <= thresholdDate) studentsCount++;
       }
-      data.push({ name, income: monthIncomes[i], students: studentsCount });
+
+      data.push({ name: monthName, income, students: studentsCount });
     }
     return data;
   }, [transactions, students]);

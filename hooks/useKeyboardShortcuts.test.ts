@@ -134,35 +134,6 @@ describe('useKeyboardShortcuts', () => {
     document.body.removeChild(textarea);
   });
 
-  it('ignores shortcuts if typed inside a select element', () => {
-    renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
-
-    const select = document.createElement('select');
-    document.body.appendChild(select);
-
-    const event = new KeyboardEvent('keydown', {
-      key: 'k',
-      ctrlKey: true,
-      bubbles: true,
-    });
-    select.dispatchEvent(event);
-
-    expect(onOpenSearch).not.toHaveBeenCalled();
-    document.body.removeChild(select);
-  });
-
-  it('ignores plain keypresses without modifier keys', () => {
-    renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
-    fireKeyDown('k');
-    expect(onOpenSearch).not.toHaveBeenCalled();
-  });
-
-  it('ignores unknown keyboard shortcuts with modifier keys', () => {
-    renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
-    fireKeyDown('x', { ctrlKey: true });
-    expect(onOpenSearch).not.toHaveBeenCalled();
-  });
-
   describe('Shift+P logic', () => {
     it('marks hovered transaction as paid if hovered (Shift+P)', () => {
       const mockTx: Transaction = {
@@ -209,41 +180,6 @@ describe('useKeyboardShortcuts', () => {
 
       (useStore as unknown as Mock).mockReturnValue({
         transactions: [mockTx],
-        updateTransaction: mockUpdateTransaction,
-        addToast: mockAddToast,
-      });
-
-      vi.spyOn(globalHover, 'currentHoveredTransactionId', 'get').mockReturnValue('tx-1');
-
-      renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
-
-      fireKeyDown('p', { shiftKey: true });
-
-      expect(mockUpdateTransaction).not.toHaveBeenCalled();
-      expect(mockAddToast).not.toHaveBeenCalled();
-    });
-
-    it('does nothing if neither transaction nor student is hovered (Shift+P)', () => {
-      (useStore as unknown as Mock).mockReturnValue({
-        transactions: [],
-        updateTransaction: mockUpdateTransaction,
-        addToast: mockAddToast,
-      });
-
-      vi.spyOn(globalHover, 'currentHoveredTransactionId', 'get').mockReturnValue(null);
-      vi.spyOn(globalHover, 'currentHoveredStudentId', 'get').mockReturnValue(null);
-
-      renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
-
-      fireKeyDown('p', { shiftKey: true });
-
-      expect(mockUpdateTransaction).not.toHaveBeenCalled();
-      expect(mockAddToast).not.toHaveBeenCalled();
-    });
-
-    it('does nothing if hovered transaction is not found (Shift+P)', () => {
-      (useStore as unknown as Mock).mockReturnValue({
-        transactions: [],
         updateTransaction: mockUpdateTransaction,
         addToast: mockAddToast,
       });

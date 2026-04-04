@@ -51,44 +51,59 @@ export const encryptObject = async (obj: any, key: CryptoKey): Promise<string> =
 };
 
 export const jsonReviver = (key: string, value: any) => {
-  const dateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
-  if (typeof value === 'string' && dateFormat.test(value)) {
-    return new Date(value);
-  }
   if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
     return undefined;
   }
-
-  const dateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
-  if (typeof value === "string" && dateFormat.test(value)) {
-    const date = new Date(value);
-    if (!isNaN(date.getTime())) {
-      return date;
-    }
-  }
-
   return value;
 };
 
 export const decryptObject = async <T = any>(
   encryptedBase64: string,
   key: CryptoKey,
-  schema?: import('zod').ZodSchema<T>
-): Promise<T> => {
-  const parsed = JSON.parse(atob(encryptedBase64), jsonReviver);
-  if (!parsed.iv || !parsed.ct) {
-    throw new Error("Invalid encrypted wrapper");
+  schema?: import('zod').ZodSchema<T>,
+  onLegacyData?: (data: T) => void | Promise<void>
+): Promise<T | null> => {
+  try {
+    const parsed = JSON.parse(atob(encryptedBase64), jsonReviver);
+    if (!parsed.iv || !parsed.ct) {
+      throw new Error("Invalid encrypted wrapper");
+    }
+    const ivArray = new Uint8Array(parsed.iv);
+    const ctArray = new Uint8Array(parsed.ct);
+    const decrypted = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: ivArray },
+      key,
+      ctArray
+    );
+    const dec = new TextDecoder();
+    const parsedData = JSON.parse(dec.decode(decrypted), jsonReviver);
+    return schema ? schema.parse(parsedData) : parsedData;
+  } catch (error) {
+    // Fallback for old unencrypted or old btoa() data
+    try {
+      const raw = atob(encryptedBase64);
+      const bytes = new Uint8Array(raw.length);
+      for (let i = 0; i < raw.length; i++) {
+        bytes[i] = raw.charCodeAt(i);
+      }
+      const decodedData = new TextDecoder().decode(bytes);
+      const parsedData = JSON.parse(decodedData, jsonReviver);
+      const result = schema ? schema.parse(parsedData) : parsedData;
+      if (onLegacyData && result) {
+        // We await the migration here so the new state is saved
+        // before we return the legacy data for this initial load
+        await Promise.resolve(onLegacyData(result)).catch(() => {});
+      }
+
+      // We return the legacy data so the app does not load an empty state,
+      // but only if it's valid JSON that matches the schema
+      return result;
+    } catch (oldError) {
+      // Throw the *original* error on failure to decrypt so that we do not fail open
+      // to arbitrary unencrypted data
+      throw error;
+    }
   }
-  const ivArray = new Uint8Array(parsed.iv);
-  const ctArray = new Uint8Array(parsed.ct);
-  const decrypted = await crypto.subtle.decrypt(
-    { name: "AES-GCM", iv: ivArray },
-    key,
-    ctArray
-  );
-  const dec = new TextDecoder();
-  const parsedData = JSON.parse(dec.decode(decrypted), jsonReviver);
-  return schema ? schema.parse(parsedData) : parsedData;
 };
 
 export const exportKeyToBase64 = async (key: CryptoKey): Promise<string> => {

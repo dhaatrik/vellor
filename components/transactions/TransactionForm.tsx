@@ -61,10 +61,9 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({ transaction, s
   };
 
   if (transaction) {
-      const dateStr = typeof transaction.date === 'string' ? transaction.date : transaction.date.toISOString();
       defaultFormValues = {
           studentId: transaction.studentId,
-          date: dateStr.split('T')[0],
+          date: transaction.date.split('T')[0],
           lessonDuration: transaction.lessonDuration,
           lessonFee: transaction.lessonFee,
           amountPaid: transaction.amountPaid,

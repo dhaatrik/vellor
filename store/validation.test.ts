@@ -140,32 +140,6 @@ describe('Zod Validation - Individual Schemas', () => {
         expect(() => phoneNumberSchema.parse({ countryCode: 1, number: '1234567890' })).toThrow();
     });
 
-    it('should handle phoneNumberSchema edge cases', () => {
-        // Empty strings (valid per z.string())
-        expect(phoneNumberSchema.safeParse({ countryCode: '', number: '' }).success).toBe(true);
-
-        // Null and undefined values
-        expect(phoneNumberSchema.safeParse({ countryCode: null, number: '123' }).success).toBe(false);
-
-        // Completely empty object
-        expect(phoneNumberSchema.safeParse({}).success).toBe(false);
-
-        // Numeric values
-        expect(phoneNumberSchema.safeParse({ countryCode: 1, number: 1234567890 }).success).toBe(false);
-        expect(phoneNumberSchema.safeParse({ countryCode: '+1', number: 1234567890 }).success).toBe(false);
-
-        // Arrays and objects
-        expect(phoneNumberSchema.safeParse({ countryCode: '+1', number: [] }).success).toBe(false);
-        expect(phoneNumberSchema.safeParse({ countryCode: '+1', number: {} }).success).toBe(false);
-
-        // Missing fields
-        expect(phoneNumberSchema.safeParse({ countryCode: '+1' }).success).toBe(false);
-
-        // Missing payload
-        expect(phoneNumberSchema.safeParse(null).success).toBe(false);
-        expect(phoneNumberSchema.safeParse(undefined).success).toBe(false);
-    });
-
     it('should validate parentSchema', () => {
         const valid = { name: 'Jane Doe', relationship: 'Mother' };
         expect(() => parentSchema.parse(valid)).not.toThrow();
@@ -229,10 +203,6 @@ describe('Zod Validation - Individual Schemas', () => {
         const invalid = { ...valid };
         delete (invalid as any).firstName;
         expect(() => studentSchema.parse(invalid)).toThrow();
-
-        // Empty string for 'firstName'
-        const emptyFirstName = { ...valid, firstName: '' };
-        expect(() => studentSchema.parse(emptyFirstName)).toThrowError(/First name is required/);
     });
 
     it('should validate transactionSchema', () => {

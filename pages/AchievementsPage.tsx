@@ -31,9 +31,7 @@ export const AchievementsPage: React.FC = () => {
     // ⚡ Bolt Performance: Cache parsed dates to avoid redundant parsing during sort comparisons
     const timeMap = new Map<any, number>();
     for (let i = 0; i < list.length; i++) {
-      const d = list[i].dateAchieved;
-      const time = d ? (typeof d === 'string' ? Date.parse(d) : d.getTime()) : Date.parse("1970-01-01T00:00:00Z");
-      timeMap.set(list[i], time);
+      timeMap.set(list[i], Date.parse(list[i].dateAchieved || "1970-01-01T00:00:00Z"));
     }
     return list.sort((a, b) => (timeMap.get(b) || 0) - (timeMap.get(a) || 0));
   }, [achievements, settings?.customAchievement, settings?.customAchievementEarned]);
@@ -57,10 +55,9 @@ export const AchievementsPage: React.FC = () => {
   const totalEarned = useMemo(() => {
     // ⚡ Bolt Performance: Replace .filter().reduce() chain with a single for-loop pass to eliminate intermediate allocations
     let sum = 0;
-    for (let i = 0, len = transactions.length; i < len; i++) {
+    for (let i = 0; i < transactions.length; i++) {
       const t = transactions[i];
-      const status = t.status;
-      if (status === PaymentStatus.Paid || status === PaymentStatus.Overpaid || status === PaymentStatus.PartiallyPaid) {
+      if (t.status === PaymentStatus.Paid || t.status === PaymentStatus.Overpaid || t.status === PaymentStatus.PartiallyPaid) {
         sum += (t.amountPaid || 0);
       }
     }

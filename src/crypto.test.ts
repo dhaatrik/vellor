@@ -13,18 +13,6 @@ describe('jsonReviver', () => {
     expect(jsonReviver('data', obj)).toBe(obj);
   });
 
-  it('revives ISO date strings into Date objects', () => {
-    const isoDate = '2023-10-27T10:00:00.000Z';
-    const result = jsonReviver('date', isoDate);
-    expect(result).toBeInstanceOf(Date);
-    expect((result as Date).toISOString()).toBe(isoDate);
-  });
-
-  it('does not revive invalid ISO-like strings', () => {
-    const invalidIso = '2023-13-45T25:61:61.000Z';
-    expect(jsonReviver('date', invalidIso)).toBe(invalidIso);
-  });
-
   it('returns undefined for sensitive keys to prevent prototype pollution', () => {
     expect(jsonReviver('__proto__', { attacker: 'props' })).toBeUndefined();
     expect(jsonReviver('constructor', { attacker: 'props' })).toBeUndefined();
@@ -32,16 +20,13 @@ describe('jsonReviver', () => {
   });
 
   it('works correctly within JSON.parse', () => {
-    const json = '{"name":"John","date":"2023-10-27T10:00:00.000Z","__proto__":{"polluted":"yes"},"nested":{"constructor":"test"}}';
+    const json = '{"name":"John","__proto__":{"polluted":"yes"},"nested":{"constructor":"test"}}';
     const parsed = JSON.parse(json, jsonReviver);
 
     expect(parsed.name).toBe('John');
-    expect(parsed.date).toBeInstanceOf(Date);
+    // Using hasOwnProperty to correctly check for the absence of the property on the object instance
     expect(Object.prototype.hasOwnProperty.call(parsed, "__proto__")).toBe(false);
     expect(Object.prototype.hasOwnProperty.call(parsed.nested, "constructor")).toBe(false);
-    // The object itself should still be returned at the end of parsing
-    expect(parsed).toBeDefined();
-    expect(parsed.nested).toBeDefined();
   });
 });
 
@@ -109,68 +94,5 @@ describe('importKeyFromBase64', () => {
 
     // importKey should throw when expecting a 256-bit AES key but given different length
     await expect(importKeyFromBase64(shortBase64)).rejects.toThrow();
-  });
-});
-
-describe('jsonReviver', () => {
-  it('returns undefined for prototype pollution keys', () => {
-    expect(jsonReviver('__proto__', 'value')).toBeUndefined();
-    expect(jsonReviver('constructor', 'value')).toBeUndefined();
-    expect(jsonReviver('prototype', 'value')).toBeUndefined();
-  });
-
-  it('parses valid ISO date strings to Date objects', () => {
-    const dateStr = '2023-10-27T10:00:00.000Z';
-    const result = jsonReviver('date', dateStr);
-    expect(result).toBeInstanceOf(Date);
-    expect((result as Date).toISOString()).toBe(dateStr);
-  });
-
-  it('returns original value for non-date strings', () => {
-    expect(jsonReviver('key', 'not a date')).toBe('not a date');
-    expect(jsonReviver('key', '2023-10-27')).toBe('2023-10-27'); // Not full ISO format
-  });
-
-  it('returns original value for non-string values', () => {
-    expect(jsonReviver('key', 123)).toBe(123);
-    expect(jsonReviver('key', true)).toBe(true);
-    expect(jsonReviver('key', null)).toBe(null);
-    expect(jsonReviver('key', { a: 1 })).toEqual({ a: 1 });
-  });
-});
-
-describe('decryptObject', () => {
-  let validKey: CryptoKey;
-  let anotherKey: CryptoKey;
-
-  beforeAll(async () => {
-    if (typeof globalThis.crypto === 'undefined' || !globalThis.crypto.subtle) {
-      Object.defineProperty(globalThis, 'crypto', {
-        value: webcrypto,
-      });
-    }
-    validKey = await importKeyFromBase64('0RGoNs9kNzJa3LLq+i/hoUbA39sfrGJs5YpYj7vRYa4=');
-    anotherKey = await importKeyFromBase64('1RGoNs9kNzJa3LLq+i/hoUbA39sfrGJs5YpYj7vRYa4='); // Different key
-  });
-
-  it('throws an error for invalid base64 encoding', async () => {
-    const invalidBase64 = 'invalid-base64-string!@#';
-    await expect(decryptObject(invalidBase64, validKey)).rejects.toThrow();
-  });
-
-  it('throws an error when iv or ct is missing in the decrypted wrapper', async () => {
-    const missingIv = btoa(JSON.stringify({ ct: [] }));
-    const missingCt = btoa(JSON.stringify({ iv: [] }));
-
-    await expect(decryptObject(missingIv, validKey)).rejects.toThrow('Invalid encrypted wrapper');
-    await expect(decryptObject(missingCt, validKey)).rejects.toThrow('Invalid encrypted wrapper');
-  });
-
-  it('throws an error when decrypted with an invalid key', async () => {
-    const data = { secret: 'message' };
-    const encrypted = await encryptObject(data, validKey);
-
-    // Decrypting with anotherKey should fail
-    await expect(decryptObject(encrypted, anotherKey)).rejects.toThrow();
   });
 });

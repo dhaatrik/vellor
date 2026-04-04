@@ -39,15 +39,11 @@ export const PortalPage: React.FC = () => {
   const student = typeof rawStudent === 'object' && rawStudent !== null ? rawStudent : {};
   const transactions = Array.isArray(rawTransactions) ? rawTransactions : [];
 
-  let totalOwed = 0;
-  for (let i = 0; i < transactions.length; i++) {
-    const t = transactions[i];
-    if (t?.status === 'Due') {
-      totalOwed += (t.lessonFee || 0);
-    } else if (t?.status === 'Partially Paid') {
-      totalOwed += ((t.lessonFee || 0) - (t.amountPaid || 0));
-    }
-  }
+  const totalOwed = transactions.reduce((sum: number, t: any) => {
+    if (t?.status === 'Due') return sum + (t.lessonFee || 0);
+    if (t?.status === 'Partially Paid') return sum + ((t.lessonFee || 0) - (t.amountPaid || 0));
+    return sum;
+  }, 0);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 font-sans">

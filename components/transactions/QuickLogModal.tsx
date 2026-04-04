@@ -83,15 +83,6 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ isOpen, onClose, d
     onClose();
   };
 
-  const handleStudentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setStudentId(e.target.value);
-    // Auto-fill duration if student has a typical duration
-    const student = studentMap.get(e.target.value);
-    if (student && student.tuition.typicalLessonDuration) {
-      setDuration(student.tuition.typicalLessonDuration.toString());
-    }
-  };
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -125,7 +116,14 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ isOpen, onClose, d
                   label="Student"
                   name="studentId"
                   value={studentId}
-                  onChange={handleStudentChange}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                    setStudentId(e.target.value);
+                    // Auto-fill duration if student has a typical duration
+                    const student = studentMap.get(e.target.value);
+                    if (student && student.tuition.typicalLessonDuration) {
+                      setDuration(student.tuition.typicalLessonDuration.toString());
+                    }
+                  }}
                   options={studentOptions}
                   required
                 />

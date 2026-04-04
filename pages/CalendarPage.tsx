@@ -45,7 +45,7 @@ export const CalendarPage: React.FC = () => {
       const student = studentMap.get(t.studentId);
       const studentName = student ? `${student.firstName} ${student.lastName}` : 'Unknown Student';
       
-      let startDateStr = typeof t.date === 'string' ? t.date : t.date.toISOString();
+      let startDateStr = t.date;
       if (!startDateStr.includes('T')) {
           startDateStr = `${startDateStr}T10:00:00`; // Fallback to 10 AM if only date is provided
       }

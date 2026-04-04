@@ -77,10 +77,10 @@ export const TransactionsPage: React.FC = () => {
   
   const studentsMap = useMemo(() => {
     // ⚡ Bolt Performance: Pre-compute searchName for faster filtering
-    const map = new Map<string, { student: typeof students[0], searchName: string }>();
+    const map = new Map<string, typeof students[0] & { searchName: string }>();
     for (const student of students) {
       map.set(student.id, {
-        student,
+        ...student,
         searchName: `${student.firstName} ${student.lastName}`.toLowerCase()
       });
     }
@@ -88,9 +88,9 @@ export const TransactionsPage: React.FC = () => {
   }, [students]);
 
   const handleGenerateInvoice = (transaction: Transaction) => {
-    const entry = studentsMap.get(transaction.studentId);
-    if (entry) {
-      generateInvoicePDF(transaction, entry.student, settings);
+    const student = studentsMap.get(transaction.studentId);
+    if (student) {
+      generateInvoicePDF(transaction, student, settings);
       addToast('Invoice generated successfully.', 'success');
     } else {
       addToast('Student not found.', 'error');
@@ -98,16 +98,14 @@ export const TransactionsPage: React.FC = () => {
   };
 
   const handleShareWhatsApp = async (transaction: Transaction) => {
-    const entry = studentsMap.get(transaction.studentId);
-    if (!entry) return addToast('Student not found.', 'error');
-    const student = entry.student;
+    const student = studentsMap.get(transaction.studentId);
+    if (!student) return addToast('Student not found.', 'error');
 
     try {
       if (navigator.share) {
          const blob = generateInvoicePDF(transaction, student, settings, true) as Blob;
          if (!blob) return;
-         const dateStr = typeof transaction.date === 'string' ? transaction.date : transaction.date.toISOString();
-         const file = new File([blob], `Invoice_${student.firstName}_${dateStr.split('T')[0]}.pdf`, { type: 'application/pdf' });
+         const file = new File([blob], `Invoice_${student.firstName}_${transaction.date.split('T')[0]}.pdf`, { type: 'application/pdf' });
          await navigator.share({
            title: 'Tutoring Invoice',
            text: `Hello ${student.firstName}, here is your latest invoice from ${settings.userName}.`,
@@ -147,7 +145,7 @@ export const TransactionsPage: React.FC = () => {
     // using Date.parse() to avoid expensive Date object allocations during sorting
     const withTimestamps = transactions.map(t => ({
       t,
-      timestamp: typeof t.date === 'string' ? Date.parse(t.date) : t.date.getTime()
+      timestamp: Date.parse(t.date)
     }));
     return withTimestamps
       .sort((a, b) => b.timestamp - a.timestamp)
@@ -180,9 +178,9 @@ export const TransactionsPage: React.FC = () => {
 
       // Apply search filter
       if (query) {
-        const entry = studentsMap.get(t.studentId);
-        if (!entry) return false;
-        if (!entry.searchName.includes(query)) return false;
+        const student = studentsMap.get(t.studentId);
+        if (!student) return false;
+        if (!student.searchName.includes(query)) return false;
       }
 
       return true;
@@ -340,8 +338,7 @@ export const TransactionsPage: React.FC = () => {
           >
             {rowVirtualizer.getVirtualItems().map((virtualRow) => {
               const t = filteredTransactions[virtualRow.index];
-              const entry = studentsMap.get(t.studentId);
-              const student = entry?.student;
+              const student = studentsMap.get(t.studentId);
               return (
                 <div
                   key={t.id}

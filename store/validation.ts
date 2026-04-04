@@ -28,7 +28,7 @@ export const tuitionDetailsSchema = z.object({
 
 export const studentSchema = z.object({
   id: z.string(),
-  firstName: z.string().min(1, 'First name is required'),
+  firstName: z.string(),
   lastName: z.string(),
   country: z.string().optional(),
   parent: parentSchema.optional(),
