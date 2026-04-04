@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { importKeyFromBase64, generateSalt } from './crypto';
+import { importKeyFromBase64, generateSalt, decryptObject, encryptObject } from './crypto';
 
 // Polyfill for crypto.subtle in jsdom environment if needed, but vitest globals=true with jsdom usually provides it, or we can use Node's crypto
 import { webcrypto } from 'crypto';
@@ -68,5 +68,41 @@ describe('importKeyFromBase64', () => {
 
     // importKey should throw when expecting a 256-bit AES key but given different length
     await expect(importKeyFromBase64(shortBase64)).rejects.toThrow();
+  });
+});
+
+describe('decryptObject', () => {
+  let validKey: CryptoKey;
+  let anotherKey: CryptoKey;
+
+  beforeAll(async () => {
+    if (typeof globalThis.crypto === 'undefined' || !globalThis.crypto.subtle) {
+      Object.defineProperty(globalThis, 'crypto', {
+        value: webcrypto,
+      });
+    }
+    validKey = await importKeyFromBase64('0RGoNs9kNzJa3LLq+i/hoUbA39sfrGJs5YpYj7vRYa4=');
+    anotherKey = await importKeyFromBase64('1RGoNs9kNzJa3LLq+i/hoUbA39sfrGJs5YpYj7vRYa4='); // Different key
+  });
+
+  it('throws an error for invalid base64 encoding', async () => {
+    const invalidBase64 = 'invalid-base64-string!@#';
+    await expect(decryptObject(invalidBase64, validKey)).rejects.toThrow();
+  });
+
+  it('throws an error when iv or ct is missing in the decrypted wrapper', async () => {
+    const missingIv = btoa(JSON.stringify({ ct: [] }));
+    const missingCt = btoa(JSON.stringify({ iv: [] }));
+
+    await expect(decryptObject(missingIv, validKey)).rejects.toThrow('Invalid encrypted wrapper');
+    await expect(decryptObject(missingCt, validKey)).rejects.toThrow('Invalid encrypted wrapper');
+  });
+
+  it('throws an error when decrypted with an invalid key', async () => {
+    const data = { secret: 'message' };
+    const encrypted = await encryptObject(data, validKey);
+
+    // Decrypting with anotherKey should fail
+    await expect(decryptObject(encrypted, anotherKey)).rejects.toThrow();
   });
 });
