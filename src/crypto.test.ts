@@ -38,7 +38,7 @@ describe('generateSalt', () => {
 
     expect(getRandomValuesSpy).toHaveBeenCalledTimes(1);
     expect(getRandomValuesSpy).toHaveBeenCalledWith(expect.any(Uint8Array));
-    expect(getRandomValuesSpy.mock.calls[0][0].length).toBe(16);
+    expect((getRandomValuesSpy.mock.calls[0]![0] as Uint8Array).length).toBe(16);
 
     getRandomValuesSpy.mockRestore();
   });
