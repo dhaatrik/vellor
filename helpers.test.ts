@@ -3,6 +3,28 @@ import { formatCurrency, formatPhoneNumber, getPaymentStatusColor, formatRelativ
 import { PaymentStatus, Student, Transaction, AppSettings, Theme } from './types';
 
 describe('Helpers', () => {
+    describe('sanitizeString', () => {
+        it('handles undefined input', () => {
+            expect(sanitizeString(undefined)).toBe('');
+        });
+
+        it('returns normal strings unmodified', () => {
+            expect(sanitizeString('Hello World')).toBe('Hello World');
+            expect(sanitizeString('12345')).toBe('12345');
+        });
+
+        it('removes HTML tags', () => {
+            expect(sanitizeString('<p>Hello</p>')).toBe('Hello');
+            expect(sanitizeString('<b>Bold</b> and <i>Italic</i>')).toBe('Bold and Italic');
+            expect(sanitizeString('<script>alert("xss")</script>')).toBe('');
+        });
+
+        it('handles complex HTML and malicious scripts', () => {
+            expect(sanitizeString('<img src="x" onerror="alert(1)">')).toBe('');
+            expect(sanitizeString('<a href="javascript:alert(1)">Click</a>')).toBe('Click');
+        });
+    });
+
     it('formats currency correctly', () => {
         expect(formatCurrency(150, '$')).toBe('$150.00');
         expect(formatCurrency(0, '£')).toBe('£0.00');

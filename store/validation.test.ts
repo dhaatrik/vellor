@@ -203,6 +203,10 @@ describe('Zod Validation - Individual Schemas', () => {
         const invalid = { ...valid };
         delete (invalid as any).firstName;
         expect(() => studentSchema.parse(invalid)).toThrow();
+
+        // Empty string for 'firstName'
+        const emptyFirstName = { ...valid, firstName: '' };
+        expect(() => studentSchema.parse(emptyFirstName)).toThrowError(/First name is required/);
     });
 
     it('should validate transactionSchema', () => {
