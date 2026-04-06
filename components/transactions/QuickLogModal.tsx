@@ -35,7 +35,11 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ isOpen, onClose, d
   const activeStudents = students;
 
   const studentMap = useMemo(() => {
-    return new Map(students.map(s => [s.id, s]));
+    const map: Record<string, typeof students[0]> = Object.create(null);
+    for (let i = 0; i < students.length; i++) {
+        map[students[i].id] = students[i];
+    }
+    return map;
   }, [students]);
 
   const studentOptions = useMemo(() => [
@@ -47,7 +51,7 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ isOpen, onClose, d
     e.preventDefault();
     if (!studentId || !duration || !amountPaid) return;
 
-    const student = studentMap.get(studentId);
+    const student = studentMap[studentId];
     if (!student) return;
 
     // Calculate lesson fee based on duration and student's default rate
@@ -86,7 +90,7 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ isOpen, onClose, d
   const handleStudentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setStudentId(e.target.value);
     // Auto-fill duration if student has a typical duration
-    const student = studentMap.get(e.target.value);
+    const student = studentMap[e.target.value];
     if (student && student.tuition.typicalLessonDuration) {
       setDuration(student.tuition.typicalLessonDuration.toString());
     }

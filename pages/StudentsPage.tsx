@@ -171,39 +171,44 @@ export const StudentsPage: React.FC = () => {
 
   const handleBulkExport = () => {
       let count = 0;
-      // Optimization: use maps for O(1) lookups and single loop through transactions
-      const selectedStudentMap = new Map();
+      // Optimization: use dict for O(1) lookups and single loop through transactions
+      const selectedStudentMap: Record<string, typeof students[0]> = Object.create(null);
       for (let i = 0; i < students.length; i++) {
           const student = students[i];
-          selectedStudentMap.set(student.id, student);
+          selectedStudentMap[student.id] = student;
       }
 
       const selectedSet = selectedStudentIds;
-      const firstUnpaidMap = new Map();
+      const firstUnpaidMap: Record<string, typeof transactions[0]> = Object.create(null);
+      let firstUnpaidMapSize = 0;
 
       for (let i = 0; i < transactions.length; i++) {
           const t = transactions[i];
           if (
               selectedSet.has(t.studentId) &&
-              !firstUnpaidMap.has(t.studentId) &&
+              firstUnpaidMap[t.studentId] === undefined &&
               t.status !== PaymentStatus.Paid &&
               t.status !== PaymentStatus.Overpaid &&
               t.status !== PaymentStatus.Scheduled
           ) {
-              firstUnpaidMap.set(t.studentId, t);
-              if (firstUnpaidMap.size === selectedSet.size) {
+              firstUnpaidMap[t.studentId] = t;
+              firstUnpaidMapSize++;
+              if (firstUnpaidMapSize === selectedSet.size) {
                   break; // found one unpaid transaction for each selected student
               }
           }
       }
 
-      firstUnpaidMap.forEach((t, studentId) => {
-          const student = selectedStudentMap.get(studentId);
+      const unpaidStudentIds = Object.keys(firstUnpaidMap);
+      for (let i = 0; i < unpaidStudentIds.length; i++) {
+          const studentId = unpaidStudentIds[i];
+          const t = firstUnpaidMap[studentId];
+          const student = selectedStudentMap[studentId];
           if (student) {
               generateInvoicePDF(t, student, settings);
               count++;
           }
-      });
+      }
 
       addToast(count > 0 ? `Exported ${count} invoices!` : 'No unpaid lessons to export for selected students.', count > 0 ? 'success' : 'info');
       setSelectedStudentIds(new Set());

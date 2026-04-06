@@ -166,10 +166,13 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
 
         const header = ['Date', 'Student', 'Duration', 'Fee', 'Amount Paid', 'Status', 'Payment Method', 'Notes'];
         
-        const studentMap = new Map(students.map(s => [s.id, s]));
+        const studentMap: Record<string, typeof students[0]> = Object.create(null);
+        for (let i = 0; i < students.length; i++) {
+            studentMap[students[i].id] = students[i];
+        }
 
         const rows = transactions.map(t => {
-            const student = studentMap.get(t.studentId);
+            const student = studentMap[t.studentId];
             const studentName = student ? `${student.firstName} ${student.lastName}` : 'Unknown Student';
             
             const escapeCSV = (str?: string) => {

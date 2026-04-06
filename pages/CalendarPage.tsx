@@ -38,11 +38,14 @@ export const CalendarPage: React.FC = () => {
   const [draggedStudentId, setDraggedStudentId] = useState<string | null>(null);
 
   const events = useMemo(() => {
-    // Create a map for O(1) student lookups, improving performance from O(N*M) to O(N+M)
-    const studentMap = new Map(students.map(s => [s.id, s]));
+    // Create a dict for O(1) student lookups, improving performance from O(N*M) to O(N+M)
+    const studentMap: Record<string, typeof students[0]> = Object.create(null);
+    for (let i = 0; i < students.length; i++) {
+        studentMap[students[i].id] = students[i];
+    }
 
     return transactions.map(t => {
-      const student = studentMap.get(t.studentId);
+      const student = studentMap[t.studentId];
       const studentName = student ? `${student.firstName} ${student.lastName}` : 'Unknown Student';
       
       let startDateStr = t.date;

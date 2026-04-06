@@ -76,7 +76,7 @@ export const DashboardPage: React.FC = () => {
     // ⚡ Bolt Performance: Pre-calculate target months and related data
     const monthIncomes = new Float64Array(6);
     const targetMonths: { name: string, thresholdDate: number }[] = [];
-    const monthLookup = new Map<string, number>();
+    const monthLookup: Record<string, number> = Object.create(null);
 
     for (let i = 5; i >= 0; i--) {
       const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
@@ -87,7 +87,7 @@ export const DashboardPage: React.FC = () => {
       const thresholdDate = new Date(year, month + 1, 0).getTime();
       const monthName = d.toLocaleString('default', { month: 'short' });
 
-      monthLookup.set(monthKey, 5 - i);
+      monthLookup[monthKey] = 5 - i;
       targetMonths.push({ name: monthName, thresholdDate });
     }
 
@@ -96,7 +96,7 @@ export const DashboardPage: React.FC = () => {
       const t = transactions[j];
       if (t.status === PaymentStatus.Paid || t.status === PaymentStatus.PartiallyPaid || t.status === PaymentStatus.Overpaid) {
         const monthKey = t.date.substring(0, 7);
-        const index = monthLookup.get(monthKey);
+        const index = monthLookup[monthKey];
         if (index !== undefined) {
           monthIncomes[index] += t.amountPaid;
         }
@@ -139,9 +139,9 @@ export const DashboardPage: React.FC = () => {
 
   // ⚡ Bolt Performance: Pre-calculate student lookup map to avoid O(N*M) lookups in virtualized lists
   const studentMap = useMemo(() => {
-    const map = new Map();
+    const map: Record<string, typeof students[0]> = Object.create(null);
     for (const student of students) {
-      map.set(student.id, student);
+      map[student.id] = student;
     }
     return map;
   }, [students]);
@@ -476,7 +476,7 @@ export const DashboardPage: React.FC = () => {
                 <div style={{ height: `${rowVirtualizerOverdue.getTotalSize()}px`, width: '100%', position: 'relative' }}>
                   {rowVirtualizerOverdue.getVirtualItems().map(virtualRow => {
                     const t = overduePayments[virtualRow.index];
-                    const student = studentMap.get(t.studentId);
+                    const student = studentMap[t.studentId];
                     return (
                       <div 
                         key={t.id}
