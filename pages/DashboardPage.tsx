@@ -36,6 +36,7 @@ export const DashboardPage: React.FC = () => {
 
   const navigate = useNavigate();
   const [isConfirmingClearAll, setIsConfirmingClearAll] = useState(false);
+  const [confirmingDeleteActivityId, setConfirmingDeleteActivityId] = useState<string | null>(null);
   const { isInstallable, promptInstall } = usePwaInstall();
 
   useEffect(() => {
@@ -438,8 +439,8 @@ export const DashboardPage: React.FC = () => {
                                     <span className="text-xs text-gray-500 dark:text-gray-400">{formatRelativeTime(activity.timestamp)}</span>
                                   </div>
                                   <button 
-                                    onClick={() => deleteActivity(activity.id)}
-                                    className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-1 rounded-full hover:bg-gray-200 dark:hover:bg-primary-light transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary"
+                                    onClick={() => setConfirmingDeleteActivityId(activity.id)}
+                                    className="opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-gray-200 dark:hover:bg-primary-light transition-opacity focus:opacity-100 focus:ring-2"
                                     aria-label="Delete activity"
                                     title="Delete activity"
                                   >
@@ -513,6 +514,20 @@ export const DashboardPage: React.FC = () => {
         </motion.div>
 
       </div>
+
+      <ConfirmationModal
+        isOpen={confirmingDeleteActivityId !== null}
+        onClose={() => setConfirmingDeleteActivityId(null)}
+        onConfirm={() => {
+          if (confirmingDeleteActivityId) {
+            deleteActivity(confirmingDeleteActivityId);
+            setConfirmingDeleteActivityId(null);
+          }
+        }}
+        title="Delete Activity"
+        message="Are you sure you want to delete this activity? This action cannot be undone."
+        confirmButtonText="Delete"
+      />
 
       <ConfirmationModal
         isOpen={isConfirmingClearAll}
