@@ -78,7 +78,7 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = React.mem
           </div>
         )}
         
-        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-white/5 flex gap-2 justify-end opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-white/5 flex gap-2 justify-end opacity-100 sm:opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200">
             {onShareWhatsApp && (
               <Button variant="ghost" size="sm" onClick={() => onShareWhatsApp(transaction)} className="!p-2 rounded-full text-green-500 hover:text-green-600 hover:bg-green-500/10" aria-label="Share via WhatsApp" title="Share via WhatsApp">
                 <Icon iconName="share" className="w-5 h-5" />
