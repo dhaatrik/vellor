@@ -32,3 +32,6 @@
 ## 2025-03-05 - Performance: Use Object.create(null) for string-keyed dictionary lookups
 **Learning:** Initializing dictionaries for fast lookups using `new Map()` introduces measurable overhead in hot paths compared to V8's highly optimized internal dictionary mode. While Maps are great for complex key types, simple string-based lookups (like IDs or dates) are slower.
 **Action:** Replace `new Map()` with `Object.create(null)` and use a traditional `for` loop to populate it. Replace `.get(key)` and `.set(key, val)` with standard property access (`[key]`). This creates a pure dictionary object with no prototype overhead, resulting in significantly faster lookups.
+## 2024-03-05 - Performance: Avoid Map usage inside array numeric sorting
+**Learning:** While Maps are useful for caching calculations (like parsed dates) before a sort to avoid repeated work, allocating a `new Map()` and accessing `.get()` inside the comparator still incurs V8 overhead.
+**Action:** For ISO 8601 string dates, completely remove the intermediate parsing step and the Map cache. Sort the dates directly using string lexicographical comparison to eliminate all allocations and parsing overhead while maintaining standard sort functionality.
