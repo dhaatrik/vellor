@@ -8,3 +8,6 @@
 ## 2024-04-06 - Fixing Keyboard Traps in Hover-Only UI Elements
 **Learning:** In this application, elements using `opacity-0 group-hover:opacity-100` (like the 'Delete Activity' button on the dashboard) become effectively invisible traps for keyboard users because they do not become visible on focus.
 **Action:** When adding keyboard focus indicators (`focus-visible:ring-*`), always ensure hover-only UI elements also include `focus-visible:opacity-100` so screen reader or keyboard navigators can actually see the focused action.
+## 2024-10-24 - Accessible Checkboxes and Hover-Only UI Traps
+**Learning:** Reusing `div`s with `onClick` handlers for checkboxes (like the bulk selection in Student Lists) breaks accessibility because they are not keyboard-focusable and lack semantic meaning. Further, applying hover-only visibility classes (e.g. `opacity-0 group-hover:opacity-100`) creates a trap where keyboard users can tab to the item but cannot visually see their focus state.
+**Action:** Always replace non-semantic clickable `div`s with actual `<button type="button">` elements. When using `group-hover:opacity-100` to hide UI elements until hovered, *always* pair it with `focus-visible:opacity-100` and `focus-visible:ring-*` classes so keyboard users can see what they are about to interact with.
