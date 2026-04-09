@@ -231,18 +231,24 @@ export const generateBulkInvoicePDF = (
   );
 
   // Group by student
-  const studentMap = new Map<string, Transaction[]>();
-  unpaidTransactions.forEach(t => {
-    if (!studentMap.has(t.studentId)) studentMap.set(t.studentId, []);
-    studentMap.get(t.studentId)!.push(t);
-  });
+  const studentMap: Record<string, Transaction[]> = Object.create(null);
+  for (let i = 0; i < unpaidTransactions.length; i++) {
+    const t = unpaidTransactions[i];
+    if (!studentMap[t.studentId]) studentMap[t.studentId] = [];
+    studentMap[t.studentId].push(t);
+  }
 
-  const studentsById = new Map<string, Student>();
-  students.forEach(s => studentsById.set(s.id, s));
+  const studentsById: Record<string, Student> = Object.create(null);
+  for (let i = 0; i < students.length; i++) {
+    studentsById[students[i].id] = students[i];
+  }
 
-  studentMap.forEach((studentTransactions, studentId) => {
-    const student = studentsById.get(studentId);
-    if (!student) return;
+  const studentIds = Object.keys(studentMap);
+  for (let idx = 0; idx < studentIds.length; idx++) {
+    const studentId = studentIds[idx];
+    const studentTransactions = studentMap[studentId];
+    const student = studentsById[studentId];
+    if (!student) continue;
     
     // Sort transactions by date
     // ⚡ Bolt Performance: Avoid Date.parse() overhead during O(N log N) sorting
@@ -345,7 +351,7 @@ export const generateBulkInvoicePDF = (
     doc.setFontSize(9);
     doc.setTextColor(150);
     doc.text('Thank you for your business!', 105, 280, { align: 'center' });
-  });
+  }
 
   if (!hasContent) {
     return false;

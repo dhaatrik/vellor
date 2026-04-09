@@ -32,14 +32,14 @@ export const useReminders = () => {
       let newNotified = false;
 
       // Build an O(1) lookup map for students to optimize the O(N*M) loop below
-      const studentMap = new Map();
+      const studentMap: Record<string, typeof students[0]> = Object.create(null);
       for (let i = 0; i < students.length; i++) {
-        studentMap.set(students[i].id, students[i]);
+        studentMap[students[i].id] = students[i];
       }
 
       transactions.forEach(t => {
         if (notified.has(t.id)) return;
-        const student = studentMap.get(t.studentId);
+        const student = studentMap[t.studentId];
         if (!student) return;
 
         const tDate = new Date(t.date);
