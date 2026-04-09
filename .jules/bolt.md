@@ -35,3 +35,6 @@
 ## 2024-03-05 - Performance: Avoid Map usage inside array numeric sorting
 **Learning:** While Maps are useful for caching calculations (like parsed dates) before a sort to avoid repeated work, allocating a `new Map()` and accessing `.get()` inside the comparator still incurs V8 overhead.
 **Action:** For ISO 8601 string dates, completely remove the intermediate parsing step and the Map cache. Sort the dates directly using string lexicographical comparison to eliminate all allocations and parsing overhead while maintaining standard sort functionality.
+## 2024-05-18 - Performance: Avoid full array iterations when updating single elements
+**Learning:** Using `Array.prototype.map()` to update a single specific item in a large array (like updating a specific student or transaction by ID) forces V8 to iterate over every remaining element after the target is found, introducing unnecessary O(N) overhead.
+**Action:** When updating a specific element in an array (especially inside Zustand state updaters), clone the array (`[...arr]`) and use a standard `for` loop to find the element, update it, and `break` immediately. This improves the average-case lookup time and avoids worst-case O(N) iteration overhead.

@@ -94,7 +94,10 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
      }
 
      set(state => {
-       const newTransactions = state.transactions.map(t => {
+       // ⚡ Bolt Performance: Use an early-breaking for loop instead of .map() to avoid full array iterations when updating a single item
+       const newTransactions = [...state.transactions];
+       for (let i = 0, len = newTransactions.length; i < len; i++) {
+        const t = newTransactions[i];
         if (t.id === transactionId) {
             const originalStatus = t.status;
             const potentiallyUpdated = { ...t, ...sanitizedTransactionData };
@@ -121,10 +124,10 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
                  setTimeout(() => get().addPoints(POINTS_ALLOCATION.CLEAR_OVERDUE, `Cleared overdue status for transaction ${updatedTransaction?.id}`), 0);
             }
 
-            return updatedTransaction;
+            newTransactions[i] = updatedTransaction;
+            break;
         }
-        return t;
-       });
+       }
        return { transactions: newTransactions };
      });
 

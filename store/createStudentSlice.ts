@@ -50,9 +50,11 @@ export const createStudentSlice: StateCreator<AppState, [], [], StudentSlice> = 
     let updatedStudent: Student | undefined;
 
     set(state => {
-      const newStudents = state.students.map(s => {
-        if (s.id === studentId) {
-          const studentToUpdate = { ...s };
+      // ⚡ Bolt Performance: Use a for loop and break early to avoid O(N) array iteration when updating a single item
+      const newStudents = [...state.students];
+      for (let i = 0, len = newStudents.length; i < len; i++) {
+        if (newStudents[i].id === studentId) {
+          const studentToUpdate = { ...newStudents[i] };
 
           if (studentData.firstName !== undefined) studentToUpdate.firstName = sanitizeString(studentData.firstName);
           if (studentData.lastName !== undefined) studentToUpdate.lastName = sanitizeString(studentData.lastName);
@@ -98,10 +100,10 @@ export const createStudentSlice: StateCreator<AppState, [], [], StudentSlice> = 
           }
 
           updatedStudent = studentToUpdate;
-          return updatedStudent;
+          newStudents[i] = updatedStudent;
+          break;
         }
-        return s;
-      });
+      }
       return { students: newStudents };
     });
 
