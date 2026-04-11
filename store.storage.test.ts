@@ -97,15 +97,15 @@ describe('store.ts - storageEngine', () => {
 
     it('sets encrypted value if globalMasterKey is set', async () => {
       useStore.getState().setMasterKey(mockKey);
-      // Clear mocks because setting masterKey might trigger automatic persistence calls
-      vi.mocked(localforage.setItem).mockClear();
 
       const valueToSet = JSON.stringify({ key: 'value' });
       await storageEngine.setItem('test-key', valueToSet);
 
-      expect(localforage.setItem).toHaveBeenCalledTimes(1);
+      // We filter calls by the expected key because Zustand might trigger automatic persistence calls to 'vellor-storage'
+      const relevantCalls = vi.mocked(localforage.setItem).mock.calls.filter(call => call[0] === 'test-key');
+      expect(relevantCalls.length).toBe(1);
 
-      const setCallArg = vi.mocked(localforage.setItem).mock.calls[0][1] as string;
+      const setCallArg = relevantCalls[0][1] as string;
       expect(setCallArg).not.toBe(valueToSet);
 
       expect(setCallArg).toBeTypeOf('string');
