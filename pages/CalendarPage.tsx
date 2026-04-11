@@ -37,13 +37,16 @@ export const CalendarPage: React.FC = () => {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [draggedStudentId, setDraggedStudentId] = useState<string | null>(null);
 
-  const events = useMemo(() => {
-    // Create a dict for O(1) student lookups, improving performance from O(N*M) to O(N+M)
-    const studentMap: Record<string, typeof students[0]> = Object.create(null);
+  const studentMap = useMemo(() => {
+    // Create a dict for O(1) student lookups
+    const map: Record<string, typeof students[0]> = Object.create(null);
     for (let i = 0; i < students.length; i++) {
-        studentMap[students[i].id] = students[i];
+        map[students[i].id] = students[i];
     }
+    return map;
+  }, [students]);
 
+  const events = useMemo(() => {
     return transactions.map(t => {
       const student = studentMap[t.studentId];
       const studentName = student ? `${student.firstName} ${student.lastName}` : 'Unknown Student';
@@ -65,7 +68,7 @@ export const CalendarPage: React.FC = () => {
         resource: t,
       };
     });
-  }, [transactions, students]);
+  }, [transactions, studentMap]);
 
   const eventStyleGetter = (event: any) => {
     const t = event.resource as Transaction;
@@ -107,14 +110,15 @@ export const CalendarPage: React.FC = () => {
   };
 
   const dragFromOutsideItem = () => {
-    const student = students.find(s => s.id === draggedStudentId);
+    if (!draggedStudentId) return {};
+    const student = studentMap[draggedStudentId];
     if (!student) return {};
     return { title: `${student.firstName} ${student.lastName}` };
   };
 
   const onDropFromOutside = ({ start, end }: any) => {
     if (!draggedStudentId) return;
-    const student = students.find(s => s.id === draggedStudentId);
+    const student = studentMap[draggedStudentId];
     if (!student) return;
     
     addTransaction({

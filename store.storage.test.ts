@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { storageEngine, setGlobalMasterKey } from './store';
+import { storageEngine, useStore } from './store';
 import localforage from 'localforage';
 import { encryptObject, decryptObject } from './src/crypto';
 
@@ -35,7 +35,7 @@ describe('store.ts - storageEngine', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    setGlobalMasterKey(null);
+    useStore.getState().setMasterKey(null);
     mockKey = await crypto.subtle.generateKey(
       { name: 'AES-GCM', length: 256 },
       true,
@@ -58,7 +58,7 @@ describe('store.ts - storageEngine', () => {
     });
 
     it('decrypts data if globalMasterKey is set', async () => {
-      setGlobalMasterKey(mockKey);
+      useStore.getState().setMasterKey(mockKey);
       const testData = { state: { foo: 'bar' } };
       const encryptedData = await encryptObject(testData, mockKey);
 
@@ -68,7 +68,7 @@ describe('store.ts - storageEngine', () => {
     });
 
     it('throws error when invalid encrypted payload is given', async () => {
-      setGlobalMasterKey(mockKey);
+      useStore.getState().setMasterKey(mockKey);
 
       // Invalid JSON or format will cause decryptObject to throw
       vi.mocked(localforage.getItem).mockResolvedValueOnce('invalid-encrypted-data');
@@ -79,7 +79,7 @@ describe('store.ts - storageEngine', () => {
     });
 
     it('throws error if decryption fails', async () => {
-      setGlobalMasterKey(mockKey);
+      useStore.getState().setMasterKey(mockKey);
       vi.mocked(localforage.getItem).mockResolvedValueOnce('some-encrypted-data');
 
       vi.mocked(decryptObject).mockRejectedValueOnce(new Error('Decryption Error'));
@@ -96,13 +96,16 @@ describe('store.ts - storageEngine', () => {
     });
 
     it('sets encrypted value if globalMasterKey is set', async () => {
-      setGlobalMasterKey(mockKey);
+      useStore.getState().setMasterKey(mockKey);
+
       const valueToSet = JSON.stringify({ key: 'value' });
       await storageEngine.setItem('test-key', valueToSet);
 
-      expect(localforage.setItem).toHaveBeenCalledTimes(1);
+      // We filter calls by the expected key because Zustand might trigger automatic persistence calls to 'vellor-storage'
+      const relevantCalls = vi.mocked(localforage.setItem).mock.calls.filter(call => call[0] === 'test-key');
+      expect(relevantCalls.length).toBe(1);
 
-      const setCallArg = vi.mocked(localforage.setItem).mock.calls[0][1] as string;
+      const setCallArg = relevantCalls[0][1] as string;
       expect(setCallArg).not.toBe(valueToSet);
 
       expect(setCallArg).toBeTypeOf('string');

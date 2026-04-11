@@ -40,6 +40,8 @@ export interface SettingsSlice {
 }
 
 export interface DataManagementSlice {
+  masterKey: CryptoKey | null;
+  setMasterKey: (key: CryptoKey | null) => void;
   exportData: () => void;
   importData: (file: File) => Promise<void>;
   resetData: () => void;

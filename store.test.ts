@@ -60,3 +60,23 @@ describe('Zustand Store - Students and Transactions', () => {
         expect(transaction.status).toBe(PaymentStatus.Paid);
     });
 });
+
+import { setGlobalMasterKey, globalMasterKey } from './store';
+
+describe('setGlobalMasterKey', () => {
+  it('updates globalMasterKey correctly when a valid CryptoKey is provided', async () => {
+    const key = await crypto.subtle.generateKey(
+      { name: 'AES-GCM', length: 256 },
+      true,
+      ['encrypt', 'decrypt']
+    );
+
+    setGlobalMasterKey(key);
+    expect(globalMasterKey).toBe(key);
+  });
+
+  it('updates globalMasterKey correctly when null is provided', () => {
+    setGlobalMasterKey(null);
+    expect(globalMasterKey).toBeNull();
+  });
+});
