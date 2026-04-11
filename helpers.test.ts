@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { sanitizeString, formatCurrency, formatPhoneNumber, getPaymentStatusColor, formatRelativeTime, generatePortalLink } from './helpers';
+import { sanitizeString, formatCurrency, formatPhoneNumber, getPaymentStatusColor, formatRelativeTime, generatePortalLink, generateWhatsAppLink } from './helpers';
 import { PaymentStatus, Student, Transaction, AppSettings, Theme } from './types';
 
 describe('Helpers', () => {
@@ -50,6 +50,26 @@ describe('Helpers', () => {
         const now = new Date();
         const thirtySecondsAgo = new Date(now.getTime() - 30 * 1000);
         expect(formatRelativeTime(thirtySecondsAgo.toISOString())).toBe('30s ago');
+    });
+
+    describe('generateWhatsAppLink', () => {
+        it('returns # if phone or number is missing', () => {
+            expect(generateWhatsAppLink(undefined)).toBe('#');
+            expect(generateWhatsAppLink({ countryCode: '+1', number: '' })).toBe('#');
+        });
+
+        it('generates a basic wa.me link without message', () => {
+            expect(generateWhatsAppLink({ countryCode: '+1', number: '1234567890' })).toBe('https://wa.me/11234567890');
+        });
+
+        it('generates a wa.me link with encoded message', () => {
+            expect(generateWhatsAppLink({ countryCode: '+44', number: '7700900123' }, 'Hello World!')).toBe('https://wa.me/447700900123?text=Hello%20World!');
+        });
+
+        it('cleans non-numeric characters from phone and country code', () => {
+            expect(generateWhatsAppLink({ countryCode: '+1', number: '(123) 456-7890' })).toBe('https://wa.me/11234567890');
+            expect(generateWhatsAppLink({ countryCode: '+44 (0)', number: '7700 900 123' })).toBe('https://wa.me/4407700900123');
+        });
     });
 });
 
