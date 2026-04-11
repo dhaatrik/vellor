@@ -46,8 +46,6 @@ export const CalendarPage: React.FC = () => {
         const s = students[i];
         studentNameMap[s.id] = `${s.firstName} ${s.lastName}`;
     }
-    return map;
-  }, [students]);
 
     const len = transactions.length;
     const result = new Array(len);
@@ -126,14 +124,14 @@ export const CalendarPage: React.FC = () => {
 
   const dragFromOutsideItem = () => {
     if (!draggedStudentId) return {};
-    const student = studentMap[draggedStudentId];
+    const student = students.find(s => s.id === draggedStudentId);
     if (!student) return {};
     return { title: `${student.firstName} ${student.lastName}` };
   };
 
   const onDropFromOutside = ({ start, end }: any) => {
     if (!draggedStudentId) return;
-    const student = studentMap[draggedStudentId];
+    const student = students.find(s => s.id === draggedStudentId);
     if (!student) return;
     
     addTransaction({
