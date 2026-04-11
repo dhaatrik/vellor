@@ -42,3 +42,7 @@
 ## $(date +%Y-%m-%d) - Performance: Hoist functions out of mapping closures
 **Learning:** Defining helper functions inside array `.map` or `.forEach` callbacks causes V8 to allocate a new closure for that function on every iteration, leading to unnecessary memory usage and garbage collection overhead, particularly when iterating over large datasets like CSV rows.
 **Action:** Hoist helper functions out of the loop and use standard string concatenation within the loop, eliminating multi-pass allocations and accelerating overall execution time.
+
+## 2025-02-12 - Optimize Immutable Array Removal Operations
+**Learning:** `Array.prototype.filter()` always allocates and returns a new array, even if no items matched the condition. For large arrays in immutable stores (like Zustand), this causes an unnecessary O(N) reallocation and creates new references that trigger React re-renders.
+**Action:** When removing elements that might not exist in the array (e.g., removing transactions for a student that has none), use an optimized `for` loop that holds onto the original array reference. Only allocate a new array via `slice(0, index)` when the first matching element is found, and push the rest. This preserves memory and references for the zero-match case.
