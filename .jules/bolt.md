@@ -42,3 +42,6 @@
 ## $(date +%Y-%m-%d) - Performance: Hoist functions out of mapping closures
 **Learning:** Defining helper functions inside array `.map` or `.forEach` callbacks causes V8 to allocate a new closure for that function on every iteration, leading to unnecessary memory usage and garbage collection overhead, particularly when iterating over large datasets like CSV rows.
 **Action:** Hoist helper functions out of the loop and use standard string concatenation within the loop, eliminating multi-pass allocations and accelerating overall execution time.
+## 2026-04-11 - Performance: Early return on empty search term
+**Learning:** Even when computations like `toLowerCase()` are hoisted outside a `.filter()` loop, processing an array with an empty search term still incurs O(N) array allocation overhead and string property accessing.
+**Action:** Always include an early return (e.g., `if (!searchTerm) return items;`) before a `.filter()` loop. This completely bypasses all loop operations when the search is empty (which is the default state), dropping time complexity from O(N) to O(1) and preventing redundant array allocations.
