@@ -14,6 +14,3 @@
 ## 2024-10-25 - Fixing Accessibility for Hidden Inputs inside Custom Toggles
 **Learning:** When fixing accessibility for custom UI toggles or checkboxes that hide the actual `<input className="sr-only">` inside a wrapper, do not change the wrapper `<label>` to a `<div>` or `<h*>`. The wrapper must remain a `<label>` to proxy clicks to the hidden input.
 **Action:** Enhance accessibility in these scenarios by applying an `id` to the heading text and an `aria-labelledby` attribute pointing to that heading on the hidden input, keeping the label wrapper intact.
-## 2026-04-11 - Native Select Placeholder Visibility
-**Learning:** When using standard HTML `<select>` elements with a placeholder option (e.g. `disabled`), the placeholder still appears in the dropdown list when clicked, causing minor confusion and visual clutter.
-**Action:** Always add the `hidden` attribute to the `disabled` placeholder `<option>` (e.g., `<option value="" disabled hidden>{placeholder}</option>`) so it serves as the default label but disappears when selecting a real option.

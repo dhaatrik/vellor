@@ -46,3 +46,7 @@
 ## 2025-02-12 - Optimize Immutable Array Removal Operations
 **Learning:** `Array.prototype.filter()` always allocates and returns a new array, even if no items matched the condition. For large arrays in immutable stores (like Zustand), this causes an unnecessary O(N) reallocation and creates new references that trigger React re-renders.
 **Action:** When removing elements that might not exist in the array (e.g., removing transactions for a student that has none), use an optimized `for` loop that holds onto the original array reference. Only allocate a new array via `slice(0, index)` when the first matching element is found, and push the rest. This preserves memory and references for the zero-match case.
+
+## 2026-04-11 - Test files referencing unmodified exports
+**Learning:** For test files that attempt to test exports (e.g., `globalMasterKey`) that don't exist in the tested code snippet but may exist on the `main` branch, ensure the test file is adapted to only import the exports that are actually present in the file under test. Otherwise, TS compilation fails on the missing exports.
+**Action:** When working on a task, if the task involves test failures due to missing module exports that are unrelated to the current fix, check the specific file history or use `replace_with_git_merge_diff` to remove the incorrect import references if they aren't actually used.

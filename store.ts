@@ -23,6 +23,13 @@ import { createDataManagementSlice } from './store/createDataManagementSlice';
 // Re-export AppState for potential type uses elsewhere
 export type { AppState };
 
+// --- Encryption & Initialization ---
+
+export let globalMasterKey: CryptoKey | null = null;
+export const setGlobalMasterKey = (key: CryptoKey | null) => {
+  globalMasterKey = key;
+};
+
 // --- Zod Schemas for State Slices ---
 const studentSchema = z.object({
   id: z.string(),
@@ -139,12 +146,11 @@ export const storageEngine = {
     const raw = await localforage.getItem<string>(name);
     if (!raw) return null;
     
-    const masterKey = useStore.getState().masterKey;
-    if (masterKey) {
+    if (globalMasterKey) {
       try {
         const obj = await decryptObject(
           raw,
-          masterKey,
+          globalMasterKey,
           persistSchema
         );
         return JSON.stringify(obj);
@@ -155,10 +161,9 @@ export const storageEngine = {
     return null;
   },
   setItem: async (name: string, value: string): Promise<void> => {
-    const masterKey = useStore.getState().masterKey;
-    if (masterKey) {
+    if (globalMasterKey) {
       const obj = JSON.parse(value, jsonReviver);
-      const encrypted = await encryptObject(obj, masterKey);
+      const encrypted = await encryptObject(obj, globalMasterKey);
       await localforage.setItem(name, encrypted);
     } else {
       await localforage.setItem(name, value);
@@ -184,10 +189,6 @@ export const useStore = create<AppState>()(
       name: 'vellor-storage',
       storage: createJSONStorage(() => storageEngine),
       skipHydration: true, // We will manually hydrate when Master Password is provided
-      partialize: (state) => {
-        const { masterKey, ...rest } = state;
-        return rest;
-      },
     }
   )
 );

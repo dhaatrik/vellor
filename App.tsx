@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
-import { useStore } from './store'; // Zustand hook
+import { useStore, setGlobalMasterKey } from './store'; // Zustand hook
 import { generateSalt, deriveKey, exportKeyToBase64, importKeyFromBase64 } from './src/crypto';
 import { NavbarLink, Icon, Button, ToastContainer, FAB, LegalModals, Modal, SearchModal } from './components/ui';
 import { useReminders } from './useReminders';
@@ -97,7 +97,11 @@ const AppLayout: React.FC = () => {
    * the sidebar menu automatically hides.
    * @returns {void}
    */
-  const handleNavLinkClick = () => setIsMobileSidebarOpen(false);
+  const handleNavLinkClick = () => {
+    if (isMobileSidebarOpen) {
+      setIsMobileSidebarOpen(false);
+    }
+  };
 
   return (
     // Main container div, applies theme class for dark/light mode styling
@@ -402,13 +406,13 @@ const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlocked }) =
         localStorage.setItem('vellor-salt', btoa(String.fromCharCode(...salt)));
         const key = await deriveKey(password, salt);
         const exported = await exportKeyToBase64(key);
-        useStore.getState().setMasterKey(key);
+        setGlobalMasterKey(key);
         setRecoveryKey(exported);
       } else {
         if (useRecovery) {
            if (recoveryInput.length < 20) { setError("Invalid recovery key format."); return; }
            const key = await importKeyFromBase64(recoveryInput);
-           useStore.getState().setMasterKey(key);
+           setGlobalMasterKey(key);
            await useStore.persist.rehydrate();
            onUnlocked();
         } else {
@@ -416,14 +420,14 @@ const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlocked }) =
            const saltStrDecoded = atob(saltString);
            const salt = new Uint8Array(saltStrDecoded.split('').map(c => c.charCodeAt(0)));
            const key = await deriveKey(password, salt);
-           useStore.getState().setMasterKey(key);
+           setGlobalMasterKey(key);
            await useStore.persist.rehydrate();
            onUnlocked();
         }
       }
     } catch (err) {
       setError("Incorrect password or decryption failed. If you reset your cache, you must wipe the site data.");
-      useStore.getState().setMasterKey(null);
+      setGlobalMasterKey(null);
     }
   };
 
