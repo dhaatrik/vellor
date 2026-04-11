@@ -42,3 +42,6 @@
 ## $(date +%Y-%m-%d) - Performance: Hoist functions out of mapping closures
 **Learning:** Defining helper functions inside array `.map` or `.forEach` callbacks causes V8 to allocate a new closure for that function on every iteration, leading to unnecessary memory usage and garbage collection overhead, particularly when iterating over large datasets like CSV rows.
 **Action:** Hoist helper functions out of the loop and use standard string concatenation within the loop, eliminating multi-pass allocations and accelerating overall execution time.
+## 2024-05-19 - Use Map Cache and For Loops to Optimize Date Parsing
+**Learning:** Parsing dates inside `useMemo` map functions for dynamic items (like transactions) can cause significant rendering delays when iterating over large arrays.
+**Action:** Replace `Array.map` with standard `for` loops pre-allocated to the exact size `new Array(len)`, and use a module-level `Map` with a size limit (e.g., `size > 5000` eviction) to cache the results of expensive operations (like `new Date()`) keyed by unique data parameters.
