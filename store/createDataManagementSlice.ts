@@ -6,6 +6,9 @@ import { backupSchema } from './validation';
 import { jsonReviver } from '../src/crypto';
 
 export const createDataManagementSlice: StateCreator<AppState, [], [], DataManagementSlice> = (set, get) => ({
+  masterKey: null,
+  setMasterKey: (key) => set({ masterKey: key }),
+
   exportData: async () => {
     try {
         const state = get();
@@ -114,7 +117,8 @@ export const createDataManagementSlice: StateCreator<AppState, [], [], DataManag
             phone: { countryCode: '+1', number: '' }, email: '',
             monthlyGoal: 500,
         },
-        activityLog: []
+        activityLog: [],
+        masterKey: null
     });
     get().addToast('All application data has been reset.', 'info');
     setTimeout(() => window.location.reload(), 1500);
@@ -126,7 +130,8 @@ export const createDataManagementSlice: StateCreator<AppState, [], [], DataManag
             ...state.settings,
             userName: DEFAULT_USER_NAME,
             email: '',
-        }
+        },
+        masterKey: null
     }));
     get().addToast('Logged out successfully.', 'info');
   }
