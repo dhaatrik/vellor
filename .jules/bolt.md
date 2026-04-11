@@ -43,6 +43,10 @@
 **Learning:** Defining helper functions inside array `.map` or `.forEach` callbacks causes V8 to allocate a new closure for that function on every iteration, leading to unnecessary memory usage and garbage collection overhead, particularly when iterating over large datasets like CSV rows.
 **Action:** Hoist helper functions out of the loop and use standard string concatenation within the loop, eliminating multi-pass allocations and accelerating overall execution time.
 
-## 2024-05-18 - Performance: Avoid O(N) array search inside event handlers
-**Learning:** Using `Array.prototype.find()` inside frequently called event handlers (like drag and drop operations) results in O(N) linear time complexity for each invocation. In large arrays, this can cause frame drops and UI stuttering.
-**Action:** When performing repeated lookups by ID, cache the array elements into a dictionary object (`Object.create(null)`) ahead of time to enable O(1) lookups. This converts the overall operation from O(M * N) to O(N + M) and ensures consistent performance regardless of list size.
+## 2025-02-12 - Optimize Immutable Array Removal Operations
+**Learning:** `Array.prototype.filter()` always allocates and returns a new array, even if no items matched the condition. For large arrays in immutable stores (like Zustand), this causes an unnecessary O(N) reallocation and creates new references that trigger React re-renders.
+**Action:** When removing elements that might not exist in the array (e.g., removing transactions for a student that has none), use an optimized `for` loop that holds onto the original array reference. Only allocate a new array via `slice(0, index)` when the first matching element is found, and push the rest. This preserves memory and references for the zero-match case.
+
+## 2026-04-11 - Test files referencing unmodified exports
+**Learning:** For test files that attempt to test exports (e.g., `globalMasterKey`) that don't exist in the tested code snippet but may exist on the `main` branch, ensure the test file is adapted to only import the exports that are actually present in the file under test. Otherwise, TS compilation fails on the missing exports.
+**Action:** When working on a task, if the task involves test failures due to missing module exports that are unrelated to the current fix, check the specific file history or use `replace_with_git_merge_diff` to remove the incorrect import references if they aren't actually used.

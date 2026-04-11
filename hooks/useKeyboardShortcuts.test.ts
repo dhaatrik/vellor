@@ -13,6 +13,7 @@ vi.mock('../store', () => ({
 // We must mock the properties directly on the module object
 vi.mock('../helpers/globalHover', () => ({
   get currentHoveredTransactionId() { return null; },
+  get currentHoveredTransaction() { return null; },
   get currentHoveredStudentId() { return null; }
 }));
 
@@ -56,6 +57,7 @@ describe('useKeyboardShortcuts', () => {
     });
     // Reset mocked getters manually if possible, or just re-stub
     vi.spyOn(globalHover, 'currentHoveredTransactionId', 'get').mockReturnValue(null);
+    vi.spyOn(globalHover, 'currentHoveredTransaction', 'get').mockReturnValue(null);
     vi.spyOn(globalHover, 'currentHoveredStudentId', 'get').mockReturnValue(null);
   });
 
@@ -183,6 +185,7 @@ describe('useKeyboardShortcuts', () => {
       });
 
       vi.spyOn(globalHover, 'currentHoveredTransactionId', 'get').mockReturnValue('tx-1');
+      vi.spyOn(globalHover, 'currentHoveredTransaction', 'get').mockReturnValue(mockTx);
 
       renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
 
@@ -214,6 +217,7 @@ describe('useKeyboardShortcuts', () => {
       });
 
       vi.spyOn(globalHover, 'currentHoveredTransactionId', 'get').mockReturnValue('tx-1');
+      vi.spyOn(globalHover, 'currentHoveredTransaction', 'get').mockReturnValue(mockTx);
 
       renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
 
@@ -231,6 +235,7 @@ describe('useKeyboardShortcuts', () => {
       });
 
       vi.spyOn(globalHover, 'currentHoveredTransactionId', 'get').mockReturnValue(null);
+      vi.spyOn(globalHover, 'currentHoveredTransaction', 'get').mockReturnValue(null);
       vi.spyOn(globalHover, 'currentHoveredStudentId', 'get').mockReturnValue(null);
 
       renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
@@ -249,6 +254,7 @@ describe('useKeyboardShortcuts', () => {
       });
 
       vi.spyOn(globalHover, 'currentHoveredTransactionId', 'get').mockReturnValue('tx-1');
+      vi.spyOn(globalHover, 'currentHoveredTransaction', 'get').mockReturnValue(null);
 
       renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
 

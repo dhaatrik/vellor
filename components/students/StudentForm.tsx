@@ -246,11 +246,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({ student, onSave, onClo
               value={subjectsInput}
               onChange={(e) => {
                 setSubjectsInput(e.target.value);
-                setValue('tuition.subjects', e.target.value.split(',').reduce<string[]>((acc, s) => {
-                  const trimmed = s.trim();
-                  if (trimmed) acc.push(trimmed);
-                  return acc;
-                }, []), { shouldValidate: true });
+                setValue('tuition.subjects', e.target.value.split(',').map(s => s.trim()).filter(Boolean), { shouldValidate: true });
               }}
               placeholder="e.g. Math, Science"
             />

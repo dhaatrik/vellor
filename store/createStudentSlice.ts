@@ -116,10 +116,28 @@ export const createStudentSlice: StateCreator<AppState, [], [], StudentSlice> = 
   deleteStudent: (studentId) => {
     const state = get();
     const studentToDelete = state.students.find(s => s.id === studentId);
-    set(state => ({
-      students: state.students.filter(s => s.id !== studentId),
-      transactions: state.transactions.filter(t => t.studentId !== studentId)
-    }));
+    set(state => {
+      // ⚡ Bolt Performance: optimize transactions filter. If no txs match, avoid array reallocation entirely.
+      const txs = state.transactions;
+      let newTransactions = txs;
+
+      for (let i = 0, len = txs.length; i < len; i++) {
+        if (txs[i].studentId === studentId) {
+          newTransactions = txs.slice(0, i);
+          for (let j = i + 1; j < len; j++) {
+            if (txs[j].studentId !== studentId) {
+              newTransactions.push(txs[j]);
+            }
+          }
+          break;
+        }
+      }
+
+      return {
+        students: state.students.filter(s => s.id !== studentId),
+        transactions: newTransactions
+      };
+    });
     if (studentToDelete) {
         get().addToast(`Student "${studentToDelete.firstName}" and their transactions have been deleted.`, 'info');
     }

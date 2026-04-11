@@ -48,16 +48,18 @@ export const SearchModal: React.FC<{ isOpen: boolean; onClose: () => void }> = (
           <div className="space-y-2 mt-4">
             <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Students</h4>
             {filteredStudents.map(s => (
-              <div 
+              <button
                 key={s.id} 
+                type="button"
                 onClick={() => handleSelectStudent(s.id)}
-                className="p-3 bg-gray-50 dark:bg-primary-light rounded-xl cursor-pointer hover:bg-accent/10 hover:text-accent transition-colors flex items-center gap-3"
+                className="w-full text-left p-3 bg-gray-50 dark:bg-primary-light rounded-xl cursor-pointer hover:bg-accent/10 hover:text-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:bg-accent/10 focus-visible:text-accent transition-colors flex items-center gap-3"
+                aria-label={`Select student ${s.firstName} ${s.lastName}`}
               >
                 <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
                   <span className="font-bold text-accent text-sm">{s.firstName[0]}</span>
                 </div>
                 <div className="dark:text-white font-medium">{s.firstName} {s.lastName}</div>
-              </div>
+              </button>
             ))}
           </div>
         )}
