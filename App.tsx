@@ -97,11 +97,7 @@ const AppLayout: React.FC = () => {
    * the sidebar menu automatically hides.
    * @returns {void}
    */
-  const handleNavLinkClick = () => {
-    if (isMobileSidebarOpen) {
-      setIsMobileSidebarOpen(false);
-    }
-  };
+  const handleNavLinkClick = () => setIsMobileSidebarOpen(false);
 
   return (
     // Main container div, applies theme class for dark/light mode styling
