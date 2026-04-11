@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
-import { useStore, setGlobalMasterKey } from './store'; // Zustand hook
+import { useStore } from './store'; // Zustand hook
 import { generateSalt, deriveKey, exportKeyToBase64, importKeyFromBase64 } from './src/crypto';
 import { NavbarLink, Icon, Button, ToastContainer, FAB, LegalModals, Modal, SearchModal } from './components/ui';
 import { useReminders } from './useReminders';
@@ -406,13 +406,13 @@ const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlocked }) =
         localStorage.setItem('vellor-salt', btoa(String.fromCharCode(...salt)));
         const key = await deriveKey(password, salt);
         const exported = await exportKeyToBase64(key);
-        setGlobalMasterKey(key);
+        useStore.getState().setMasterKey(key);
         setRecoveryKey(exported);
       } else {
         if (useRecovery) {
            if (recoveryInput.length < 20) { setError("Invalid recovery key format."); return; }
            const key = await importKeyFromBase64(recoveryInput);
-           setGlobalMasterKey(key);
+           useStore.getState().setMasterKey(key);
            await useStore.persist.rehydrate();
            onUnlocked();
         } else {
@@ -420,14 +420,14 @@ const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlocked }) =
            const saltStrDecoded = atob(saltString);
            const salt = new Uint8Array(saltStrDecoded.split('').map(c => c.charCodeAt(0)));
            const key = await deriveKey(password, salt);
-           setGlobalMasterKey(key);
+           useStore.getState().setMasterKey(key);
            await useStore.persist.rehydrate();
            onUnlocked();
         }
       }
     } catch (err) {
       setError("Incorrect password or decryption failed. If you reset your cache, you must wipe the site data.");
-      setGlobalMasterKey(null);
+      useStore.getState().setMasterKey(null);
     }
   };
 
