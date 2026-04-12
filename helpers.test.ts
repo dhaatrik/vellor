@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { sanitizeString, formatCurrency, formatPhoneNumber, getPaymentStatusColor, formatRelativeTime, generatePortalLink, generateWhatsAppLink } from './helpers';
+import { sanitizeString, formatCurrency, formatDate, formatPhoneNumber, getPaymentStatusColor, formatRelativeTime, generatePortalLink, generateWhatsAppLink } from './helpers';
 import { PaymentStatus, Student, Transaction, AppSettings, Theme } from './types';
 
 describe('Helpers', () => {
@@ -29,6 +29,29 @@ describe('Helpers', () => {
         expect(formatCurrency(150, '$')).toBe('$150.00');
         expect(formatCurrency(0, '£')).toBe('£0.00');
         expect(formatCurrency(12.3, '€')).toBe('€12.30');
+    });
+
+    describe('formatDate', () => {
+        it('formats ISO date strings correctly', () => {
+            // Using a specific date where timezone differences might matter less, or setting tz
+            // Let's use string containing 'en-US' expected format or test with regex
+            const formatted = formatDate('2023-10-15T10:00:00Z');
+            // Depending on timezone of runner, day could be 14 or 15.
+            // Let's use toLocaleDateString manually to get the exact expected string in this env.
+            const expected = new Date('2023-10-15T10:00:00Z').toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+            expect(formatted).toBe(expected);
+        });
+
+        it('formats date-only strings correctly', () => {
+            const dateString = '2023-05-01';
+            const formatted = formatDate(dateString);
+            const expected = new Date(dateString).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+            expect(formatted).toBe(expected);
+        });
+
+        it('handles invalid date strings gracefully (returns "Invalid Date" based on JS Date implementation)', () => {
+            expect(formatDate('not-a-date')).toBe('Invalid Date');
+        });
     });
 
     it('formats phone numbers correctly', () => {
