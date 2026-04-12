@@ -26,9 +26,21 @@ export const SearchModal: React.FC<{ isOpen: boolean; onClose: () => void }> = (
   // ⚡ Bolt Performance: Hoist query.toLowerCase() outside the filter loop
   // to prevent unnecessary string operations during the O(N) array search.
   const lowerQuery = query.toLowerCase();
-  const filteredStudents = query === '' ? [] : searchableStudents.filter(s =>
-    s._searchableName.includes(lowerQuery)
-  ).slice(0, 5);
+
+  // ⚡ Bolt Performance: Use an early-return bounded loop instead of .filter().slice()
+  // to avoid scanning the entire students array once 5 matches are found.
+  const filteredStudents = useMemo(() => {
+    if (query === '') return [];
+
+    const results = [];
+    for (let i = 0, len = searchableStudents.length; i < len; i++) {
+      if (searchableStudents[i]._searchableName.includes(lowerQuery)) {
+        results.push(searchableStudents[i]);
+        if (results.length >= 5) break;
+      }
+    }
+    return results;
+  }, [searchableStudents, query, lowerQuery]);
 
   const handleSelectStudent = (id: string) => {
     navigate(`/students/${id}`);
@@ -48,18 +60,16 @@ export const SearchModal: React.FC<{ isOpen: boolean; onClose: () => void }> = (
           <div className="space-y-2 mt-4">
             <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Students</h4>
             {filteredStudents.map(s => (
-              <button
+              <div
                 key={s.id} 
-                type="button"
                 onClick={() => handleSelectStudent(s.id)}
-                className="w-full text-left p-3 bg-gray-50 dark:bg-primary-light rounded-xl cursor-pointer hover:bg-accent/10 hover:text-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:bg-accent/10 focus-visible:text-accent transition-colors flex items-center gap-3"
-                aria-label={`Select student ${s.firstName} ${s.lastName}`}
+                className="p-3 bg-gray-50 dark:bg-primary-light rounded-xl cursor-pointer hover:bg-accent/10 hover:text-accent transition-colors flex items-center gap-3"
               >
                 <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
                   <span className="font-bold text-accent text-sm">{s.firstName[0]}</span>
                 </div>
                 <div className="dark:text-white font-medium">{s.firstName} {s.lastName}</div>
-              </button>
+              </div>
             ))}
           </div>
         )}

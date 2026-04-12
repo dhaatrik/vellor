@@ -61,8 +61,6 @@ export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> 
     }
 
     // Validate that image data URIs start with data:image/ to prevent XSS via javascript: or other schemes
-    // Note: We use `''` instead of `delete` here. If we delete the key, Zustand's partial state merge
-    // will preserve the existing value in the state, which could be malicious if it bypassed validation earlier.
     if (newSettings.brandLogoBase64 !== undefined && newSettings.brandLogoBase64 !== '' && !newSettings.brandLogoBase64.startsWith('data:image/')) {
         newSettings.brandLogoBase64 = '';
     }

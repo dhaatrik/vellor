@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
   currentHoveredTransactionId,
-  currentHoveredTransaction,
   currentHoveredStudentId,
   setHoveredTransaction,
   setHoveredStudent,
@@ -15,23 +14,17 @@ describe('globalHover', () => {
   });
 
   describe('setHoveredTransaction', () => {
-    it('should set currentHoveredTransactionId and currentHoveredTransaction to the given id and transaction', () => {
+    it('should set currentHoveredTransactionId to the given id', () => {
       expect(currentHoveredTransactionId).toBeNull();
-      expect(currentHoveredTransaction).toBeNull();
-      const mockTx: any = { id: 'tx-123' };
-      setHoveredTransaction('tx-123', mockTx);
+      setHoveredTransaction('tx-123');
       expect(currentHoveredTransactionId).toBe('tx-123');
-      expect(currentHoveredTransaction).toBe(mockTx);
     });
 
-    it('should set currentHoveredTransactionId and currentHoveredTransaction to null', () => {
-      const mockTx: any = { id: 'tx-123' };
-      setHoveredTransaction('tx-123', mockTx);
+    it('should set currentHoveredTransactionId to null', () => {
+      setHoveredTransaction('tx-123');
       expect(currentHoveredTransactionId).toBe('tx-123');
-      expect(currentHoveredTransaction).toBe(mockTx);
-      setHoveredTransaction(null, null);
+      setHoveredTransaction(null);
       expect(currentHoveredTransactionId).toBeNull();
-      expect(currentHoveredTransaction).toBeNull();
     });
   });
 

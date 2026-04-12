@@ -31,8 +31,8 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = React.mem
   return (
     <Card
       className="hover:border-accent/50 transition-colors duration-300 group border border-white/20 dark:border-white/5 shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl"
-      onMouseEnter={() => setHoveredTransaction(transaction.id, transaction)}
-      onMouseLeave={() => setHoveredTransaction(null, null)}
+      onMouseEnter={() => setHoveredTransaction(transaction.id)}
+      onMouseLeave={() => setHoveredTransaction(null)}
     >
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex items-center gap-4 w-full sm:w-auto">

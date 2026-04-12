@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useStore } from '../store';
-import { currentHoveredTransactionId, currentHoveredTransaction, currentHoveredStudentId } from '../helpers/globalHover';
+import { currentHoveredTransactionId, currentHoveredStudentId } from '../helpers/globalHover';
 import { PaymentStatus } from '../types';
 
 export const useKeyboardShortcuts = (
@@ -34,7 +34,7 @@ export const useKeyboardShortcuts = (
         
         // Mark hovered transaction as paid
         if (currentHoveredTransactionId) {
-          const t = currentHoveredTransaction || store.transactions.find(tx => tx.id === currentHoveredTransactionId);
+          const t = store.transactions.find(tx => tx.id === currentHoveredTransactionId);
           if (t && t.status !== PaymentStatus.Paid && t.status !== PaymentStatus.Overpaid) {
             store.updateTransaction(t.id, {
               amountPaid: t.lessonFee, // Pay in full
