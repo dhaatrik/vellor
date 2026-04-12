@@ -27,14 +27,19 @@ export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElemen
  * @param {SelectProps} props - The properties for the Select component.
  * @returns {React.ReactElement} A JSX element representing the select dropdown field.
  */
-export const Select = forwardRef<HTMLSelectElement, SelectProps>(({ label, name, error, options, placeholder, wrapperClassName = "", className, ...props }, ref) => {
+export const Select = forwardRef<HTMLSelectElement, SelectProps>(({ label, name, error, options, placeholder, wrapperClassName = "", className, required, ...props }, ref) => {
   const baseStyle = "block w-full px-4 py-3 border border-gray-200 dark:border-white/10 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent sm:text-sm bg-white dark:bg-primary-light disabled:opacity-50 transition-all duration-200 appearance-none";
   const errorStyle = "border-danger focus:ring-danger/50 focus:border-danger";
   const errorId = error ? `${name}-error` : undefined;
 
   return (
     <div className={wrapperClassName}>
-      {label && <label htmlFor={name} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 ml-1">{label}</label>}
+      {label && (
+        <label htmlFor={name} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 ml-1">
+          {label}
+          {required && <span className="text-danger ml-1" aria-hidden="true">*</span>}
+        </label>
+      )}
       <div className="relative">
         <select
           ref={ref}
@@ -43,6 +48,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(({ label, name,
           className={`${baseStyle} ${error ? errorStyle : ""} ${className || ""}`}
           aria-invalid={!!error}
           aria-describedby={errorId}
+          required={required}
           {...props}
         >
           {placeholder && <option value="" disabled hidden>{placeholder}</option>}

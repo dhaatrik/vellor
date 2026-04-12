@@ -25,7 +25,7 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
  * @param {InputProps} props - The properties for the Input component.
  * @returns {React.ReactElement} A JSX element representing the input field, label, and associated text.
  */
-export const Input = forwardRef<HTMLInputElement, InputProps>(({ label, name, error, helperText, type = "text", wrapperClassName = "", className, ...props }, ref) => {
+export const Input = forwardRef<HTMLInputElement, InputProps>(({ label, name, error, helperText, type = "text", wrapperClassName = "", className, required, ...props }, ref) => {
   const baseStyle = "block w-full px-4 py-3 border border-gray-200 dark:border-white/10 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent sm:text-sm bg-white dark:bg-primary-light disabled:opacity-50 transition-all duration-200";
   const errorStyle = "border-danger focus:ring-danger/50 focus:border-danger"; // Style for error state
   const errorId = error ? `${name}-error` : undefined;
@@ -34,7 +34,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({ label, name, er
 
   return (
     <div className={wrapperClassName}>
-      {label && <label htmlFor={name} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 ml-1">{label}</label>}
+      {label && (
+        <label htmlFor={name} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 ml-1">
+          {label}
+          {required && <span className="text-danger ml-1" aria-hidden="true">*</span>}
+        </label>
+      )}
       <input
         ref={ref}
         type={type}
@@ -43,6 +48,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({ label, name, er
         className={`${baseStyle} ${error ? errorStyle : ""} ${className || ""}`}
         aria-invalid={!!error}
         aria-describedby={describedBy}
+        required={required}
         {...props}
       />
       {error && <p id={errorId} className="mt-1.5 ml-1 text-xs text-danger font-medium">{error}</p>}
