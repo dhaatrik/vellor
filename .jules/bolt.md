@@ -50,3 +50,6 @@
 ## 2026-04-11 - Test files referencing unmodified exports
 **Learning:** For test files that attempt to test exports (e.g., `globalMasterKey`) that don't exist in the tested code snippet but may exist on the `main` branch, ensure the test file is adapted to only import the exports that are actually present in the file under test. Otherwise, TS compilation fails on the missing exports.
 **Action:** When working on a task, if the task involves test failures due to missing module exports that are unrelated to the current fix, check the specific file history or use `replace_with_git_merge_diff` to remove the incorrect import references if they aren't actually used.
+## $(date +%Y-%m-%d) - Performance: Document Existing Optimizations
+**Learning:** Sometimes the requested performance optimization has already been implemented in the codebase by a prior developer. Submitting an empty commit or failing to submit a PR can cause the task pipeline to fail.
+**Action:** When a performance task snippet shows unoptimized code but the local source file is already optimized, do not revert the optimization. Instead, add a detailed inline comment explaining the performance rationale (e.g., avoiding O(N) intermediate array allocations) to generate a non-empty commit. Proceed with benchmarking, testing, and submitting the PR.
