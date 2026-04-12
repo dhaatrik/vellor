@@ -27,8 +27,6 @@ const localizer = dateFnsLocalizer({
 
 const DragAndDropCalendar = withDragAndDrop(Calendar);
 
-const parsedDateCache = new Map<string, { start: Date; end: Date }>();
-
 export const CalendarPage: React.FC = () => {
   const transactions = useStore(s => s.transactions);
   const students = useStore(s => s.students);
@@ -39,49 +37,38 @@ export const CalendarPage: React.FC = () => {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [draggedStudentId, setDraggedStudentId] = useState<string | null>(null);
 
-  const events = useMemo(() => {
-    // Create a dict for O(1) student lookups and pre-calculate full names
-    const studentNameMap: Record<string, string> = Object.create(null);
-    for (let i = 0, len = students.length; i < len; i++) {
-        const s = students[i];
-        studentNameMap[s.id] = `${s.firstName} ${s.lastName}`;
+  const studentMap = useMemo(() => {
+    // Create a dict for O(1) student lookups
+    const map: Record<string, typeof students[0]> = Object.create(null);
+    for (let i = 0; i < students.length; i++) {
+        map[students[i].id] = students[i];
     }
+    return map;
+  }, [students]);
 
-    const len = transactions.length;
-    const result = new Array(len);
-
-    for (let i = 0; i < len; i++) {
-      const t = transactions[i];
-      const studentName = studentNameMap[t.studentId] || 'Unknown Student';
+  const events = useMemo(() => {
+    return transactions.map(t => {
+      const student = studentMap[t.studentId];
+      const studentName = student ? `${student.firstName} ${student.lastName}` : 'Unknown Student';
       
-      const cacheKey = `${t.date}|${t.lessonDuration}`;
-      let dates = parsedDateCache.get(cacheKey);
-      
-      if (!dates) {
-          let startDateStr = t.date;
-          if (!startDateStr.includes('T')) {
-              startDateStr = `${startDateStr}T10:00:00`; // Fallback to 10 AM if only date is provided
-          }
-          const start = new Date(startDateStr);
-          // Fallback duration to 60 if not specified
-          const end = new Date(start.getTime() + (t.lessonDuration || 60) * 60000);
-          dates = { start, end };
-
-          if (parsedDateCache.size > 5000) parsedDateCache.clear();
-          parsedDateCache.set(cacheKey, dates);
+      let startDateStr = t.date;
+      if (!startDateStr.includes('T')) {
+          startDateStr = `${startDateStr}T10:00:00`; // Fallback to 10 AM if only date is provided
       }
 
-      result[i] = {
+      const startDate = new Date(startDateStr);
+      // Fallback duration to 60 if not specified
+      const endDate = new Date(startDate.getTime() + (t.lessonDuration || 60) * 60000);
+
+      return {
         id: t.id,
         title: studentName,
-        start: dates.start,
-        end: dates.end,
+        start: startDate,
+        end: endDate,
         resource: t,
       };
-    }
-
-    return result;
-  }, [transactions, students]);
+    });
+  }, [transactions, studentMap]);
 
   const eventStyleGetter = (event: any) => {
     const t = event.resource as Transaction;
@@ -124,14 +111,14 @@ export const CalendarPage: React.FC = () => {
 
   const dragFromOutsideItem = () => {
     if (!draggedStudentId) return {};
-    const student = students.find(s => s.id === draggedStudentId);
+    const student = studentMap[draggedStudentId];
     if (!student) return {};
     return { title: `${student.firstName} ${student.lastName}` };
   };
 
   const onDropFromOutside = ({ start, end }: any) => {
     if (!draggedStudentId) return;
-    const student = students.find(s => s.id === draggedStudentId);
+    const student = studentMap[draggedStudentId];
     if (!student) return;
     
     addTransaction({
