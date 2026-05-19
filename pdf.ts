@@ -63,21 +63,16 @@ export const generateProgressReportPDF = (
      currentY += 15;
   }
 
-  const mapped = [];
+  const reportTransactions = [];
   for (let i = 0; i < transactions.length; i++) {
     const t = transactions[i];
     if (t.studentId === student.id && (t.grade || t.progressRemark)) {
-      mapped.push({
-        t,
-        time: typeof t.date === 'string' ? Date.parse(t.date) : (t.date as unknown as Date).getTime()
-      });
+      reportTransactions.push(t);
     }
   }
-  mapped.sort((a, b) => b.time - a.time);
-  const reportTransactions = new Array(mapped.length);
-  for (let i = 0; i < mapped.length; i++) {
-    reportTransactions[i] = mapped[i].t;
-  }
+
+  // ⚡ Bolt Performance: Use direct string comparison for ISO 8601 dates to eliminate Date.parse() overhead and intermediate mapping
+  reportTransactions.sort((a, b) => b.date < a.date ? -1 : (b.date > a.date ? 1 : 0));
 
   if (reportTransactions.length > 0) {
       // ⚡ Bolt Performance: Replace Array.prototype.map() with a pre-allocated for loop

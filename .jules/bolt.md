@@ -71,3 +71,6 @@
 ## 2026-05-13 - Avoid over-optimization of standard declarative methods
 **Learning:** Manual array slice/push operations inside `for` loops (intended as an extreme micro-optimization to avoid array allocations if a match is not found) actually hurt readability, introduce unnecessary code complexity, and provide no measurable performance gain compared to standard `.filter()` in modern JavaScript engines for single-item removal.
 **Action:** When working on item deletion or simple filtering, prefer native `.filter()` operations over manual `slice` and `push` loops unless profiling explicitly shows a massive performance bottleneck.
+## 2026-05-19 - Avoid Date.parse() for ISO 8601 sorting
+**Learning:** Parsing dates repeatedly inside a sort function adds unnecessary processing overhead.
+**Action:** To optimize performance when sorting or comparing ISO 8601 date strings, use direct lexicographical string comparison instead of `Date.parse()` to eliminate parsing and garbage collection overhead.
