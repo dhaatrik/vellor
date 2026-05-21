@@ -74,3 +74,7 @@
 ## 2026-05-19 - Avoid Date.parse() for ISO 8601 sorting
 **Learning:** Parsing dates repeatedly inside a sort function adds unnecessary processing overhead.
 **Action:** To optimize performance when sorting or comparing ISO 8601 date strings, use direct lexicographical string comparison instead of `Date.parse()` to eliminate parsing and garbage collection overhead.
+
+## 2024-05-20 - Global O(1) Lookups over Local Maps
+**Learning:** React components (`DashboardPage`, `CalendarPage`, `TransactionsPage`) were each building their own `Record<string, Student>` dictionaries using `useMemo([students])` just to perform O(1) lookups during rendering or filtering. This meant that every time the global `students` array changed, multiple components redundantly executed O(N) loops and allocated new intermediate dictionary objects, putting pressure on garbage collection.
+**Action:** Instead of building localized `studentMap` objects in components, use the store's built-in `getStudentById` selector. It maintains a globally cached `Map<string, Student>` that only recalculates when the store reference changes, providing O(1) lookups with zero redundant allocation across the entire application.
