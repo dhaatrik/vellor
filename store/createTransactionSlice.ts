@@ -73,6 +73,7 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
     const newTransactions: Transaction[] = [];
     let pointsToAdd = 0;
     let studentsOverdueCleared = 0;
+    const now = new Date().toISOString();
 
     // ⚡ Bolt Performance: Process bulk additions inside a single loop to avoid N+1 state updates
     for (let j = 0; j < transactionsData.length; j++) {
@@ -91,7 +92,7 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
         ...sanitizedTransactionData,
         id: crypto.randomUUID(),
         status,
-        createdAt: new Date().toISOString(),
+        createdAt: now,
       };
 
       newTransactions.push(newTransaction);
