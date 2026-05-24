@@ -59,6 +59,7 @@ export const CalendarPage: React.FC = () => {
   const transactions = useStore(s => s.transactions);
   const students = useStore(s => s.students);
   const settings = useStore(s => s.settings);
+  const getStudentById = useStore(s => s.getStudentById);
   const addTransaction = useStore(s => s.addTransaction);
   const updateTransaction = useStore(s => s.updateTransaction);
   const addToast = useStore(s => s.addToast);
@@ -70,15 +71,6 @@ export const CalendarPage: React.FC = () => {
     e.dataTransfer.setData('text/plain', studentId);
   }, []);
 
-  const studentMap = useMemo(() => {
-    // Create a dict for O(1) student lookups
-    const map: Record<string, typeof students[0]> = Object.create(null);
-    for (let i = 0; i < students.length; i++) {
-        map[students[i].id] = students[i];
-    }
-    return map;
-  }, [students]);
-
   const events = useMemo((): CalendarEvent[] => {
     // ⚡ Bolt Performance: Replace transactions.map() with a pre-allocated for loop
     // to eliminate intermediate array allocations and callback overhead during bulk render.
@@ -86,7 +78,7 @@ export const CalendarPage: React.FC = () => {
     const result = new Array(len);
     for (let i = 0; i < len; i++) {
       const t = transactions[i];
-      const student = studentMap[t.studentId];
+      const student = getStudentById(t.studentId);
       const studentName = student ? `${student.firstName} ${student.lastName}` : 'Unknown Student';
       
       let startDateStr = t.date;
@@ -107,7 +99,7 @@ export const CalendarPage: React.FC = () => {
       };
     }
     return result;
-  }, [transactions, studentMap]);
+  }, [transactions, students, getStudentById]);
 
   const eventStyleGetter = (event: CalendarEvent) => {
     const t = event.resource;
@@ -156,14 +148,14 @@ export const CalendarPage: React.FC = () => {
 
   const dragFromOutsideItem = () => {
     if (!draggedStudentId) return {};
-    const student = studentMap[draggedStudentId];
+    const student = getStudentById(draggedStudentId);
     if (!student) return {};
     return { title: `${student.firstName} ${student.lastName}` };
   };
 
   const onDropFromOutside = ({ start, end }: { start: Date | string; end: Date | string }) => {
     if (!draggedStudentId) return;
-    const student = studentMap[draggedStudentId];
+    const student = getStudentById(draggedStudentId);
     if (!student) return;
 
     const startDate = typeof start === 'string' ? new Date(start) : start;
