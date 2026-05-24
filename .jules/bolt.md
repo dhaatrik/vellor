@@ -74,3 +74,6 @@
 ## 2026-05-19 - Avoid Date.parse() for ISO 8601 sorting
 **Learning:** Parsing dates repeatedly inside a sort function adds unnecessary processing overhead.
 **Action:** To optimize performance when sorting or comparing ISO 8601 date strings, use direct lexicographical string comparison instead of `Date.parse()` to eliminate parsing and garbage collection overhead.
+## 2026-05-22 - Avoid "holey" arrays via dynamic length truncation
+**Learning:** Pre-allocating an array with `new Array(len)` and then selectively assigning items via an index counter (`count`) before truncating with `result.length = count` is often a micro-optimization with negligible impact. Furthermore, if you pre-allocate a large array but only populate a few elements, the JS engine might create a "holey" array which performs significantly worse than a dense array built with standard `.push()`.
+**Action:** Do not replace `[]` and `.push()` with `new Array(len)` and `.length` truncation when filtering items, as it sacrifices readability and safety for no real-world performance benefit.
