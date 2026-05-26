@@ -170,7 +170,8 @@ export const bulkMapCSVRows = (rows: Record<string, string>[], mapping: ImportMa
         entities: []
     };
 
-    rows.forEach((row, index) => {
+    for (let index = 0, len = rows.length; index < len; index++) {
+        const row = rows[index];
         try {
             if (!row[mapping.firstName]) {
                 throw new Error('Missing first name');
@@ -185,7 +186,7 @@ export const bulkMapCSVRows = (rows: Record<string, string>[], mapping: ImportMa
                 error: err instanceof Error ? err.message : String(err) 
             });
         }
-    });
+    }
 
     return result;
 };

@@ -231,13 +231,13 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
         result.push(t);
       }
     }
-    return result.sort((a, b) => b.date < a.date ? -1 : (b.date > a.date ? 1 : 0));
+    return result.sort((a, b) => b.date.localeCompare(a.date));
   },
 
   exportTransactionsCSV: () => {
     try {
         const state = get();
-        const { transactions, students } = state;
+        const { transactions } = state;
         
         if (transactions.length === 0) {
             get().addToast('No transactions to export.', 'info');
@@ -245,11 +245,6 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
         }
 
         const header = ['Date', 'Student', 'Duration', 'Fee', 'Amount Paid', 'Status', 'Payment Method', 'Notes'];
-        
-        const studentMap: Record<string, typeof students[0]> = Object.create(null);
-        for (let i = 0; i < students.length; i++) {
-            studentMap[students[i].id] = students[i];
-        }
 
         const escapeCSV = (str?: string) => {
             if (!str) return '';
@@ -262,7 +257,7 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
         const rows = [header.join(',')];
         for (let i = 0, len = transactions.length; i < len; i++) {
             const t = transactions[i];
-            const student = studentMap[t.studentId];
+            const student = get().getStudentById(t.studentId);
             const studentName = student ? `${student.firstName} ${student.lastName}` : 'Unknown Student';
             
             rows.push(

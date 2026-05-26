@@ -23,7 +23,7 @@ export const createDataManagementSlice: StateCreator<AppState, [], [], DataManag
 
         if (password === null) return; // User cancelled
 
-        let exportPayload: any = dataToExport;
+        let exportPayload: unknown = dataToExport;
 
         if (password) {
             const { generateSalt, deriveKey, encryptObject } = await import('../src/crypto');

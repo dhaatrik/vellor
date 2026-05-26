@@ -172,7 +172,8 @@ export const CSVImportWizard: React.FC<CSVImportWizardProps> = ({ isOpen, onClos
              
              // Enhanced Auto-Map logic
              const newMap: Partial<ImportMapping> = {};
-             headers.forEach(h => {
+            for (let i = 0; i < headers.length; i++) {
+                const h = headers[i];
                  const hl = h.toLowerCase();
                  if (!newMap.firstName && (hl === 'first name' || hl === 'name' || hl === 'firstname')) newMap.firstName = h;
                  if (!newMap.lastName && (hl === 'last name' || hl === 'lastname')) newMap.lastName = h;
@@ -182,7 +183,7 @@ export const CSVImportWizard: React.FC<CSVImportWizardProps> = ({ isOpen, onClos
                  if (!newMap.subjects && (hl.includes('subject') || hl.includes('topic'))) newMap.subjects = h;
                  if (!newMap.guardianName && (hl.includes('parent') || hl.includes('guardian'))) newMap.guardianName = h;
                  if (!newMap.paymentAmount && (hl.includes('paid') || hl.includes('amount'))) newMap.paymentAmount = h;
-             });
+            }
              setMapping(newMap as ImportMapping);
              setStep(2);
         };

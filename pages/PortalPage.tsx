@@ -75,7 +75,8 @@ export const PortalPage: React.FC = () => {
     let present = 0;
     const total = transactions.length;
 
-    for (const t of transactions) {
+    for (let i = 0; i < total; i++) {
+      const t = transactions[i];
       if (t?.status === 'Due') {
         owed += (t.lessonFee || 0);
       } else if (t?.status === 'Partially Paid') {

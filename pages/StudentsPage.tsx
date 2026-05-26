@@ -36,7 +36,7 @@ export const StudentsPage: React.FC = () => {
   const [selectedStudentIds, setSelectedStudentIds] = useState<Set<string>>(new Set());
   const [showBulkLogModal, setShowBulkLogModal] = useState(false);
   const [showImportWizard, setShowImportWizard] = useState(false);
-  const [bulkLogData, setBulkLogData] = useState({ date: new Date().toISOString().split('T')[0], duration: 60, fee: 50, notes: 'Bulk logged lesson' });
+  const [bulkLogData, setBulkLogData] = useState(() => ({ date: new Date().toISOString().split('T')[0], duration: 60, fee: 50, notes: 'Bulk logged lesson' }));
 
   const [makeupPrompt, setMakeupPrompt] = useState<{isOpen: boolean, studentId: string}>({isOpen: false, studentId: ''});
   const [showMakeupModal, setShowMakeupModal] = useState<{isOpen: boolean, studentId: string}>({isOpen: false, studentId: ''});
@@ -171,12 +171,6 @@ export const StudentsPage: React.FC = () => {
 
   const handleBulkExport = () => {
       let count = 0;
-      // Optimization: use dict for O(1) lookups and single loop through transactions
-      const selectedStudentMap: Record<string, typeof students[0]> = Object.create(null);
-      for (let i = 0; i < students.length; i++) {
-          const student = students[i];
-          selectedStudentMap[student.id] = student;
-      }
 
       const selectedSet = selectedStudentIds;
       const firstUnpaidMap: Record<string, typeof transactions[0]> = Object.create(null);
@@ -205,7 +199,7 @@ export const StudentsPage: React.FC = () => {
       for (let i = 0; i < unpaidStudentIds.length; i++) {
           const studentId = unpaidStudentIds[i];
           const t = firstUnpaidMap[studentId];
-          const student = selectedStudentMap[studentId];
+          const student = getStudentById(studentId);
           if (student) {
               toExportStudents.push(student);
               toExportTransactions.push(t);

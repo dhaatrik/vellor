@@ -99,6 +99,19 @@
 ## 2026-05-22 - Avoid "holey" arrays via dynamic length truncation
 **Learning:** Pre-allocating an array with `new Array(len)` and then selectively assigning items via an index counter (`count`) before truncating with `result.length = count` is often a micro-optimization with negligible impact. Furthermore, if you pre-allocate a large array but only populate a few elements, the JS engine might create a "holey" array which performs significantly worse than a dense array built with standard `.push()`.
 **Action:** Do not replace `[]` and `.push()` with `new Array(len)` and `.length` truncation when filtering items, as it sacrifices readability and safety for no real-world performance benefit.
+
+## 2026-05-23 - Pre-compute Currency Options
+**Learning:** Inline mapping of static arrays like `CURRENCY_OPTIONS.map` during render loops creates unnecessary objects and operations on every render, especially noticeable in highly interactive forms or dropdowns.
+**Action:** Hoist these format operations out of React components and export pre-computed values directly from constants files so they only run once at module initialization time.
+
+## 2026-05-24 - Destructuring Store Methods in Components
+**Learning:** When replacing local variables with store methods, failing to declare the method (e.g., `const getStudentById = useStore(s => s.getStudentById);`) before calling it causes runtime ReferenceErrors.
+**Action:** Always ensure store methods are explicitly destructured at the top of the component before calling them in event handlers or render loops.
+
+## 2026-05-25 - Optimized PortalPage transactions calculation
+**Learning:** `for...of` loops creating iterators can be a performance bottleneck when traversing arrays that could be arbitrarily large or when executed frequently.
+**Action:** Replace `for...of` loops with standard bounded `for` loops (`for (let i = 0; i < len; i++)`) in critical data-processing paths to avoid iterator allocation overhead.
+
 ## 2026-05-26 - Optimize StudentDetailView Subject Mapping
 **Learning:** Mapping over arrays directly inside complex JSX expressions can lead to unnecessary computational overhead and re-renders, especially when dealing with lists or multiple potential render cycles.
 **Action:** Extract list mappings into a `useMemo` hook at the top level of the component to cache the rendered JSX elements, ensuring they are only recalculated when the underlying data changes.

@@ -13,8 +13,9 @@ export const BackupPromptModal: React.FC = () => {
     const checkBackupStatus = () => {
       const lastBackupDateStr = localStorage.getItem('lastBackupDate');
       const now = new Date();
+      const lastBackupDate = lastBackupDateStr ? new Date(lastBackupDateStr) : null;
 
-      if (!lastBackupDateStr) {
+      if (!lastBackupDateStr || !lastBackupDate || isNaN(lastBackupDate.getTime())) {
         const students = useStore.getState().students;
         if (students.length > 0) {
             setIsOpen(true);
@@ -22,7 +23,6 @@ export const BackupPromptModal: React.FC = () => {
         return;
       }
 
-      const lastBackupDate = new Date(lastBackupDateStr);
       const diffTime = Math.abs(now.getTime() - lastBackupDate.getTime());
       const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 

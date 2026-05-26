@@ -25,7 +25,11 @@ const LazyRevenueChart = lazy(() =>
   }))
 );
 
-export const PremiumFeaturesSection = ({ data }: { data: any }) => (
+export interface PremiumFeaturesSectionProps {
+  data: { month: string; revenue: number }[];
+}
+
+export const PremiumFeaturesSection = ({ data }: PremiumFeaturesSectionProps) => (
   <section data-pomelli-section="premium-features" data-crawler-intent="education" className="py-24 px-4 relative z-20">
     <div className="max-w-6xl mx-auto">
        <motion.div
