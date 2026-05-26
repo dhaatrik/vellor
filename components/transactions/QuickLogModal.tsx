@@ -42,10 +42,18 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ isOpen, onClose, d
     return map;
   }, [students]);
 
-  const studentOptions = useMemo(() => [
-    { value: '', label: 'Select a student...' },
-    ...activeStudents.map(s => ({ value: s.id, label: `${s.firstName} ${s.lastName}` }))
-  ], [activeStudents]);
+  const studentOptions = useMemo(() => {
+    // ⚡ Bolt Performance: Replace array spread and .map() with a pre-allocated array
+    // and a standard for loop to avoid intermediate allocations and callback overhead.
+    const len = activeStudents.length;
+    const options = new Array(len + 1);
+    options[0] = { value: '', label: 'Select a student...' };
+    for (let i = 0; i < len; i++) {
+      const s = activeStudents[i];
+      options[i + 1] = { value: s.id, label: `${s.firstName} ${s.lastName}` };
+    }
+    return options;
+  }, [activeStudents]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
