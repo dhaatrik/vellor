@@ -13,7 +13,33 @@ uniform float u_time;
 uniform vec2 u_resolution;
 out vec4 outColor;
 void main() {
-    outColor = vec4(0.05, 0.05, 0.08, 1.0);
+    vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+    uv.x *= u_resolution.x / u_resolution.y;
+
+    float t = u_time * 0.001; // Scale time so it's a smooth slow undulation
+
+    // Kinetic vector deformation
+    vec2 pos = uv;
+    pos.x += sin(pos.y * 5.0 + t * 0.4) * 0.015;
+    pos.y += sin(pos.x * 5.0 + t * 0.4) * 0.015;
+
+    // Razor-sharp digital coordinate grid mesh using fract
+    vec2 grid = fract(pos * 40.0);
+
+    // Calculate distance to grid lines
+    vec2 dist = abs(grid - 0.5);
+
+    // Make the grid wireframes extremely thin
+    vec2 lines = smoothstep(0.48, 0.5, dist);
+    float gridAlpha = max(lines.x, lines.y);
+
+    vec3 bgColor = vec3(0.0, 0.0, 0.0);
+    // Absolute minimal alpha of neon green token rgba(0, 255, 102, 0.03)
+    vec3 gridColor = vec3(0.0, 1.0, 0.4);
+    float gridIntensity = 0.03;
+
+    vec3 finalColor = mix(bgColor, gridColor, gridAlpha * gridIntensity);
+    outColor = vec4(finalColor, 1.0);
 }
 `;
 
@@ -105,7 +131,7 @@ export const TerminalBackground: React.FC = () => {
       gl.useProgram(program);
       gl.bindVertexArray(vao);
 
-      gl.uniform1f(timeUniformLocation, time * 0.001);
+      gl.uniform1f(timeUniformLocation, time);
       gl.uniform2f(resolutionUniformLocation, canvas.width, canvas.height);
 
       gl.drawArrays(gl.TRIANGLES, 0, 6);

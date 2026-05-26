@@ -77,3 +77,6 @@
 ## 2026-05-25 - CRT Scanline Hardware Effect in Recharts
 **Learning:** Recharts `<Area>` elements support custom SVG pattern fills like scanlines. Using an SVG `<pattern>` def with a `<rect>` height of 1px and a low opacity color creates an authentic hardware effect without altering data performance or requiring external assets. Make sure `fillOpacity={1}` on the `<Area>` when using a pattern to ensure the pattern renders correctly.
 **Action:** Use inline `<pattern>` defs referenced by `fill="url(#id)"` to add visual texture to Recharts components.
+## 2024-05-26 - Kinetic Digital Mesh
+**Learning:** For a clinical, technical vibe on screens, animating GLSL grid fracts using native device timestamps provides completely fluid GPU motion without main thread JS blocking. Modulating alpha using a very specific minimal green code allows visual scale.
+**Action:** When designing technical components, rely on precision vector fields over DOM manipulation for large ambient textures.
