@@ -45,3 +45,6 @@
 ## 2026-05-14 - Empty States in Search Interfaces
 **Learning:** Providing a dead-end, text-only empty state (e.g., 'No results found') in interactive components like search palettes is a missed opportunity to guide the user. Polishing these with a standard visual hierarchy (icon, clear title, descriptive subtext) improves the user experience and aligns with the app's overall design system.
 **Action:** When implementing or refactoring search or filter components, always replace plain text empty states with polished, structured UI components to provide better visual feedback and guidance.
+## 2024-05-19 - Missing ARIA Labels on Navigation Tab Buttons
+**Learning:** Found custom chart navigation buttons in `DashboardCharts.tsx` utilizing `role="tab"` but missing `aria-controls` to link them to their respective tab panels. Tab components must be properly linked to their controlled elements for screen reader usability.
+**Action:** Always verify `aria-controls` is present when implementing custom tab interfaces (`role="tab"`).

@@ -106,6 +106,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ itemVariants }
                 <button
                   role="tab"
                   aria-selected={activeChart === 'income'}
+                  aria-controls="dashboard-chart-panel"
                   aria-label="View Income Overview"
                   onClick={() => setActiveChart('income')}
                   className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary ${activeChart === 'income' ? 'bg-white dark:bg-primary-light text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
@@ -115,6 +116,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ itemVariants }
                 <button
                   role="tab"
                   aria-selected={activeChart === 'students'}
+                  aria-controls="dashboard-chart-panel"
                   aria-label="View Student Growth"
                   onClick={() => setActiveChart('students')}
                   className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary ${activeChart === 'students' ? 'bg-white dark:bg-primary-light text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
@@ -123,7 +125,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ itemVariants }
                 </button>
               </div>
             </div>
-            <div className="flex-1 min-h-[200px] w-full">
+            <div id="dashboard-chart-panel" className="flex-1 min-h-[200px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
