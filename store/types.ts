@@ -39,7 +39,6 @@ export interface UISlice {
 export interface SettingsSlice {
   settings: AppSettings;
   updateSettings: (newSettings: Partial<AppSettings>) => void;
-  toggleTheme: () => void;
 }
 
 export interface DataManagementSlice {

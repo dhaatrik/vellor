@@ -37,22 +37,6 @@ describe('createSettingsSlice', () => {
       expect(checkAchievementsMock).toHaveBeenCalled();
     });
 
-    it('adds "dark" class to document.documentElement when theme is set to Dark', () => {
-      useStore.getState().updateSettings({ theme: Theme.Dark });
-      expect(document.documentElement.classList.contains('dark')).toBe(true);
-      expect(useStore.getState().settings.theme).toBe(Theme.Dark);
-    });
-
-    it('removes "dark" class from document.documentElement when theme is set to Light', () => {
-      // Setup initial state as dark
-      document.documentElement.classList.add('dark');
-      useStore.setState({
-        settings: { ...useStore.getState().settings, theme: Theme.Dark }
-      });
-
-      useStore.getState().updateSettings({ theme: Theme.Light });
-      expect(document.documentElement.classList.contains('dark')).toBe(false);
-      expect(useStore.getState().settings.theme).toBe(Theme.Light);
     });
 
     it('awards points and logs activity when profile setup is completed (userName changed from empty)', () => {
@@ -113,39 +97,5 @@ describe('createSettingsSlice', () => {
       expect(useStore.getState().settings.brandLogoBase64).toBe('');
       expect(useStore.getState().settings.invoiceLogoBase64).toBe('');
     });
-  });
 
-  describe('toggleTheme', () => {
-    it('toggles from Light to Dark mode', () => {
-        vi.useFakeTimers();
-        const logActivityMock = useStore.getState().logActivity;
-
-        useStore.getState().toggleTheme();
-
-        expect(document.documentElement.classList.contains('dark')).toBe(true);
-        expect(useStore.getState().settings.theme).toBe(Theme.Dark);
-
-        vi.runAllTimers();
-        expect(logActivityMock).toHaveBeenCalledWith('Switched to dark mode', 'moon');
-        vi.useRealTimers();
-    });
-
-    it('toggles from Dark to Light mode', () => {
-        vi.useFakeTimers();
-        document.documentElement.classList.add('dark');
-        useStore.setState({
-          settings: { ...useStore.getState().settings, theme: Theme.Dark }
-        });
-        const logActivityMock = useStore.getState().logActivity;
-
-        useStore.getState().toggleTheme();
-
-        expect(document.documentElement.classList.contains('dark')).toBe(false);
-        expect(useStore.getState().settings.theme).toBe(Theme.Light);
-
-        vi.runAllTimers();
-        expect(logActivityMock).toHaveBeenCalledWith('Switched to light mode', 'sun');
-        vi.useRealTimers();
-    });
-  });
 });

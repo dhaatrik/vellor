@@ -5,10 +5,7 @@ import { DEFAULT_CURRENCY_SYMBOL, POINTS_ALLOCATION } from '../constants';
 import { sanitizeString } from '../helpers';
 
 const getInitialTheme = (): Theme => {
-  if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    return Theme.Dark;
-  }
-  return Theme.Light;
+  return Theme.Dark;
 };
 
 export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> = (set, get) => ({
@@ -73,30 +70,5 @@ export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> 
     set(s => ({ settings: { ...s.settings, ...newSettings } }));
     get().addToast('Settings saved successfully.', 'success');
     get().checkAndAwardAchievements();
-    
-    if (newSettings.theme) {
-        const root = window.document.documentElement;
-        if (newSettings.theme === Theme.Dark) {
-          root.classList.add('dark');
-        } else {
-          root.classList.remove('dark');
-        }
-    }
-  },
-
-  toggleTheme: () => {
-    set(state => {
-      const newTheme = state.settings.theme === Theme.Light ? Theme.Dark : Theme.Light;
-      setTimeout(() => state.logActivity(`Switched to ${newTheme} mode`, newTheme === Theme.Dark ? 'moon' : 'sun'), 0);
-      
-      const root = window.document.documentElement;
-      if (newTheme === Theme.Dark) {
-        root.classList.add('dark');
-      } else {
-        root.classList.remove('dark');
-      }
-
-      return { settings: { ...state.settings, theme: newTheme } };
-    });
   },
 });
