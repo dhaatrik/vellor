@@ -99,3 +99,6 @@
 ## 2026-05-22 - Avoid "holey" arrays via dynamic length truncation
 **Learning:** Pre-allocating an array with `new Array(len)` and then selectively assigning items via an index counter (`count`) before truncating with `result.length = count` is often a micro-optimization with negligible impact. Furthermore, if you pre-allocate a large array but only populate a few elements, the JS engine might create a "holey" array which performs significantly worse than a dense array built with standard `.push()`.
 **Action:** Do not replace `[]` and `.push()` with `new Array(len)` and `.length` truncation when filtering items, as it sacrifices readability and safety for no real-world performance benefit.
+## 2026-05-26 - Pre-compute Currency Options
+**Learning:** Inline mapping of static arrays like `CURRENCY_OPTIONS.map` during render loops creates unnecessary objects and operations on every render, especially noticeable in highly interactive forms or dropdowns.
+**Action:** Hoist these format operations out of React components and export pre-computed values directly from constants files so they only run once at module initialization time.
