@@ -39,6 +39,9 @@ export const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlock
            onUnlocked();
         } else {
            const saltString = localStorage.getItem('vellor-salt')!;
+           if (!/^[A-Za-z0-9+/]*={0,2}$/.test(saltString)) {
+             throw new Error("Invalid salt format.");
+           }
            const saltStrDecoded = atob(saltString);
            // ⚡ Bolt Performance: Replace .split('').map() with a pre-allocated Uint8Array and a for loop
            // to eliminate intermediate array allocations during string-to-byte-array conversion.

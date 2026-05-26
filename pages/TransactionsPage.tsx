@@ -129,7 +129,7 @@ export const TransactionsPage: React.FC = () => {
   
   const sortedTransactions = useMemo(() => {
     // ⚡ Bolt Performance: Use direct string comparison for ISO 8601 dates to eliminate Date.parse() overhead and intermediate mapping
-    return [...transactions].sort((a, b) => b.date < a.date ? -1 : (b.date > a.date ? 1 : 0));
+    return [...transactions].sort((a, b) => b.date.localeCompare(a.date));
   }, [transactions]);
 
   const deferredSearchQuery = React.useDeferredValue(searchQuery);
