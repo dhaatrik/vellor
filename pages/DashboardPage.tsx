@@ -132,6 +132,31 @@ export const DashboardPage: React.FC = () => {
       
       {/* Bento Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[minmax(180px,auto)]">
+        {/* System Status Telemetry */}
+        <motion.div variants={itemVariants} className="col-span-1 md:col-span-2 lg:col-span-4">
+          <div className="border border-white/5 bg-black p-4 flex flex-col md:flex-row gap-6 font-mono text-xs text-gray-500">
+            <div className="flex gap-2 items-center">
+              <span className="text-accent animate-pulse">●</span>
+              <span>CORE_ENGINE: ZUSTAND_PERSIST_PERSISTENT</span>
+            </div>
+            <div className="flex gap-2 items-center">
+              <span className="text-accent animate-pulse">●</span>
+              <span>CRYPTO_VAULT: AES-GCM_LOCALFORAGE_LOCKED</span>
+            </div>
+            <div className="flex gap-2 items-center">
+              <span className="text-accent animate-pulse">●</span>
+              <span>BACKUP_ENTROPY: {
+                (() => {
+                  const lastBackup = localStorage.getItem('lastBackupDate');
+                  if (!lastBackup) return 'UNKNOWN';
+                  const daysSinceBackup = (Date.now() - Date.parse(lastBackup)) / (1000 * 3600 * 24);
+                  return daysSinceBackup > 7 ? 'CRITICAL' : 'NOMINAL';
+                })()
+              }</span>
+            </div>
+          </div>
+        </motion.div>
+
         
         {/* Stats Row */}
         <motion.div variants={itemVariants} className="col-span-1 md:col-span-2 lg:col-span-2">
@@ -143,7 +168,7 @@ export const DashboardPage: React.FC = () => {
                 iconColorClass={totalUnpaid > 0 ? "text-danger" : "text-success"}
                 iconBgClass={totalUnpaid > 0 ? "bg-danger/10" : "bg-success/10"}
                 onClick={() => navigate('/transactions', { state: { filter: 'unpaid' } })}
-                className="rounded-3xl border border-white/20 dark:border-white/5 shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl"
+                className="border border-white/5 bg-black"
             />
             <StatDisplayCard 
                 title="Paid This Month" 
@@ -152,7 +177,7 @@ export const DashboardPage: React.FC = () => {
                 iconColorClass="text-accent"
                 iconBgClass="bg-accent/10"
                 onClick={() => navigate('/transactions', { state: { filter: 'paid' } })}
-                className="rounded-3xl border border-white/20 dark:border-white/5 shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl cursor-pointer hover:border-accent/30 transition-colors"
+                className="border border-white/5 bg-black cursor-pointer hover:border-accent/30 transition-colors"
             />
             <StatDisplayCard 
                 title="Predicted Income" 
@@ -160,7 +185,7 @@ export const DashboardPage: React.FC = () => {
                 iconName="trending-up" 
                 iconColorClass="text-indigo-500"
                 iconBgClass="bg-indigo-500/10"
-                className="rounded-3xl border border-white/20 dark:border-white/5 shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl"
+                className="border border-white/5 bg-black"
             />
           </div>
         </motion.div>
@@ -174,7 +199,7 @@ export const DashboardPage: React.FC = () => {
         {/* Active Students */}
         <motion.div
             variants={itemVariants}
-            className="col-span-1 lg:col-span-1 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary rounded-3xl"
+            className="col-span-1 lg:col-span-1 cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-0 rounded-3xl"
             onClick={() => navigate('/students')}
             role="button"
             tabIndex={0}
@@ -186,7 +211,7 @@ export const DashboardPage: React.FC = () => {
                 }
             }}
         >
-          <Card className="h-full rounded-3xl border border-white/20 dark:border-white/5 shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl flex flex-col items-center justify-center text-center relative overflow-hidden hover:border-accent/30 transition-colors">
+          <Card className="h-full border border-white/5 bg-black flex flex-col items-center justify-center text-center relative overflow-hidden hover:border-accent/30 transition-colors">
             <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl"></div>
             <div className="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center mb-4 relative z-10">
               <Icon iconName="users" className="w-8 h-8 text-blue-500" />
@@ -199,7 +224,7 @@ export const DashboardPage: React.FC = () => {
         {/* Login Streak */}
         {settings.gamificationEnabled && (
         <motion.div variants={itemVariants} className="col-span-1 lg:col-span-1">
-          <Card className="h-full rounded-3xl border border-white/20 dark:border-white/5 shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl flex flex-col items-center justify-center text-center relative overflow-hidden group">
+          <Card className="h-full border border-white/5 bg-black flex flex-col items-center justify-center text-center relative overflow-hidden group">
             <div className="absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl group-hover:bg-orange-500/20 transition-colors duration-500"></div>
             <div className="w-16 h-16 rounded-2xl bg-orange-500/10 flex items-center justify-center mb-4 relative z-10 group-hover:scale-110 transition-transform duration-300">
               <Icon iconName="flame" className="w-8 h-8 text-orange-500" />
@@ -213,7 +238,7 @@ export const DashboardPage: React.FC = () => {
         {/* Total Points */}
         {settings.gamificationEnabled && (
         <motion.div variants={itemVariants} className="col-span-1 lg:col-span-1">
-          <Card className="h-full rounded-3xl border border-white/20 dark:border-white/5 shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl flex flex-col items-center justify-center text-center relative overflow-hidden group">
+          <Card className="h-full border border-white/5 bg-black flex flex-col items-center justify-center text-center relative overflow-hidden group">
             <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-yellow-500/10 rounded-full blur-3xl group-hover:bg-yellow-500/20 transition-colors duration-500"></div>
             <div className="w-16 h-16 rounded-2xl bg-yellow-500/10 flex items-center justify-center mb-4 relative z-10 group-hover:scale-110 transition-transform duration-300">
               <Icon iconName="star" className="w-8 h-8 text-yellow-500" />
@@ -226,7 +251,7 @@ export const DashboardPage: React.FC = () => {
 
         {/* Recent Activity */}
         <motion.div variants={itemVariants} className="col-span-1 md:col-span-1 lg:col-span-2 row-span-2">
-          <Card className="h-full rounded-3xl border border-white/20 dark:border-white/5 shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl flex flex-col">
+          <Card className="h-full border border-white/5 bg-black flex flex-col">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-display font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <Icon iconName="bolt" className="w-5 h-5 text-yellow-500" />
@@ -235,7 +260,7 @@ export const DashboardPage: React.FC = () => {
               {activityLog.length > 0 && (
                 <button 
                   onClick={() => setIsConfirmingClearAll(true)}
-                  className="text-xs text-gray-500 hover:text-red-500 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary rounded"
+                  className="text-xs text-gray-500 hover:text-red-500 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-0 rounded"
                   aria-label="Clear all activity history"
                   title="Clear all activity history"
                 >
@@ -260,23 +285,20 @@ export const DashboardPage: React.FC = () => {
                               initial={{ opacity: 0, x: -10 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: Math.min(virtualRow.index * 0.05, 0.3) }}
-                              className="flex items-start group"
+                              className="flex items-start group font-mono text-xs"
                             >
-                                <div className="w-10 h-10 rounded-2xl bg-gray-100 dark:bg-primary flex items-center justify-center mr-4 flex-shrink-0 group-hover:bg-accent/10 transition-colors">
-                                  <Icon iconName={activity.icon} className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-accent transition-colors" />
-                                </div>
-                                <div className="flex-grow pt-1 flex justify-between items-start">
-                                  <div>
-                                    <p className="text-sm text-gray-800 dark:text-gray-200 font-medium">{activity.message}</p>
-                                    <span className="text-xs text-gray-500 dark:text-gray-400">{formatRelativeTime(activity.timestamp)}</span>
+                                <div className="flex-grow flex justify-between items-start border-b border-white/5 pb-2">
+                                  <div className="flex gap-4">
+                                    <span className="text-gray-500">[{formatRelativeTime(activity.timestamp)}]</span>
+                                    <p className="text-gray-300">{activity.message}</p>
                                   </div>
                                   <button 
                                     onClick={() => setConfirmingDeleteActivityId(activity.id)}
-                                    className="opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-gray-200 dark:hover:bg-primary-light transition-opacity focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary focus-visible:outline-none"
+                                    className="opacity-0 group-hover:opacity-100 p-1 hover:text-accent transition-colors focus-visible:opacity-100 focus-visible:ring-1 focus-visible:ring-accent focus-visible:outline-none"
                                     aria-label="Delete activity"
                                     title="Delete activity"
                                   >
-                                    <Icon iconName="x-mark" className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                                    [DEL]
                                   </button>
                                 </div>
                             </motion.li>
@@ -299,7 +321,7 @@ export const DashboardPage: React.FC = () => {
 
         {/* Overdue Payments */}
         <motion.div variants={itemVariants} className="col-span-1 lg:col-span-2">
-          <Card className={`h-full rounded-3xl border shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl flex flex-col ${overduePayments.length > 0 ? 'border-danger/30' : 'border-white/20 dark:border-white/5'}`}>
+          <Card className={`h-full border bg-black flex flex-col ${overduePayments.length > 0 ? 'border-danger/30' : 'border-white/5'}`}>
             <h3 className="text-lg font-display font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
               <Icon iconName="warning" className={`w-5 h-5 ${overduePayments.length > 0 ? 'text-danger' : 'text-gray-400'}`} />
               Action Needed

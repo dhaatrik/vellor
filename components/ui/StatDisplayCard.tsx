@@ -48,7 +48,7 @@ export const StatDisplayCard: React.FC<StatDisplayCardProps> = ({
     const finalIconColorClass = customIconColorClass || defaultIconColorClass;
     const finalIconBgClass = customIconBgClass || defaultIconBgClass;
 
-    const cardClasses = `relative overflow-hidden group ${className} ${onClick ? 'cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary' : ''}`;
+    const cardClasses = `relative overflow-hidden group ${className} ${onClick ? 'cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-300 focus:outline-none focus-visible:ring-1 focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-0' : ''}`;
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (onClick && (e.key === 'Enter' || e.key === ' ')) {

@@ -30,7 +30,7 @@ interface CardProps {
  */
 export const Card: React.FC<CardProps & React.HTMLAttributes<HTMLDivElement>> = ({ children, className = "", title, titleIcon, actions, ...props }) => {
   return (
-    <div className={`bg-white dark:bg-primary-light shadow-sm border border-gray-100 dark:border-white/5 rounded-3xl p-6 ${className}`} {...props}>
+    <div className={`bg-transparent border border-white/5 p-6 ${className}`} {...props}>
       {/* Card Header (if title or actions are provided) */}
       {(title || actions) && (
         <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100 dark:border-white/5">
