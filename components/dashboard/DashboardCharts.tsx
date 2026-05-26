@@ -96,7 +96,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ itemVariants }
 
   return (
         <motion.div variants={itemVariants} className="col-span-1 md:col-span-2 lg:col-span-2 row-span-2">
-          <Card className="h-full rounded-3xl border border-white/20 dark:border-white/5 shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl flex flex-col">
+          <Card className="h-full border border-white/5 bg-black flex flex-col">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-display font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <Icon iconName={activeChart === 'income' ? 'chart-bar' : 'users'} className={`w-5 h-5 ${activeChart === 'income' ? 'text-[#00ff66]' : 'text-white'}`} />

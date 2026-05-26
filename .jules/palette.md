@@ -57,3 +57,6 @@
 ## 2026-05-26 - Chart Visual Overhaul
 **Learning:** Overhauled Recharts dashboard representation using terminal/oscilloscope styling while maintaining 100% of underlying heavy compute logics and Vite testing functionality. Monospaced UI components and strict flat colors provide a raw data visual aesthetic.
 **Action:** Always decouple pure visual modifications in chart wrappers (`defs`, `Tooltip`, `Area`, `XAxis`/`YAxis`) from data-processing functions (`useMemo` heavy array traversals) to guarantee computational integrity and zero regression in performance when modifying appearance.
+## 2026-05-26 - Dashboard Telemetry Refactor
+**Learning:** Successfully stripped out rounded corners and soft dropshadows to apply a clinical compute telemetry design, strictly following visual constraints while maintaining component logic.
+**Action:** Consistently replace micro-interaction cards with flat layout containers bordered by thin neon accents on a pitch-black canvas background when performing system telemetry aesthetic updates.

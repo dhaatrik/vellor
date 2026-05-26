@@ -26,7 +26,7 @@ export const DashboardGoal: React.FC<DashboardGoalProps> = ({ itemVariants }) =>
 
   return (
         <motion.div variants={itemVariants} className="col-span-1 md:col-span-1 lg:col-span-1">
-          <Card className="h-full rounded-3xl border border-white/20 dark:border-white/5 shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl flex flex-col justify-center relative overflow-hidden group">
+          <Card className="h-full border border-white/5 bg-black flex flex-col justify-center relative overflow-hidden group">
             <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-accent/10 rounded-full blur-3xl group-hover:bg-accent/20 transition-colors duration-500"></div>
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
@@ -55,7 +55,7 @@ export const DashboardGoal: React.FC<DashboardGoalProps> = ({ itemVariants }) =>
                     </div>
                 ) : (
                     <span
-                        className="text-sm font-medium text-gray-500 dark:text-gray-400 cursor-pointer hover:text-accent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary rounded px-1"
+                        className="text-sm font-medium text-gray-500 dark:text-gray-400 cursor-pointer hover:text-accent transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-1 focus-visible:ring-accent focus-visible:ring-offset-0 rounded px-1"
                         onClick={() => setIsEditingGoal(true)}
                         title="Click to edit goal"
                         role="button"

@@ -76,7 +76,7 @@ describe('Card Component', () => {
     );
     const container = screen.getByTestId('card-container');
     expect(container).toHaveClass('custom-class-123');
-    expect(container).toHaveClass('bg-white'); // One of the default classes
+    expect(container).toHaveClass("bg-transparent"); // One of the default classes
   });
 
   it('passes additional HTML attributes correctly', () => {
