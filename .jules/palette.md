@@ -33,18 +33,27 @@
 ## 2026-05-06 - Password Visibility Toggle
 **Learning:** Adding a show/hide password toggle to the SetupEncryption component was a highly effective micro-UX enhancement that prevents critical typos during master password creation without breaking the existing design system or requiring large re-writes.
 **Action:** Always check if crucial, unrecoverable inputs (like master passwords or encryption keys) provide a way for the user to visually verify their entry before submission.
+
 ## 2026-05-08 - Accessibility Anti-Pattern: Redundant ARIA Labels
 **Learning:** Adding an `aria-label` that exactly matches the visible text content of an element (e.g., `<button aria-label="About">About</button>`) is an accessibility anti-pattern. Redundant ARIA labels do not improve the experience and can interfere with translation tools.
 **Action:** Only add `aria-label` to interactive elements lacking descriptive text, like icon-only buttons. Purely decorative elements should instead receive `aria-hidden="true"`.
+
 ## 2026-05-10 - Playwright Marketing Page & Profile Bypasses
 **Learning:** When using Playwright to visually verify frontend changes on internal routes, the script must account for being initially redirected to the marketing page. It must explicitly click "Get Started" to reach the auth flow, complete the Master Password setup or unlock, and then explicitly complete or skip the 'Welcome to Vellor' profile setup form before reaching the target dashboard components.
 **Action:** Always include robust conditional bypass blocks in Playwright scripts for "Get Started", Master Password setup/unlock, and the "Welcome to Vellor" profile setup.
+
 ## 2026-05-14 - ARIA Roles in Framer Motion Components Break Tests
 **Learning:** Adding explicit ARIA roles (like `role="menuitem"`) to components inside Framer Motion's `<AnimatePresence>` can break existing React Testing Library tests that expect the default element roles (like `getByRole('button')`).
 **Action:** When modifying semantic HTML elements or ARIA roles for accessibility, always update the corresponding React Testing Library queries in the associated `.test.tsx` files to prevent test suite regressions.
+
 ## 2026-05-14 - Empty States in Search Interfaces
 **Learning:** Providing a dead-end, text-only empty state (e.g., 'No results found') in interactive components like search palettes is a missed opportunity to guide the user. Polishing these with a standard visual hierarchy (icon, clear title, descriptive subtext) improves the user experience and aligns with the app's overall design system.
 **Action:** When implementing or refactoring search or filter components, always replace plain text empty states with polished, structured UI components to provide better visual feedback and guidance.
+
+## 2026-05-19 - Missing ARIA Labels on Navigation Tab Buttons
+**Learning:** Found custom chart navigation buttons in `DashboardCharts.tsx` utilizing `role="tab"` but missing `aria-controls` to link them to their respective tab panels. Tab components must be properly linked to their controlled elements for screen reader usability.
+**Action:** Always verify `aria-controls` is present when implementing custom tab interfaces (`role="tab"`).
+
 ## 2026-05-26 - Chart Visual Overhaul
 **Learning:** Overhauled Recharts dashboard representation using terminal/oscilloscope styling while maintaining 100% of underlying heavy compute logics and Vite testing functionality. Monospaced UI components and strict flat colors provide a raw data visual aesthetic.
 **Action:** Always decouple pure visual modifications in chart wrappers (`defs`, `Tooltip`, `Area`, `XAxis`/`YAxis`) from data-processing functions (`useMemo` heavy array traversals) to guarantee computational integrity and zero regression in performance when modifying appearance.

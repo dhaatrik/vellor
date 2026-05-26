@@ -106,6 +106,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ itemVariants }
                 <button
                   role="tab"
                   aria-selected={activeChart === 'income'}
+                  aria-controls="dashboard-chart-panel"
                   aria-label="View Income Overview"
                   onClick={() => setActiveChart('income')}
                   className={`px-3 py-1 text-xs font-mono rounded-sm transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[#00ff66] focus-visible:ring-offset-1 focus-visible:ring-offset-black ${activeChart === 'income' ? 'bg-[#222222] text-[#00ff66] border border-[#00ff66]/30 shadow-sm' : 'text-gray-500 hover:text-gray-300 border border-transparent'}`}
@@ -115,6 +116,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ itemVariants }
                 <button
                   role="tab"
                   aria-selected={activeChart === 'students'}
+                  aria-controls="dashboard-chart-panel"
                   aria-label="View Student Growth"
                   onClick={() => setActiveChart('students')}
                   className={`px-3 py-1 text-xs font-mono rounded-sm transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:ring-offset-black ${activeChart === 'students' ? 'bg-[#222222] text-white border border-white/30 shadow-sm' : 'text-gray-500 hover:text-gray-300 border border-transparent'}`}
@@ -123,7 +125,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ itemVariants }
                 </button>
               </div>
             </div>
-            <div className="flex-1 min-h-[200px] w-full">
+            <div id="dashboard-chart-panel" className="flex-1 min-h-[200px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="rgba(255,255,255,0.05)" />
