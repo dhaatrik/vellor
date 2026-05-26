@@ -54,19 +54,26 @@
 **Learning:** Found custom chart navigation buttons in `DashboardCharts.tsx` utilizing `role="tab"` but missing `aria-controls` to link them to their respective tab panels. Tab components must be properly linked to their controlled elements for screen reader usability.
 **Action:** Always verify `aria-controls` is present when implementing custom tab interfaces (`role="tab"`).
 
-## 2026-05-26 - Chart Visual Overhaul
+## 2026-05-20 - Chart Visual Overhaul
 **Learning:** Overhauled Recharts dashboard representation using terminal/oscilloscope styling while maintaining 100% of underlying heavy compute logics and Vite testing functionality. Monospaced UI components and strict flat colors provide a raw data visual aesthetic.
 **Action:** Always decouple pure visual modifications in chart wrappers (`defs`, `Tooltip`, `Area`, `XAxis`/`YAxis`) from data-processing functions (`useMemo` heavy array traversals) to guarantee computational integrity and zero regression in performance when modifying appearance.
-## 2026-05-26 - Dashboard Telemetry Refactor
+
+## 2026-05-21 - Dashboard Telemetry Refactor
 **Learning:** Successfully stripped out rounded corners and soft dropshadows to apply a clinical compute telemetry design, strictly following visual constraints while maintaining component logic.
 **Action:** Consistently replace micro-interaction cards with flat layout containers bordered by thin neon accents on a pitch-black canvas background when performing system telemetry aesthetic updates.
 
-## 2026-05-26 - Cybertext Cipher Effect
+## 2026-05-22 - Cybertext Cipher Effect
 **Learning:** Adding a cryptographic scramble effect to headings in authentication flows provides visceral feedback that data is encrypted, but calculating random strings on every frame inside React state can cause performance stuttering and GC pauses on low-end devices.
 **Action:** When creating high-frequency text animation effects like ciphers, avoid intermediate array allocation and use `requestAnimationFrame` with standard bounded `for` loops inside the animation loop to ensure buttery 60fps renders even on older mobile devices.
-## 2026-05-26 - Sequential Telemetry Terminal Logs
+
+## 2026-05-23 - Sequential Telemetry Terminal Logs
 **Learning:** Replaced standard styled card elements for progress logs with an unstyled, monospaced canvas using lightweight stagger animations to mimic a sequential telemetry log stream, ensuring non-standard ARIA roles aren't applied onto motion elements.
 **Action:** When implementing terminal log aesthetics for list items, use monospaced fonts (`font-mono`) over dark transparent backgrounds with raw staggered layout fade-ins using Framer Motion, while ensuring clean string construction prior to render elements.
-## 2026-05-26 - Lock Theme to Dark Mode
+
+## 2026-05-24 - Lock Theme to Dark Mode
 **Learning:** For a permanent hardware terminal aesthetic, remove Theme toggles from the store and UI rather than just hiding them to prevent state inconsistencies, and replace the unused UI real-estate with immersive indicators (like 'SYS_SECURE').
 **Action:** When locking themes, update the initial state of the store, remove any `toggleTheme` actions, remove test suites checking for theme switching, and use a static indicator.
+
+## 2026-05-25 - CRT Scanline Hardware Effect in Recharts
+**Learning:** Recharts `<Area>` elements support custom SVG pattern fills like scanlines. Using an SVG `<pattern>` def with a `<rect>` height of 1px and a low opacity color creates an authentic hardware effect without altering data performance or requiring external assets. Make sure `fillOpacity={1}` on the `<Area>` when using a pattern to ensure the pattern renders correctly.
+**Action:** Use inline `<pattern>` defs referenced by `fill="url(#id)"` to add visual texture to Recharts components.
