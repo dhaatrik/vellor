@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Modal, Input, Icon } from '.';
 import { useStore } from '../../store';
 import { useNavigate } from 'react-router-dom';
+import { PaymentStatus } from '../../types';
 
 export const SearchModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
   const [query, setQuery] = useState('');
@@ -146,11 +147,12 @@ export const SearchModal: React.FC<{ isOpen: boolean; onClose: () => void }> = (
             if (studentId) {
                 addTransaction({
                     studentId,
-                    type: 'lesson',
+
                     date: new Date().toISOString(),
-                    amount: parseFloat(feeStr) || 0,
-                    status: (statusStr.toLowerCase() === 'paid' ? 'paid' : 'pending') as 'paid' | 'pending',
-                    duration: parseInt(durationStr) || 60,
+                    lessonFee: parseFloat(feeStr) || 0,
+                    amountPaid: statusStr.toLowerCase() === 'paid' ? parseFloat(feeStr) || 0 : 0,
+                    status: statusStr.toLowerCase() === 'paid' ? PaymentStatus.Paid : PaymentStatus.Due,
+                    lessonDuration: parseInt(durationStr) || 60,
                 });
                 setQuery('');
                 onClose();
