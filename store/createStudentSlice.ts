@@ -167,7 +167,7 @@ export const createStudentSlice: StateCreator<AppState, [], [], StudentSlice> = 
 
   deleteStudent: (studentId) => {
     const state = get();
-    const studentToDelete = state.students.find(s => s.id === studentId);
+    const studentToDelete = state.getStudentById(studentId);
 
     set(state => {
       // ⚡ Bolt Performance: Use native .filter() which is internally optimized in modern JS engines
