@@ -64,3 +64,6 @@
 ## 2026-05-26 - Cybertext Cipher Effect
 **Learning:** Adding a cryptographic scramble effect to headings in authentication flows provides visceral feedback that data is encrypted, but calculating random strings on every frame inside React state can cause performance stuttering and GC pauses on low-end devices.
 **Action:** When creating high-frequency text animation effects like ciphers, avoid intermediate array allocation and use `requestAnimationFrame` with standard bounded `for` loops inside the animation loop to ensure buttery 60fps renders even on older mobile devices.
+## 2026-05-26 - Sequential Telemetry Terminal Logs
+**Learning:** Replaced standard styled card elements for progress logs with an unstyled, monospaced canvas using lightweight stagger animations to mimic a sequential telemetry log stream, ensuring non-standard ARIA roles aren't applied onto motion elements.
+**Action:** When implementing terminal log aesthetics for list items, use monospaced fonts (`font-mono`) over dark transparent backgrounds with raw staggered layout fade-ins using Framer Motion, while ensuring clean string construction prior to render elements.

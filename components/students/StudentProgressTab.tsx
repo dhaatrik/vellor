@@ -1,5 +1,6 @@
 import type { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
-import React from 'react';
+import React, { useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { Transaction } from '../../types';
 import { Button, Card, Icon } from '../ui';
 import { formatDate } from '../../helpers';
@@ -24,6 +25,29 @@ export const StudentProgressTab: React.FC<StudentProgressTabProps> = ({
   setShowReportModal,
   formatGrade,
 }) => {
+
+  const memoizedLogEntries = useMemo(() => {
+    return progressTransactions.map((t, index) => {
+      const timestamp = formatDate(t.date);
+      const gradeStr = t.grade ? ` [GRADE: ${t.grade}]` : '';
+      const remarkStr = t.progressRemark ? ` // ${t.progressRemark}` : '';
+      // Direct string concatenation
+      const logLine = `[${timestamp}] ENTRY${gradeStr}${remarkStr}`;
+
+      return (
+        <motion.div
+          key={t.id + '-prog'}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: index * 0.05, duration: 0.3 }}
+          className="py-1"
+        >
+          {logLine}
+        </motion.div>
+      );
+    });
+  }, [progressTransactions]);
+
   return (
     <Card className="border-gray-100 dark:border-white/5">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -91,30 +115,8 @@ export const StudentProgressTab: React.FC<StudentProgressTabProps> = ({
       )}
 
       {progressTransactions.length > 0 ? (
-        <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-          {progressTransactions.map((t) => (
-            <div
-              key={t.id + '-prog'}
-              className="p-4 bg-gray-50 dark:bg-primary/30 rounded-2xl border border-gray-100 dark:border-white/5 relative transition-colors hover:border-accent/40"
-            >
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-                  <Icon iconName="calendar" className="w-4 h-4" />{' '}
-                  {formatDate(t.date)}
-                </span>
-                {t.grade && (
-                  <span className="px-2.5 py-0.5 rounded-full bg-accent text-primary-dark font-bold text-sm shadow-sm">
-                    Grade: {t.grade}
-                  </span>
-                )}
-              </div>
-              {t.progressRemark && (
-                <p className="text-gray-900 dark:text-gray-100 font-medium mt-2">
-                  {t.progressRemark}
-                </p>
-              )}
-            </div>
-          ))}
+        <div className="max-h-[400px] overflow-y-auto pr-2 custom-scrollbar font-mono text-xs text-gray-800 dark:text-green-400 bg-transparent">
+          {memoizedLogEntries}
         </div>
       ) : (
         <div className="text-center py-12 bg-gray-50 dark:bg-primary/30 rounded-2xl border border-dashed border-gray-200 dark:border-white/10">
