@@ -22,3 +22,5 @@ export * from './Toast';
 export * from './FAB';
 export * from './LegalModals';
 export * from './OnboardingWizard';
+
+export * from './TerminalBackground';

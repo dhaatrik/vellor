@@ -137,3 +137,6 @@
 ## 2026-05-29 - Array zero-allocation string parsing
 **Learning:** Using `.split().filter()` to parse space-delimited string commands inside hot loops or input handlers creates unnecessary array allocations, adding memory pressure and garbage collection overhead.
 **Action:** Use manual `while` loops with `.indexOf()` and `.slice()` to iterate over a string and extract arguments sequentially without ever instantiating an intermediate array.
+## 2026-05-30 - WebGL2 zero-allocation loops
+**Learning:** Instantiating new objects, arrays, or anonymous functions inside a tight `requestAnimationFrame` render loop causes continuous memory allocations, leading to garbage collection pauses and frame drops.
+**Action:** When working in high-frequency rendering contexts like WebGL loops, pre-allocate all necessary variables and arrays outside the tick function, and avoid using any syntax that generates implicit objects (e.g., closures, `{...spreads}`) to maintain a steady 60+ FPS without jank.
