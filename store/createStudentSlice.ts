@@ -10,6 +10,7 @@ export const createStudentSlice: StateCreator<AppState, [], [], StudentSlice> = 
 
   addStudents: (studentsData) => {
     const newStudents: Student[] = [];
+    const now = new Date().toISOString();
 
     // ⚡ Bolt Performance: Process bulk additions inside a single loop to avoid N+1 state updates
     for (let i = 0; i < studentsData.length; i++) {
@@ -41,7 +42,7 @@ export const createStudentSlice: StateCreator<AppState, [], [], StudentSlice> = 
           ...sanitizedStudentData,
           searchName: `${sanitizedStudentData.firstName} ${sanitizedStudentData.lastName}`.toLowerCase(),
           id: crypto.randomUUID(),
-          createdAt: new Date().toISOString(),
+          createdAt: now,
         });
     }
 
