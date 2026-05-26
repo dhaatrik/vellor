@@ -45,7 +45,7 @@ describe('SearchModal', () => {
         <SearchModal {...defaultProps} />
       </MemoryRouter>
     );
-    expect(screen.getByPlaceholderText('Search students...')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Search or enter command...')).toBeInTheDocument();
     expect(screen.getByText('Command Palette')).toBeInTheDocument();
   });
 
@@ -65,7 +65,7 @@ describe('SearchModal', () => {
       </MemoryRouter>
     );
 
-    const input = screen.getByPlaceholderText('Search students...');
+    const input = screen.getByPlaceholderText('Search or enter command...');
     fireEvent.change(input, { target: { value: 'alice' } });
 
     await waitFor(() => {
@@ -81,7 +81,7 @@ describe('SearchModal', () => {
       </MemoryRouter>
     );
 
-    const input = screen.getByPlaceholderText('Search students...');
+    const input = screen.getByPlaceholderText('Search or enter command...');
     fireEvent.change(input, { target: { value: 'i' } });
 
     await waitFor(() => {
@@ -102,12 +102,12 @@ describe('SearchModal', () => {
       </MemoryRouter>
     );
 
-    const input = screen.getByPlaceholderText('Search students...');
+    const input = screen.getByPlaceholderText('Search or enter command...');
     fireEvent.change(input, { target: { value: 'xyz' } });
 
     await waitFor(() => {
-      expect(screen.getByText('No students found')).toBeInTheDocument();
-      expect(screen.getByText('We couldn\'t find anyone matching "xyz"')).toBeInTheDocument();
+      expect(screen.getByText('ERR: COMMAND_UNRECOGNIZED')).toBeInTheDocument();
+      expect(screen.getByText(/No matching records or macros found for "xyz"/)).toBeInTheDocument();
     });
   });
 
@@ -118,7 +118,7 @@ describe('SearchModal', () => {
       </MemoryRouter>
     );
 
-    const input = screen.getByPlaceholderText('Search students...');
+    const input = screen.getByPlaceholderText('Search or enter command...');
     fireEvent.change(input, { target: { value: 'alice' } });
 
     await waitFor(() => {
@@ -138,7 +138,7 @@ describe('SearchModal', () => {
       </MemoryRouter>
     );
 
-    const input = screen.getByPlaceholderText('Search students...');
+    const input = screen.getByPlaceholderText('Search or enter command...');
     fireEvent.change(input, { target: { value: 'alice' } });
 
     await waitFor(() => {
@@ -161,7 +161,7 @@ describe('SearchModal', () => {
       </MemoryRouter>
     );
 
-    const input = screen.getByPlaceholderText('Search students...');
+    const input = screen.getByPlaceholderText('Search or enter command...');
     fireEvent.change(input, { target: { value: 'alice' } });
 
     await waitFor(() => {
@@ -185,7 +185,7 @@ describe('SearchModal', () => {
       </MemoryRouter>
     );
 
-    const input = screen.getByPlaceholderText('Search students...');
+    const input = screen.getByPlaceholderText('Search or enter command...');
     fireEvent.change(input, { target: { value: 'alice' } });
 
     await waitFor(() => {
