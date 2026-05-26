@@ -4,11 +4,32 @@
 @tailwind utilities;
 
 :root {
-  --color-primary: #8b5cf6;
+  --color-primary: #000000;
   --color-secondary: #0f172a;
-  --color-accent: #8b5cf6;
-  --color-accent-light: color-mix(in srgb, var(--color-accent) 80%, white);
-  --color-accent-dark: color-mix(in srgb, var(--color-accent) 80%, black);
+  --color-accent: #00ff66;
+  --color-accent-light: #33ff85;
+  --color-accent-dark: #00cc52;
+}
+
+@layer base {
+  /* Wireframe Containment Primitives */
+  * {
+    /* Remove soft box-shadows globally without breaking focus rings */
+    --tw-shadow: 0 0 #0000 !important;
+    --tw-shadow-colored: 0 0 #0000 !important;
+  }
+}
+
+@layer components {
+  /* Replace smooth, rounded corners across UI blocks */
+  .rounded-3xl, .rounded-2xl, .rounded-xl, .rounded-lg, .rounded-md, .rounded {
+    border-radius: 0.125rem !important; /* rounded-sm */
+  }
+
+  /* Implement razor-thin, semi-translucent borders for layout elements */
+  .border-white\/20, .border-white\/10, .border-gray-100, .border-gray-200 {
+    border-color: rgba(255, 255, 255, 0.05) !important;
+  }
 }
 
 @layer utilities {

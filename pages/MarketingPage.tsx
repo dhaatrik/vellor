@@ -173,7 +173,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
             {/* Improvement #1: Mobile Hamburger Button */}
             <button
                 onClick={() => setIsMobileMenuOpen(true)}
-                className="md:hidden p-2 text-gray-600 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="md:hidden p-2 text-gray-600 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary"
                 aria-label="Open navigation menu"
                 title="Open navigation menu"
             >
@@ -848,7 +848,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
             ].map((faq, i) => (
               <Accordion.Item key={i} value={`item-${i}`} className="bg-white dark:bg-primary-light border border-gray-100 dark:border-white/5 rounded-2xl overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
                 <Accordion.Header className="flex">
-                  <Accordion.Trigger className="group flex flex-1 items-center justify-between py-5 px-6 font-semibold transition-all hover:bg-gray-50 dark:hover:bg-white/5 text-left w-full outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset rounded-2xl">
+                  <Accordion.Trigger className="group flex flex-1 items-center justify-between py-5 px-6 font-semibold transition-all hover:bg-gray-50 dark:hover:bg-white/5 text-left w-full outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary rounded-2xl">
                     <span className="text-gray-900 dark:text-white text-lg">{faq.q}</span>
                     <Icon iconName="chevron-down" className="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-data-[state=open]:rotate-180" />
                   </Accordion.Trigger>

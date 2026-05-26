@@ -69,7 +69,7 @@ export const BeforeAfterSlider = () => {
         style={{ left: `${sliderPos}%` }}
       >
         <div className="w-1.5 h-full bg-white shadow-[0_0_15px_rgba(0,0,0,0.5)] flex items-center justify-center">
-           <div className="w-12 h-12 bg-white rounded-full shadow-2xl border-2 border-gray-200 flex items-center justify-center text-accent ring-4 ring-white/50 backdrop-blur-md transition-transform active:scale-95 group-hover:scale-110 focus-visible:ring-accent">
+           <div className="w-12 h-12 bg-white rounded-full shadow-2xl border-2 border-gray-200 flex items-center justify-center text-accent ring-4 ring-white/50 backdrop-blur-md transition-transform active:scale-95 group-hover:scale-110 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6 rotate-90 text-gray-800">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
               </svg>

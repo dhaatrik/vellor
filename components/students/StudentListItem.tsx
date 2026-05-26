@@ -65,7 +65,7 @@ export const StudentListItem: React.FC<StudentListItemProps> = React.memo(({ stu
         {onToggleSelect && (
             <button
                 type="button"
-                className={`absolute top-4 right-4 z-10 w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:opacity-100 ${isSelected ? 'bg-accent border-accent text-primary-dark' : 'border-gray-300 dark:border-white/20 opacity-0 group-hover:opacity-100'}`}
+                className={`absolute top-4 right-4 z-10 w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary focus-visible:opacity-100 ${isSelected ? 'bg-accent border-accent text-primary-dark' : 'border-gray-300 dark:border-white/20 opacity-0 group-hover:opacity-100'}`}
                 onClick={(e) => { e.stopPropagation(); onToggleSelect(student); }}
                 aria-label={isSelected ? `Deselect ${student.firstName}` : `Select ${student.firstName}`}
                 title={isSelected ? `Deselect ${student.firstName}` : `Select ${student.firstName}`}

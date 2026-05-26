@@ -49,7 +49,7 @@ export const Button: React.FC<ButtonProps> = ({ children, variant = 'primary', s
   };
 
   // Adjust focus ring offset for dark mode based on new background
-  const darkFocusOffset = (variant === 'ghost' || variant === 'outline') ? 'dark:focus:ring-offset-primary' : 'dark:focus:ring-offset-primary-dark';
+  const darkFocusOffset = (variant === 'ghost' || variant === 'outline') ? 'dark:focus:ring-offset-primary' : 'dark:focus:ring-offset-primary';
 
 
   return (
