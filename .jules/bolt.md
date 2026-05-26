@@ -99,6 +99,6 @@
 ## 2026-05-22 - Avoid "holey" arrays via dynamic length truncation
 **Learning:** Pre-allocating an array with `new Array(len)` and then selectively assigning items via an index counter (`count`) before truncating with `result.length = count` is often a micro-optimization with negligible impact. Furthermore, if you pre-allocate a large array but only populate a few elements, the JS engine might create a "holey" array which performs significantly worse than a dense array built with standard `.push()`.
 **Action:** Do not replace `[]` and `.push()` with `new Array(len)` and `.length` truncation when filtering items, as it sacrifices readability and safety for no real-world performance benefit.
-## 2024-05-26 - Optimize StudentDetailView Subject Mapping
+## 2026-05-26 - Optimize StudentDetailView Subject Mapping
 **Learning:** Mapping over arrays directly inside complex JSX expressions can lead to unnecessary computational overhead and re-renders, especially when dealing with lists or multiple potential render cycles.
 **Action:** Extract list mappings into a `useMemo` hook at the top level of the component to cache the rendered JSX elements, ensuring they are only recalculated when the underlying data changes.
