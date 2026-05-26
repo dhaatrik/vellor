@@ -228,6 +228,11 @@ COUNTRIES.forEach(c => {
 });
 
 /**
+ * Pre-computed country options for select inputs.
+ */
+export const COUNTRY_OPTIONS = COUNTRIES.map(c => ({ value: c.name, label: c.name }));
+
+/**
  * Default currency symbol used if no currency is set by the user.
  */
 export const DEFAULT_CURRENCY_SYMBOL = '$';
