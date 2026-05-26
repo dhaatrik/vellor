@@ -45,3 +45,6 @@
 ## 2026-05-14 - Empty States in Search Interfaces
 **Learning:** Providing a dead-end, text-only empty state (e.g., 'No results found') in interactive components like search palettes is a missed opportunity to guide the user. Polishing these with a standard visual hierarchy (icon, clear title, descriptive subtext) improves the user experience and aligns with the app's overall design system.
 **Action:** When implementing or refactoring search or filter components, always replace plain text empty states with polished, structured UI components to provide better visual feedback and guidance.
+## YYYY-MM-DD - Chart Visual Overhaul
+**Learning:** Overhauled Recharts dashboard representation using terminal/oscilloscope styling while maintaining 100% of underlying heavy compute logics and Vite testing functionality. Monospaced UI components and strict flat colors provide a raw data visual aesthetic.
+**Action:** Always decouple pure visual modifications in chart wrappers (`defs`, `Tooltip`, `Area`, `XAxis`/`YAxis`) from data-processing functions (`useMemo` heavy array traversals) to guarantee computational integrity and zero regression in performance when modifying appearance.
