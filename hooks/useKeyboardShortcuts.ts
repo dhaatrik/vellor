@@ -34,7 +34,7 @@ export const useKeyboardShortcuts = (
         
         // Mark hovered transaction as paid
         if (currentHoveredTransactionId) {
-          const t = store.transactions.find(tx => tx.id === currentHoveredTransactionId);
+          const t = store.getTransactionById(currentHoveredTransactionId);
           if (t && t.status !== PaymentStatus.Paid && t.status !== PaymentStatus.Overpaid) {
             store.updateTransaction(t.id, {
               amountPaid: t.lessonFee, // Pay in full

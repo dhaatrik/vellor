@@ -36,6 +36,7 @@ describe('useKeyboardShortcuts', () => {
     vi.mocked(useStore).mockReturnValue({
       transactions: [],
       updateTransaction: mockUpdateTransaction,
+        getTransactionById: vi.fn((id) => (useStore as unknown as Mock).mock.results[0].value.transactions.find((tx: any) => tx.id === id)),
       addToast: mockAddToast,
     });
 
@@ -223,6 +224,7 @@ describe('useKeyboardShortcuts', () => {
       (useStore as unknown as Mock).mockReturnValue({
         transactions: [mockTx],
         updateTransaction: mockUpdateTransaction,
+        getTransactionById: vi.fn((id) => (useStore as unknown as Mock).mock.results[0].value.transactions.find((tx: any) => tx.id === id)),
         addToast: mockAddToast,
       });
 
@@ -254,6 +256,7 @@ describe('useKeyboardShortcuts', () => {
       (useStore as unknown as Mock).mockReturnValue({
         transactions: [mockTx],
         updateTransaction: mockUpdateTransaction,
+        getTransactionById: vi.fn((id) => (useStore as unknown as Mock).mock.results[0].value.transactions.find((tx: any) => tx.id === id)),
         addToast: mockAddToast,
       });
 
@@ -271,6 +274,7 @@ describe('useKeyboardShortcuts', () => {
       (useStore as unknown as Mock).mockReturnValue({
         transactions: [],
         updateTransaction: mockUpdateTransaction,
+        getTransactionById: vi.fn((id) => (useStore as unknown as Mock).mock.results[0].value.transactions.find((tx: any) => tx.id === id)),
         addToast: mockAddToast,
       });
 
@@ -289,6 +293,7 @@ describe('useKeyboardShortcuts', () => {
       (useStore as unknown as Mock).mockReturnValue({
         transactions: [],
         updateTransaction: mockUpdateTransaction,
+        getTransactionById: vi.fn((id) => (useStore as unknown as Mock).mock.results[0].value.transactions.find((tx: any) => tx.id === id)),
         addToast: mockAddToast,
       });
 
@@ -319,6 +324,7 @@ describe('useKeyboardShortcuts', () => {
       (useStore as unknown as Mock).mockReturnValue({
         transactions: [mockTx1, mockTx2, mockTx3],
         updateTransaction: mockUpdateTransaction,
+        getTransactionById: vi.fn((id) => (useStore as unknown as Mock).mock.results[0].value.transactions.find((tx: any) => tx.id === id)),
         addToast: mockAddToast,
       });
 
@@ -344,6 +350,7 @@ describe('useKeyboardShortcuts', () => {
       (useStore as unknown as Mock).mockReturnValue({
         transactions: [mockTx],
         updateTransaction: mockUpdateTransaction,
+        getTransactionById: vi.fn((id) => (useStore as unknown as Mock).mock.results[0].value.transactions.find((tx: any) => tx.id === id)),
         addToast: mockAddToast,
       });
 
