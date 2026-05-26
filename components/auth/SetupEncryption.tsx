@@ -179,7 +179,7 @@ export const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlock
 
            {!isFirstTime && (
               <div className="text-center mt-4">
-                 <button onClick={() => { setUseRecovery(!useRecovery); setError(''); setPassword(''); setRecoveryInput(''); }} className="text-sm text-gray-500 hover:text-accent transition-colors rounded px-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 dark:focus-visible:ring-offset-primary-dark">
+                 <button onClick={() => { setUseRecovery(!useRecovery); setError(''); setPassword(''); setRecoveryInput(''); }} className="text-sm text-gray-500 hover:text-accent transition-colors rounded px-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary">
                     {useRecovery ? 'Use Master Password Instead' : 'Forgot Password? Use Recovery Key'}
                  </button>
               </div>

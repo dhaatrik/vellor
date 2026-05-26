@@ -13,12 +13,13 @@ export default {
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
         display: ['Plus Jakarta Sans', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
       },
       colors: {
         primary: {
-          light: '#1e293b',
-          DEFAULT: '#0f172a',
-          dark: '#020617',
+          light: '#0a0a0a',
+          DEFAULT: '#000000',
+          dark: '#000000',
         },
         secondary: {
           light: '#ffffff',
@@ -26,9 +27,9 @@ export default {
           dark: '#f1f5f9',
         },
         accent: {
-          light: 'var(--color-accent-light, #a78bfa)',
-          DEFAULT: 'var(--color-accent, #8b5cf6)',
-          dark: 'var(--color-accent-dark, #7c3aed)',
+          light: 'var(--color-accent-light, #33ff85)',
+          DEFAULT: 'var(--color-accent, #00ff66)',
+          dark: 'var(--color-accent-dark, #00cc52)',
         },
         success: '#10b981',
         warning: '#f59e0b',
