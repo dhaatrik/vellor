@@ -118,16 +118,23 @@ export const TerminalBackground: React.FC = () => {
 
     let animationFrameId: number;
 
-    const render = (time: number) => {
-      const displayWidth = canvas.clientWidth;
-      const displayHeight = canvas.clientHeight;
+    const handleResize = () => {
+      const displayWidth = window.innerWidth;
+      const displayHeight = window.innerHeight;
 
       if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
         canvas.width = displayWidth;
         canvas.height = displayHeight;
         gl.viewport(0, 0, canvas.width, canvas.height);
       }
+    };
 
+    // Initial size
+    handleResize();
+    window.addEventListener('resize', handleResize);
+
+    const render = (time: number) => {
+      // Dynamic canvas resizing moved to resize event listener
       gl.useProgram(program);
       gl.bindVertexArray(vao);
 
@@ -142,6 +149,7 @@ export const TerminalBackground: React.FC = () => {
     animationFrameId = requestAnimationFrame(render);
 
     return () => {
+      window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationFrameId);
 
       gl.bindVertexArray(null);
@@ -164,7 +172,7 @@ export const TerminalBackground: React.FC = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 w-full h-full pointer-events-none"
+      className="fixed inset-0 w-full h-full pointer-events-none z-0"
       aria-hidden="true"
       tabIndex={-1}
     />

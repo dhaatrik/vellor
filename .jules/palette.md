@@ -80,3 +80,6 @@
 ## 2024-05-26 - Kinetic Digital Mesh
 **Learning:** For a clinical, technical vibe on screens, animating GLSL grid fracts using native device timestamps provides completely fluid GPU motion without main thread JS blocking. Modulating alpha using a very specific minimal green code allows visual scale.
 **Action:** When designing technical components, rely on precision vector fields over DOM manipulation for large ambient textures.
+## 2026-05-31 - Ambient Canvas Sizing for Structural Layouts
+**Learning:** Injecting fixed, absolute ambient layers (like WebGL canvases) behind structural layouts requires decoupling layer controls. Merely assigning a global z-index works, but applying a translucent backdrop layer specifically on surrounding semantic `<main>` and `<aside>` container divs using `backdrop-blur-md` allows full-screen immersive shader layouts without losing necessary interactive state hierarchy for core content flows.
+**Action:** Use unified layer opacity configuration `bg-black/30 backdrop-blur-md border-white/5 z-10 relative` for root content structural groups when introducing screen-wide global composite shader logic on `z-0` beneath them.

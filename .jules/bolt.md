@@ -140,3 +140,6 @@
 ## 2026-05-30 - WebGL2 zero-allocation loops
 **Learning:** Instantiating new objects, arrays, or anonymous functions inside a tight `requestAnimationFrame` render loop causes continuous memory allocations, leading to garbage collection pauses and frame drops.
 **Action:** When working in high-frequency rendering contexts like WebGL loops, pre-allocate all necessary variables and arrays outside the tick function, and avoid using any syntax that generates implicit objects (e.g., closures, `{...spreads}`) to maintain a steady 60+ FPS without jank.
+## 2026-05-31 - WebGL Canvas Resize Strategy
+**Learning:** Using `clientWidth` and `clientHeight` coupled with `canvas.width` and `canvas.height` assignment directly within `requestAnimationFrame` render loops is a continuous layout observation that can cause micro-stuttering and jank on lower-end devices.
+**Action:** When handling canvas size in WebGL applications, always shift dynamic scaling bounds out of the tick render function into an explicit `window.addEventListener('resize')` listener to avoid expensive per-frame DOM layout trashing.
