@@ -127,3 +127,7 @@
 ## 2026-05-26 - Optimize StudentDetailView Subject Mapping
 **Learning:** Mapping over arrays directly inside complex JSX expressions can lead to unnecessary computational overhead and re-renders, especially when dealing with lists or multiple potential render cycles.
 **Action:** Extract list mappings into a `useMemo` hook at the top level of the component to cache the rendered JSX elements, ensuring they are only recalculated when the underlying data changes.
+
+## 2026-05-27 - Command Palette Tokenizer
+**Learning:** Using regex or `.split().map()` for parsing commands in hot paths (like the command palette input) creates unnecessary array allocations and string copies.
+**Action:** Use direct string scanning methods like `indexOf` and `slice` to extract command arguments efficiently and minimize garbage collection overhead in hot input paths.
