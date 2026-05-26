@@ -99,17 +99,17 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ itemVariants }
           <Card className="h-full rounded-3xl border border-white/20 dark:border-white/5 shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl flex flex-col">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-display font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <Icon iconName={activeChart === 'income' ? 'chart-bar' : 'users'} className={`w-5 h-5 ${activeChart === 'income' ? 'text-accent' : 'text-blue-500'}`} />
+                <Icon iconName={activeChart === 'income' ? 'chart-bar' : 'users'} className={`w-5 h-5 ${activeChart === 'income' ? 'text-[#00ff66]' : 'text-white'}`} />
                 {activeChart === 'income' ? 'Income Overview' : 'Student Growth'}
               </h3>
-              <div className="flex bg-gray-100 dark:bg-primary rounded-full p-1" role="tablist" aria-label="Chart view options">
+              <div className="flex bg-black border border-[#333333] rounded-sm p-[2px]" role="tablist" aria-label="Chart view options">
                 <button
                   role="tab"
                   aria-selected={activeChart === 'income'}
                   aria-controls="dashboard-chart-panel"
                   aria-label="View Income Overview"
                   onClick={() => setActiveChart('income')}
-                  className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary ${activeChart === 'income' ? 'bg-white dark:bg-primary-light text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
+                  className={`px-3 py-1 text-xs font-mono rounded-sm transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[#00ff66] focus-visible:ring-offset-1 focus-visible:ring-offset-black ${activeChart === 'income' ? 'bg-[#222222] text-[#00ff66] border border-[#00ff66]/30 shadow-sm' : 'text-gray-500 hover:text-gray-300 border border-transparent'}`}
                 >
                   Income
                 </button>
@@ -119,7 +119,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ itemVariants }
                   aria-controls="dashboard-chart-panel"
                   aria-label="View Student Growth"
                   onClick={() => setActiveChart('students')}
-                  className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary ${activeChart === 'students' ? 'bg-white dark:bg-primary-light text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
+                  className={`px-3 py-1 text-xs font-mono rounded-sm transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-white focus-visible:ring-offset-1 focus-visible:ring-offset-black ${activeChart === 'students' ? 'bg-[#222222] text-white border border-white/30 shadow-sm' : 'text-gray-500 hover:text-gray-300 border border-transparent'}`}
                 >
                   Students
                 </button>
@@ -128,25 +128,35 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ itemVariants }
             <div id="dashboard-chart-panel" className="flex-1 min-h-[200px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="colorStudents" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" className="text-gray-200 dark:text-white/10" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} className="text-gray-500 dark:text-gray-400" />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12 }} className="text-gray-500 dark:text-gray-400" tickFormatter={(value) => activeChart === 'income' ? `${settings.currencySymbol}${value}` : value} />
+                  <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                  <XAxis
+                    dataKey="name"
+                    axisLine={false}
+                    tickLine={false}
+                    stroke="#333333"
+                    tick={{ fontSize: 12, fontFamily: 'monospace', fill: '#888888' }}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    stroke="#333333"
+                    tick={{ fontSize: 12, fontFamily: 'monospace', fill: '#888888' }}
+                    tickFormatter={(value) => activeChart === 'income' ? `${settings.currencySymbol}${value}` : value}
+                  />
                   <Tooltip
-                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
-                    itemStyle={{ color: activeChart === 'income' ? '#8b5cf6' : '#3b82f6', fontWeight: 'bold' }}
+                    contentStyle={{ backgroundColor: '#000000', border: '1px solid #333333', borderRadius: '0', padding: '8px' }}
+                    itemStyle={{ color: activeChart === 'income' ? '#00ff66' : '#ffffff', fontFamily: 'monospace', fontSize: '14px' }}
+                    labelStyle={{ color: '#888888', fontFamily: 'monospace', fontSize: '12px', marginBottom: '4px' }}
                     formatter={(value: ValueType | undefined) => activeChart === 'income' ? [formatCurrency(Number(value), settings.currencySymbol), 'Income'] : [value, 'Students']}
                   />
-                  <Area type="monotone" dataKey={activeChart} stroke={activeChart === 'income' ? '#8b5cf6' : '#3b82f6'} strokeWidth={3} fillOpacity={1} fill={`url(#color${activeChart === 'income' ? 'Income' : 'Students'})`} />
+                  <Area
+                    type="monotone"
+                    dataKey={activeChart}
+                    stroke={activeChart === 'income' ? '#00ff66' : '#ffffff'}
+                    strokeWidth={1.5}
+                    fillOpacity={0.1}
+                    fill={activeChart === 'income' ? '#00ff66' : '#ffffff'}
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
