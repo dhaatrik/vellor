@@ -2,7 +2,7 @@ import React from 'react';
 import { Student, PhoneNumber } from '../../types';
 import { generateId } from '../../helpers';
 import { Button, Input, Select, Textarea, PhoneInput, Icon } from '../ui';
-import { COUNTRIES, COUNTRY_CODE_MAP } from '../../constants';
+import { COUNTRY_CODE_MAP, COUNTRY_OPTIONS } from '../../constants';
 import { z } from 'zod';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -110,8 +110,6 @@ export const StudentForm: React.FC<StudentFormProps> = ({ student, onSave, onClo
 
   const [subjectsInput, setSubjectsInput] = React.useState((student?.tuition.subjects || []).join(', '));
 
-  const countryOptions = COUNTRIES.map(c => ({ value: c.name, label: c.name }));
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       <div className="space-y-6">
@@ -149,7 +147,7 @@ export const StudentForm: React.FC<StudentFormProps> = ({ student, onSave, onClo
                 }
               }
             })} 
-            options={countryOptions} 
+            options={COUNTRY_OPTIONS}
             error={errors.country?.message}
           />
         </div>

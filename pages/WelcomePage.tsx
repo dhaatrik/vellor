@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import { AppSettings, PhoneNumber } from '../types';
-import { CURRENCY_OPTIONS, COUNTRIES, COUNTRY_CODE_MAP } from '../constants';
+import { FORMATTED_CURRENCY_OPTIONS, COUNTRIES, COUNTRY_CODE_MAP } from '../constants';
 import { Button, Input, Select, Card, PhoneInput } from '../components/ui';
 import { motion } from 'framer-motion';
 
@@ -135,7 +135,7 @@ export const WelcomePage: React.FC = () => {
                                 name="currencySymbol"
                                 value={formData.currencySymbol}
                                 onChange={handleChange}
-                                options={CURRENCY_OPTIONS.map(c => ({ value: c.symbol, label: `${c.name} (${c.symbol})` }))}
+                                options={FORMATTED_CURRENCY_OPTIONS}
                             />
                         </motion.div>
                         
