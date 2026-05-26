@@ -128,6 +128,11 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ itemVariants }
             <div id="dashboard-chart-panel" className="flex-1 min-h-[200px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <pattern id="scanlines" patternUnits="userSpaceOnUse" width="4" height="4">
+                      <rect width="4" height="1" fill={activeChart === 'income' ? 'rgba(0, 255, 102, 0.15)' : 'rgba(255, 255, 255, 0.15)'} />
+                    </pattern>
+                  </defs>
                   <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="rgba(255,255,255,0.05)" />
                   <XAxis
                     dataKey="name"
@@ -154,8 +159,8 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ itemVariants }
                     dataKey={activeChart}
                     stroke={activeChart === 'income' ? '#00ff66' : '#ffffff'}
                     strokeWidth={1.5}
-                    fillOpacity={0.1}
-                    fill={activeChart === 'income' ? '#00ff66' : '#ffffff'}
+                    fillOpacity={1}
+                    fill="url(#scanlines)"
                   />
                 </AreaChart>
               </ResponsiveContainer>
