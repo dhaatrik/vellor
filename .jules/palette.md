@@ -67,3 +67,6 @@
 ## 2026-05-26 - Sequential Telemetry Terminal Logs
 **Learning:** Replaced standard styled card elements for progress logs with an unstyled, monospaced canvas using lightweight stagger animations to mimic a sequential telemetry log stream, ensuring non-standard ARIA roles aren't applied onto motion elements.
 **Action:** When implementing terminal log aesthetics for list items, use monospaced fonts (`font-mono`) over dark transparent backgrounds with raw staggered layout fade-ins using Framer Motion, while ensuring clean string construction prior to render elements.
+## 2026-05-26 - CRT Scanline Hardware Effect in Recharts
+**Learning:** Recharts `<Area>` elements support custom SVG pattern fills like scanlines. Using an SVG `<pattern>` def with a `<rect>` height of 1px and a low opacity color creates an authentic hardware effect without altering data performance or requiring external assets. Make sure `fillOpacity={1}` on the `<Area>` when using a pattern to ensure the pattern renders correctly.
+**Action:** Use inline `<pattern>` defs referenced by `fill="url(#id)"` to add visual texture to Recharts components.
