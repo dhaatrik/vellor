@@ -103,3 +103,7 @@
 ## 2026-05-26 - Destructuring Store Methods in Components
 **Learning:** When replacing local variables with store methods, failing to declare the method (e.g., `const getStudentById = useStore(s => s.getStudentById);`) before calling it causes runtime ReferenceErrors.
 **Action:** Always ensure store methods are explicitly destructured at the top of the component before calling them in event handlers or render loops.
+
+## 2026-05-26 - Optimized PortalPage transactions calculation
+**Learning:** `for...of` loops creating iterators can be a performance bottleneck when traversing arrays that could be arbitrarily large or when executed frequently.
+**Action:** Replace `for...of` loops with standard bounded `for` loops (`for (let i = 0; i < len; i++)`) in critical data-processing paths to avoid iterator allocation overhead.

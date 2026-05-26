@@ -162,8 +162,8 @@ describe('generatePortalLink', () => {
     it('generates a valid portal link with encoded payload', () => {
         const link = generatePortalLink(mockStudent, mockTransactions, mockSettings);
 
-        const baseUrl = window.location.origin + window.location.pathname;
-        expect(link.startsWith(baseUrl)).toBe(true);
+        const expectedUrl = new URL(window.location.pathname, window.location.origin);
+        expect(link.startsWith(expectedUrl.toString())).toBe(true);
         expect(link).toContain('#/portal?data=');
 
         const base64Data = link.split('?data=')[1];
