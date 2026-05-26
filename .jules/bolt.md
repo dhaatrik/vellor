@@ -128,18 +128,22 @@
 **Learning:** Mapping over arrays directly inside complex JSX expressions can lead to unnecessary computational overhead and re-renders, especially when dealing with lists or multiple potential render cycles.
 **Action:** Extract list mappings into a `useMemo` hook at the top level of the component to cache the rendered JSX elements, ensuring they are only recalculated when the underlying data changes.
 
-## 2026-05-27 - Command Palette Tokenizer
+## 2026-05-26 - Command Palette Tokenizer
 **Learning:** Using regex or `.split().map()` for parsing commands in hot paths (like the command palette input) creates unnecessary array allocations and string copies.
 **Action:** Use direct string scanning methods like `indexOf` and `slice` to extract command arguments efficiently and minimize garbage collection overhead in hot input paths.
-## 2026-05-28 - Cache Intl.DateTimeFormat
+
+## 2026-05-26 - Cache Intl.DateTimeFormat
 **Learning:** `new Date().toLocaleDateString()` implicitly creates a new `Intl.DateTimeFormat` instance every time it is called. When formatting dates in large lists (e.g., thousands of transactions), this repeated instantiation creates a massive performance bottleneck. Furthermore, `Intl.DateTimeFormat.format()` throws a `RangeError` on invalid dates, while `toLocaleDateString` gracefully returns `'Invalid Date'`.
 **Action:** Always create a single cached `Intl.DateTimeFormat` instance at the module level when repeatedly formatting dates. Guard the formatter call with `isNaN(date.getTime())` to maintain the graceful degradation behavior of `toLocaleDateString` and prevent crashes.
-## 2026-05-29 - Array zero-allocation string parsing
+
+## 2026-05-26 - Array zero-allocation string parsing
 **Learning:** Using `.split().filter()` to parse space-delimited string commands inside hot loops or input handlers creates unnecessary array allocations, adding memory pressure and garbage collection overhead.
 **Action:** Use manual `while` loops with `.indexOf()` and `.slice()` to iterate over a string and extract arguments sequentially without ever instantiating an intermediate array.
-## 2026-05-30 - WebGL2 zero-allocation loops
+
+## 2026-05-27 - WebGL2 zero-allocation loops
 **Learning:** Instantiating new objects, arrays, or anonymous functions inside a tight `requestAnimationFrame` render loop causes continuous memory allocations, leading to garbage collection pauses and frame drops.
 **Action:** When working in high-frequency rendering contexts like WebGL loops, pre-allocate all necessary variables and arrays outside the tick function, and avoid using any syntax that generates implicit objects (e.g., closures, `{...spreads}`) to maintain a steady 60+ FPS without jank.
-## 2026-05-31 - WebGL Canvas Resize Strategy
+
+## 2026-05-27 - WebGL Canvas Resize Strategy
 **Learning:** Using `clientWidth` and `clientHeight` coupled with `canvas.width` and `canvas.height` assignment directly within `requestAnimationFrame` render loops is a continuous layout observation that can cause micro-stuttering and jank on lower-end devices.
 **Action:** When handling canvas size in WebGL applications, always shift dynamic scaling bounds out of the tick render function into an explicit `window.addEventListener('resize')` listener to avoid expensive per-frame DOM layout trashing.
