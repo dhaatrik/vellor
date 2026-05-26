@@ -184,6 +184,20 @@ describe('BackupPromptModal', () => {
     expect(screen.queryByTestId('modal')).not.toBeInTheDocument();
   });
 
+  it('opens if last backup date is an invalid string', async () => {
+    localStorage.setItem('lastBackupDate', 'invalid_date_string');
+
+    await act(async () => {
+        render(<BackupPromptModal />);
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(3100);
+    });
+
+    expect(screen.getByTestId('modal')).toBeInTheDocument();
+  });
+
   it('updates localStorage and shows toast when Remind Me Later is clicked', async () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     await act(async () => {
