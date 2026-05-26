@@ -48,7 +48,9 @@ export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> 
         newSettings.country = sanitizeString(newSettings.country);
     }
     if (newSettings.customRankTitles) {
-        newSettings.customRankTitles = newSettings.customRankTitles.map(title => sanitizeString(title));
+        if (newSettings.customRankTitles !== state.settings.customRankTitles) {
+            newSettings.customRankTitles = newSettings.customRankTitles.map((title, idx) => title === state.settings.customRankTitles?.[idx] ? title : sanitizeString(title));
+        }
     }
     if (newSettings.customAchievement) {
         newSettings.customAchievement = sanitizeString(newSettings.customAchievement);

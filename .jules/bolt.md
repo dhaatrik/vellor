@@ -100,6 +100,10 @@
 **Learning:** Pre-allocating an array with `new Array(len)` and then selectively assigning items via an index counter (`count`) before truncating with `result.length = count` is often a micro-optimization with negligible impact. Furthermore, if you pre-allocate a large array but only populate a few elements, the JS engine might create a "holey" array which performs significantly worse than a dense array built with standard `.push()`.
 **Action:** Do not replace `[]` and `.push()` with `new Array(len)` and `.length` truncation when filtering items, as it sacrifices readability and safety for no real-world performance benefit.
 
+## 2026-05-22 - Optimize customRankTitles sanitization
+**Learning:** In state updates (like Zustand slices), modifying arrays by unconditionally mapping elements through expensive operations like `DOMPurify.sanitize` creates significant CPU overhead when the array length and values haven't actually changed.
+**Action:** When updating arrays with potentially expensive per-element computations, first check array reference equality (`newArr !== oldArr`) to skip the mapping completely if nothing changed. If the array reference changed, check element-level equality (`title === state.settings.customRankTitles?.[idx]`) inside the `.map()` to bypass the expensive operation for items that remained exactly the same.
+
 ## 2026-05-23 - Pre-computing constant array mappings
 **Learning:** Performing `Array.map()` operations on static constants (like a list of countries) directly inside React component render functions or functional closures forces unnecessary recalculation and memory allocation on every render/call.
 **Action:** Extract operations that transform static data into separate constants pre-computed outside the component or module scope to save CPU cycles and reduce garbage collection overhead.
