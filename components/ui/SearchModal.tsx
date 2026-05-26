@@ -111,28 +111,29 @@ export const SearchModal: React.FC<{ isOpen: boolean; onClose: () => void }> = (
             let statusStr = '';
 
             let currentArgIndex = 0;
-            let currentStr = remainingArgsStr;
+            let i = 0;
+            const len = remainingArgsStr.length;
 
-            while (currentStr.length > 0) {
+            while (i < len) {
                 // Skip leading spaces
-                while (currentStr.length > 0 && currentStr[0] === ' ') {
-                    currentStr = currentStr.slice(1);
+                while (i < len && remainingArgsStr[i] === ' ') {
+                    i++;
                 }
 
-                if (currentStr.length === 0) break;
+                if (i >= len) break;
 
                 // Find next space or end
-                let nextSpace = currentStr.indexOf(' ');
-                if (nextSpace === -1) nextSpace = currentStr.length;
+                let nextSpace = remainingArgsStr.indexOf(' ', i);
+                if (nextSpace === -1) nextSpace = len;
 
-                const arg = currentStr.slice(0, nextSpace);
+                const arg = remainingArgsStr.slice(i, nextSpace);
 
                 if (currentArgIndex === 0) durationStr = arg;
                 else if (currentArgIndex === 1) feeStr = arg;
                 else if (currentArgIndex === 2) statusStr = arg;
 
                 currentArgIndex++;
-                currentStr = currentStr.slice(nextSpace);
+                i = nextSpace;
             }
 
             let studentId = '';
