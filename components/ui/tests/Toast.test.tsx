@@ -1,5 +1,5 @@
-import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+
+import { render, screen } from '@testing-library/react';
 import { ToastContainer } from '../Toast';
 import { useStore } from '../../../store';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
