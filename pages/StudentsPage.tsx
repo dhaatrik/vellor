@@ -36,7 +36,7 @@ export const StudentsPage: React.FC = () => {
   const [selectedStudentIds, setSelectedStudentIds] = useState<Set<string>>(new Set());
   const [showBulkLogModal, setShowBulkLogModal] = useState(false);
   const [showImportWizard, setShowImportWizard] = useState(false);
-  const [bulkLogData, setBulkLogData] = useState({ date: new Date().toISOString().split('T')[0], duration: 60, fee: 50, notes: 'Bulk logged lesson' });
+  const [bulkLogData, setBulkLogData] = useState(() => ({ date: new Date().toISOString().split('T')[0], duration: 60, fee: 50, notes: 'Bulk logged lesson' }));
 
   const [makeupPrompt, setMakeupPrompt] = useState<{isOpen: boolean, studentId: string}>({isOpen: false, studentId: ''});
   const [showMakeupModal, setShowMakeupModal] = useState<{isOpen: boolean, studentId: string}>({isOpen: false, studentId: ''});
