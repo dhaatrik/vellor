@@ -20,6 +20,7 @@ export const DashboardPage: React.FC = () => {
   const deleteActivity = useStore(s => s.deleteActivity);
   const clearActivityLog = useStore(s => s.clearActivityLog);
   const addToast = useStore(s => s.addToast);
+  const getStudentById = useStore(s => s.getStudentById);
   const { totalUnpaid, totalPaidThisMonth, activeStudentsCount, overduePayments } = useData.derived();
   
   const predictedIncome = useMemo(() => {
@@ -69,16 +70,6 @@ export const DashboardPage: React.FC = () => {
     estimateSize: () => 72,
     overscan: 5,
   });
-
-  // ⚡ Bolt Performance: Pre-calculate student lookup map to avoid O(N*M) lookups in virtualized lists
-  const studentMap = useMemo(() => {
-    const map: Record<string, typeof students[0]> = Object.create(null);
-    for (let i = 0; i < students.length; i++) {
-      const student = students[i];
-      map[student.id] = student;
-    }
-    return map;
-  }, [students]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -318,7 +309,7 @@ export const DashboardPage: React.FC = () => {
                 <div style={{ height: `${rowVirtualizerOverdue.getTotalSize()}px`, width: '100%', position: 'relative' }}>
                   {rowVirtualizerOverdue.getVirtualItems().map(virtualRow => {
                     const t = overduePayments[virtualRow.index];
-                    const student = studentMap[t.studentId];
+                    const student = getStudentById(t.studentId);
                     return (
                       <div 
                         key={t.id}

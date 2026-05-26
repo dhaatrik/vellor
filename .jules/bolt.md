@@ -100,6 +100,10 @@
 **Learning:** Pre-allocating an array with `new Array(len)` and then selectively assigning items via an index counter (`count`) before truncating with `result.length = count` is often a micro-optimization with negligible impact. Furthermore, if you pre-allocate a large array but only populate a few elements, the JS engine might create a "holey" array which performs significantly worse than a dense array built with standard `.push()`.
 **Action:** Do not replace `[]` and `.push()` with `new Array(len)` and `.length` truncation when filtering items, as it sacrifices readability and safety for no real-world performance benefit.
 
+## 2026-05-26 - Destructuring Store Methods in Components
+**Learning:** When replacing local variables with store methods, failing to declare the method (e.g., `const getStudentById = useStore(s => s.getStudentById);`) before calling it causes runtime ReferenceErrors.
+**Action:** Always ensure store methods are explicitly destructured at the top of the component before calling them in event handlers or render loops.
+
 ## 2026-05-26 - Optimized PortalPage transactions calculation
 **Learning:** `for...of` loops creating iterators can be a performance bottleneck when traversing arrays that could be arbitrarily large or when executed frequently.
 **Action:** Replace `for...of` loops with standard bounded `for` loops (`for (let i = 0; i < len; i++)`) in critical data-processing paths to avoid iterator allocation overhead.
