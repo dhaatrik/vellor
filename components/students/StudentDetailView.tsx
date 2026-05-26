@@ -152,6 +152,18 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({ student, o
 
   const gradientClass = useMemo(() => getGradient(student.firstName + student.lastName), [student.firstName, student.lastName]);
 
+  const renderedSubjects = useMemo(() => {
+    return student.tuition.subjects.length > 0 ? (
+      student.tuition.subjects.map((subject, idx) => (
+        <span key={idx} className="px-2 py-0.5 bg-white dark:bg-primary-light border border-gray-200 dark:border-white/10 rounded-md text-xs font-medium text-gray-700 dark:text-gray-300">
+          {subject}
+        </span>
+      ))
+    ) : (
+      <span className="text-gray-500 dark:text-gray-400">N/A</span>
+    );
+  }, [student.tuition.subjects]);
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -281,11 +293,7 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({ student, o
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-0.5">Subjects</p>
                   <div className="flex flex-wrap gap-1.5 mt-1">
-                    {student.tuition.subjects.length > 0 ? student.tuition.subjects.map((subject, idx) => (
-                      <span key={idx} className="px-2 py-0.5 bg-white dark:bg-primary-light border border-gray-200 dark:border-white/10 rounded-md text-xs font-medium text-gray-700 dark:text-gray-300">
-                        {subject}
-                      </span>
-                    )) : <span className="text-gray-500 dark:text-gray-400">N/A</span>}
+                    {renderedSubjects}
                   </div>
                 </div>
               </div>
