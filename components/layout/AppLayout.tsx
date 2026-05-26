@@ -14,13 +14,11 @@ import { SettingsPage } from '../../pages/SettingsPage';
 import { AchievementsPage } from '../../pages/AchievementsPage';
 import { ProfilePage } from '../../pages/ProfilePage';
 import { TutorAdvicePage } from '../../pages/TutorAdvicePage';
-import { Theme } from '../../types';
 import { TUTOR_RANK_LEVELS } from '../../constants';
 
 export const AppLayout: React.FC = () => {
   // Access data and functions from the store
   const settings = useStore(s => s.settings);
-  const toggleTheme = useStore(s => s.toggleTheme);
   const gamification = useStore(s => s.gamification);
   const achievements = useStore(s => s.achievements);
   const logout = useStore(s => s.logout);
@@ -231,17 +229,11 @@ export const AppLayout: React.FC = () => {
                 Offline Mode
               </div>
             )}
-            {/* Theme Toggle Button */}
-            <Button
-                onClick={toggleTheme}
-                variant="ghost"
-                size="sm"
-                aria-label={`Switch to ${settings.theme === Theme.Dark ? 'Light' : 'Dark'} Mode`}
-                title={`Switch to ${settings.theme === Theme.Dark ? 'Light' : 'Dark'} Mode`}
-                className="!p-2 rounded-full"
-            >
-                <Icon iconName={settings.theme === Theme.Dark ? 'sun' : 'moon'} className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-            </Button>
+            {/* System Secure Indicator */}
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-black/20 dark:bg-white/5 rounded-full border border-gray-200 dark:border-white/10">
+              <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+              <span className="text-xs font-mono font-bold tracking-wider text-gray-700 dark:text-gray-300">SYS_SECURE</span>
+            </div>
             <div className="hidden sm:flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-white/10">
               <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-primary-dark font-bold text-sm" title={settings.userName}>
                 {settings.userName.charAt(0).toUpperCase()}

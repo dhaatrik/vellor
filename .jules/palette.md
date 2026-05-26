@@ -67,3 +67,6 @@
 ## 2026-05-26 - Sequential Telemetry Terminal Logs
 **Learning:** Replaced standard styled card elements for progress logs with an unstyled, monospaced canvas using lightweight stagger animations to mimic a sequential telemetry log stream, ensuring non-standard ARIA roles aren't applied onto motion elements.
 **Action:** When implementing terminal log aesthetics for list items, use monospaced fonts (`font-mono`) over dark transparent backgrounds with raw staggered layout fade-ins using Framer Motion, while ensuring clean string construction prior to render elements.
+## 2024-05-19 - Lock Theme to Dark Mode
+**Learning:** For a permanent hardware terminal aesthetic, remove Theme toggles from the store and UI rather than just hiding them to prevent state inconsistencies, and replace the unused UI real-estate with immersive indicators (like 'SYS_SECURE').
+**Action:** When locking themes, update the initial state of the store, remove any `toggleTheme` actions, remove test suites checking for theme switching, and use a static indicator.

@@ -24,8 +24,7 @@ const XIcon = ({ className }: { className?: string }) => (
     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
   </svg>
 );
-import { useStore } from '../store';
-import { Theme, IconName } from '../types';
+import { IconName } from '../types';
 
 interface MarketingPageProps {
   onGetStarted: () => void;
@@ -42,8 +41,6 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
   const [showFab, setShowFab] = React.useState(false);
   const gamificationRef = useRef<HTMLElement>(null);
   const isGamificationInView = useInView(gamificationRef, { once: true, amount: 0.5 });
-  const settings = useStore(s => s.settings);
-  const toggleTheme = useStore(s => s.toggleTheme);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -156,15 +153,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
                 <Linkedin className="w-5 h-5" />
             </a>
             <div className="w-px h-6 bg-gray-200 dark:bg-white/10 ml-2 mr-1"></div>
-            <Button
-                onClick={toggleTheme}
-                variant="ghost"
-                className="!p-2 shadow-none border-none hover:bg-black/5 dark:hover:bg-white/5"
-                aria-label={`Switch to ${settings.theme === Theme.Dark ? 'Light' : 'Dark'} Mode`}
-                title={`Switch to ${settings.theme === Theme.Dark ? 'Light' : 'Dark'} Mode`}
-            >
-                <Icon iconName={settings.theme === Theme.Dark ? 'sun' : 'moon'} className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-            </Button>
+
             <div className="hidden sm:block ml-2">
                 <Button onClick={onGetStarted} className="rounded-full px-5 text-sm font-bold shadow-lg shadow-accent/20 tracking-wide">
                     Get Started
