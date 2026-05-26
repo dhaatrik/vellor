@@ -23,12 +23,14 @@ export const MagneticButton: React.FC<{ children: React.ReactNode; onClick: () =
     y.set(0);
   };
 
+  const style = { x: springX, y: springY };
+
   return (
     <motion.div
       ref={ref}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      style={{ x: springX, y: springY }}
+      style={style}
       className="inline-block"
     >
       <Button
