@@ -60,3 +60,7 @@
 ## 2026-05-26 - Dashboard Telemetry Refactor
 **Learning:** Successfully stripped out rounded corners and soft dropshadows to apply a clinical compute telemetry design, strictly following visual constraints while maintaining component logic.
 **Action:** Consistently replace micro-interaction cards with flat layout containers bordered by thin neon accents on a pitch-black canvas background when performing system telemetry aesthetic updates.
+
+## 2026-05-26 - Cybertext Cipher Effect
+**Learning:** Adding a cryptographic scramble effect to headings in authentication flows provides visceral feedback that data is encrypted, but calculating random strings on every frame inside React state can cause performance stuttering and GC pauses on low-end devices.
+**Action:** When creating high-frequency text animation effects like ciphers, avoid intermediate array allocation and use `requestAnimationFrame` with standard bounded `for` loops inside the animation loop to ensure buttery 60fps renders even on older mobile devices.

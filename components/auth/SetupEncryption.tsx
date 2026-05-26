@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useStore } from '../../store';
 import { generateSalt, deriveKey, exportKeyToBase64, importKeyFromBase64 } from '../../src/crypto';
 import { Icon, Button } from '../ui';
+import { useCybertext } from '../../hooks/useCybertext';
 
 export const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlocked }) => {
   const [isFirstTime, setIsFirstTime] = useState<boolean | null>(null);
@@ -13,6 +14,10 @@ export const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlock
   const [isCopied, setIsCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const headingText = isFirstTime ? 'Set Master Password' : (useRecovery ? 'Recover Data' : 'Unlock Vellor');
+  const scrambledHeading = useCybertext(headingText);
+  const scrambledRecoveryHeading = useCybertext('Recovery Key');
 
   useEffect(() => {
     const saltString = localStorage.getItem('vellor-salt');
@@ -75,7 +80,7 @@ export const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlock
         <div className="fixed inset-0 flex items-center justify-center bg-gray-900/50 backdrop-blur-md z-50">
           <div className="bg-white dark:bg-primary p-8 rounded-3xl shadow-2xl max-w-md w-full ml-4 mr-4">
             <h2 className="text-2xl font-display font-bold mb-4 text-gray-900 dark:text-white">
-              Recovery Key
+              {scrambledRecoveryHeading}
             </h2>
             <div className="p-4 bg-danger/10 border border-danger/30 rounded-xl mb-6">
                 <p className="text-danger text-sm font-semibold mb-2 flex items-center gap-2">
@@ -125,7 +130,7 @@ export const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlock
     <div className="fixed inset-0 flex items-center justify-center bg-gray-900/50 backdrop-blur-md z-50">
       <div className="bg-white dark:bg-primary p-8 rounded-3xl shadow-2xl max-w-md w-full ml-4 mr-4">
         <h2 className="text-2xl font-display font-bold mb-4 text-gray-900 dark:text-white">
-          {isFirstTime ? 'Set Master Password' : (useRecovery ? 'Recover Data' : 'Unlock Vellor')}
+          {scrambledHeading}
         </h2>
         <p className="text-gray-600 dark:text-gray-300 mb-6 text-sm">
           {isFirstTime
