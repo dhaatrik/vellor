@@ -108,6 +108,10 @@
 **Learning:** When replacing local variables with store methods, failing to declare the method (e.g., `const getStudentById = useStore(s => s.getStudentById);`) before calling it causes runtime ReferenceErrors.
 **Action:** Always ensure store methods are explicitly destructured at the top of the component before calling them in event handlers or render loops.
 
-## 2026-05-26 - Optimized PortalPage transactions calculation
+## 2026-05-25 - Optimized PortalPage transactions calculation
 **Learning:** `for...of` loops creating iterators can be a performance bottleneck when traversing arrays that could be arbitrarily large or when executed frequently.
 **Action:** Replace `for...of` loops with standard bounded `for` loops (`for (let i = 0; i < len; i++)`) in critical data-processing paths to avoid iterator allocation overhead.
+
+## 2026-05-26 - Optimize StudentDetailView Subject Mapping
+**Learning:** Mapping over arrays directly inside complex JSX expressions can lead to unnecessary computational overhead and re-renders, especially when dealing with lists or multiple potential render cycles.
+**Action:** Extract list mappings into a `useMemo` hook at the top level of the component to cache the rendered JSX elements, ensuring they are only recalculated when the underlying data changes.
