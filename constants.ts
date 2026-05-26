@@ -20,6 +20,8 @@ export const CURRENCY_OPTIONS = [
   { symbol: '₹', name: 'INR' },
 ];
 
+export const FORMATTED_CURRENCY_OPTIONS = CURRENCY_OPTIONS.map(c => ({ value: c.symbol, label: `${c.name} (${c.symbol})` }));
+
 /**
  * Array of countries with their corresponding phone country codes.
  */

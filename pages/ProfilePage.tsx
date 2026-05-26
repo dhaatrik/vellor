@@ -3,7 +3,7 @@ import { useStore } from '../store';
 import { AppSettings, PhoneNumber } from '../types';
 import { Button, Input, Card, PhoneInput, Modal, Icon, Select } from '../components/ui';
 import { formatPhoneNumber } from '../helpers';
-import { CURRENCY_OPTIONS, COUNTRIES, COUNTRY_CODE_MAP } from '../constants';
+import { FORMATTED_CURRENCY_OPTIONS, COUNTRIES, COUNTRY_CODE_MAP } from '../constants';
 import { motion } from 'framer-motion';
 
 /**
@@ -117,7 +117,7 @@ export const ProfilePage: React.FC = () => {
               name="currencySymbol"
               value={formData.currencySymbol}
               onChange={handleChange}
-              options={CURRENCY_OPTIONS.map(c => ({ value: c.symbol, label: `${c.name} (${c.symbol})` }))}
+              options={FORMATTED_CURRENCY_OPTIONS}
               placeholder="Select currency"
             />
             <Input
