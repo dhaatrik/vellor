@@ -15,6 +15,7 @@ export interface TransactionSlice {
   addTransactions: (transactionsData: TransactionFormData[]) => Transaction[];
   updateTransaction: (transactionId: string, transactionData: Partial<TransactionFormData>) => Transaction | undefined;
   deleteTransaction: (transactionId: string) => void;
+  getTransactionById: (transactionId: string) => Transaction | undefined;
   getTransactionsByStudent: (studentId: string) => Transaction[];
   exportTransactionsCSV: () => void;
 }

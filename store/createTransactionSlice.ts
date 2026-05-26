@@ -234,6 +234,23 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
     return result.sort((a, b) => b.date < a.date ? -1 : (b.date > a.date ? 1 : 0));
   },
 
+  getTransactionById: (() => {
+    let cachedTransactions: import('../types').Transaction[] | null = null;
+    const transactionMap = new Map<string, import('../types').Transaction>();
+    return (transactionId: string) => {
+      const currentTransactions = get().transactions;
+      if (currentTransactions !== cachedTransactions) {
+        cachedTransactions = currentTransactions;
+        transactionMap.clear();
+        for (let i = 0, len = currentTransactions.length; i < len; i++) {
+          const t = currentTransactions[i];
+          transactionMap.set(t.id, t);
+        }
+      }
+      return transactionMap.get(transactionId);
+    };
+  })(),
+
   exportTransactionsCSV: () => {
     try {
         const state = get();
