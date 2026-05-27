@@ -155,3 +155,6 @@
 ## 2026-05-27 - CSS Paint Containment for Hardware Acceleration
 **Learning:** High-frequency layout changes and animations can trigger costly recalculations of the entire DOM tree, causing lag on mobile devices. Promoting rapidly shifting containers to distinct compositing sheets and defining structural containment boundaries mitigates this.
 **Action:** When working with frequently shifting UI elements (like modals, toasts, or off-screen slide panels), apply CSS layer promotion (`will-change-transform transform-gpu`) combined with strict containment (`contain-layout contain-paint` or `content-visibility: auto`) to isolate invalidations to the GPU without triggering global reflows.
+## 2026-05-28 - GPU Hardware Compositing Overrides
+**Learning:** Elements promoted to hardware graphics layers can occasionally experience sub-pixel text aliasing or softening on modern high-DPI displays when GPU compositing is applied.
+**Action:** To preserve crisp, medical-grade legibility across monospaced data readouts within overlays promoted via `transform-gpu` and `will-change-[transform,opacity]`, always append font smoothing overrides (`antialiased subpixel-antialiased`) directly alongside the layout utility classes.
