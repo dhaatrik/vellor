@@ -38,7 +38,7 @@ export const TransactionsPage: React.FC = () => {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const searchRafRef = useRef<number | null>(null);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setSearchQuery(val);
     if (searchRafRef.current !== null) {
@@ -47,7 +47,7 @@ export const TransactionsPage: React.FC = () => {
     searchRafRef.current = requestAnimationFrame(() => {
       setDebouncedSearchQuery(val);
     });
-  };
+  }, []);
   const [dateRange, setDateRange] = useState<{ start: string; end: string }>({ start: '', end: '' });
 
   useEffect(() => {
