@@ -3,6 +3,13 @@ import { DEFAULT_VELLOR_LOGO_BASE64 } from './src/defaultLogo';
 import autoTable from 'jspdf-autotable';
 import { Transaction, Student, AppSettings, PaymentStatus } from './types';
 
+// ⚡ Bolt Performance: Cache Intl.DateTimeFormat to avoid massive repeated allocation overhead
+const dateFormatter = new Intl.DateTimeFormat(undefined);
+const formatDate = (dateInput: string | number | Date) => {
+  const d = new Date(dateInput);
+  return isNaN(d.getTime()) ? 'Invalid Date' : dateFormatter.format(d);
+};
+
 interface jsPDFWithPlugin extends jsPDF {
   lastAutoTable: {
     finalY: number;
@@ -41,7 +48,7 @@ export const generateProgressReportPDF = (
   doc.setFontSize(10);
   doc.setTextColor(100);
   currentY += 8;
-  doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, currentY);
+  doc.text(`Generated: ${formatDate(new Date())}`, 14, currentY);
   
   currentY += 15;
   doc.setTextColor(0);
@@ -81,7 +88,7 @@ export const generateProgressReportPDF = (
       for (let i = 0, len = reportTransactions.length; i < len; i++) {
         const t = reportTransactions[i];
         bodyArgs[i] = [
-          new Date(t.date).toLocaleDateString(),
+          formatDate(t.date),
           t.grade || '-',
           t.progressRemark || '-'
         ];
@@ -175,7 +182,7 @@ export const generateBulkInvoicePDF = (
     doc.setFontSize(10);
     doc.setTextColor(100);
     currentY += 8;
-    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, currentY);
+    doc.text(`Generated: ${formatDate(new Date())}`, 14, currentY);
     
     currentY += 15;
     
@@ -206,7 +213,7 @@ export const generateBulkInvoicePDF = (
       const balance = t.lessonFee - t.amountPaid;
       totalDue += balance;
       bodyArgs[i] = [
-        new Date(t.date).toLocaleDateString(),
+        formatDate(t.date),
         `${t.lessonDuration} mins`,
         `${settings.currencySymbol}${t.lessonFee}`,
         `${settings.currencySymbol}${t.amountPaid}`,
