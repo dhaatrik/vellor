@@ -158,3 +158,6 @@
 ## 2026-05-28 - GPU Hardware Compositing Overrides
 **Learning:** Elements promoted to hardware graphics layers can occasionally experience sub-pixel text aliasing or softening on modern high-DPI displays when GPU compositing is applied.
 **Action:** To preserve crisp, medical-grade legibility across monospaced data readouts within overlays promoted via `transform-gpu` and `will-change-[transform,opacity]`, always append font smoothing overrides (`antialiased subpixel-antialiased`) directly alongside the layout utility classes.
+## 2026-05-28 - Composite-Only Framer Motion Variants
+**Learning:** Animating layout geometric space properties (e.g. `margin`, `padding`, `width`, `height`, or implicit bounding box modifications inside lists) with Framer Motion triggers expensive browser reflow computations and can cause frame drops.
+**Action:** When creating list entry animations (like historical logs), always map positional intent to composite-safe hardware channels (`x`, `y`, `scale`, `opacity`) using `initial={{ opacity: 0, y: 10 }}` to `animate={{ opacity: 1, y: 0 }}`. Reinforce GPU processing by adding `transform-gpu will-change-[opacity,transform]` to the element's `className`.
