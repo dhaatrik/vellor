@@ -161,3 +161,6 @@
 ## 2026-05-28 - Composite-Only Framer Motion Variants
 **Learning:** Animating layout geometric space properties (e.g. `margin`, `padding`, `width`, `height`, or implicit bounding box modifications inside lists) with Framer Motion triggers expensive browser reflow computations and can cause frame drops.
 **Action:** When creating list entry animations (like historical logs), always map positional intent to composite-safe hardware channels (`x`, `y`, `scale`, `opacity`) using `initial={{ opacity: 0, y: 10 }}` to `animate={{ opacity: 1, y: 0 }}`. Reinforce GPU processing by adding `transform-gpu will-change-[opacity,transform]` to the element's `className`.
+## 2026-05-29 - Physics Loop Math and Ref Variables
+**Learning:** Using `useRef` rather than React state `useState` for internal values inside high-frequency `requestAnimationFrame` update loops prevents unnecessary and expensive React re-renders, protecting the framerate budget (16.6ms).
+**Action:** When tracking numeric integration states, define mutating values via `useRef` and explicitly call a bound `mutator` callback to surgically patch the DOM, circumventing React's render phase.
