@@ -131,7 +131,12 @@ export const TerminalBackground: React.FC = () => {
 
     // Initial size
     handleResize();
-    window.addEventListener('resize', handleResize);
+    const resizeObserver = new ResizeObserver(() => {
+      handleResize();
+    });
+    if (canvas) {
+      resizeObserver.observe(document.body);
+    }
 
     const render = (time: number) => {
       // Dynamic canvas resizing moved to resize event listener
@@ -149,7 +154,7 @@ export const TerminalBackground: React.FC = () => {
     animationFrameId = requestAnimationFrame(render);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      resizeObserver.disconnect();
       cancelAnimationFrame(animationFrameId);
 
       gl.bindVertexArray(null);

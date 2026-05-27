@@ -147,3 +147,7 @@
 ## 2026-05-27 - WebGL Canvas Resize Strategy
 **Learning:** Using `clientWidth` and `clientHeight` coupled with `canvas.width` and `canvas.height` assignment directly within `requestAnimationFrame` render loops is a continuous layout observation that can cause micro-stuttering and jank on lower-end devices.
 **Action:** When handling canvas size in WebGL applications, always shift dynamic scaling bounds out of the tick render function into an explicit `window.addEventListener('resize')` listener to avoid expensive per-frame DOM layout trashing.
+
+## 2026-05-27 - Cache layout measurements and use native ResizeObserver loops
+**Learning:** React synthetic pointer and scroll events do not natively support `{ passive: true }` through direct JSX bindings (`onPointerMove`), which blocks layout and causes forced synchronous reflow loops when paired with `getBoundingClientRect()`.
+**Action:** Always shift high-frequency resize bound measurements to a native `ResizeObserver` listener and register native pointer event listeners manually using `el.addEventListener('pointermove', handler, { passive: true })` inside a `useEffect` layout block.

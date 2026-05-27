@@ -1,38 +1,74 @@
-import React, { useRef } from 'react';
+import { useRef, useEffect, useState } from 'react';
 
 const CELLS = Array.from({ length: 48 }, (_, i) => i);
 
 export const BeforeAfterSlider = () => {
-  const [sliderPos, setSliderPos] = React.useState(50);
+  const [sliderPos, setSliderPos] = useState(50);
   const containerRef = useRef<HTMLDivElement>(null);
+  const rectRef = useRef<{ left: number; width: number } | null>(null);
 
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!containerRef.current || e.buttons !== 1) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-    setSliderPos((x / rect.width) * 100);
-  };
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
 
-  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-    setSliderPos((x / rect.width) * 100);
-  };
+    const observer = new ResizeObserver(() => {
+      if (el) {
+        rectRef.current = el.getBoundingClientRect();
+      }
+    });
+    observer.observe(el);
+    rectRef.current = el.getBoundingClientRect();
 
-  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.releasePointerCapture(e.pointerId);
-  };
+    const handleScroll = () => {
+      if (el) {
+        rectRef.current = el.getBoundingClientRect();
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    let isPointerDown = false;
+
+    const handlePointerMove = (e: PointerEvent) => {
+      if (!isPointerDown || !rectRef.current) return;
+      const rect = rectRef.current;
+      const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+      setSliderPos((x / rect.width) * 100);
+    };
+
+    const handlePointerDown = (e: PointerEvent) => {
+      isPointerDown = true;
+      el.setPointerCapture(e.pointerId);
+      if (!rectRef.current) return;
+      const rect = rectRef.current;
+      const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+      setSliderPos((x / rect.width) * 100);
+    };
+
+    const handlePointerUp = (e: PointerEvent) => {
+      isPointerDown = false;
+      el.releasePointerCapture(e.pointerId);
+    };
+
+    el.addEventListener('pointermove', handlePointerMove, { passive: true });
+    el.addEventListener('pointerdown', handlePointerDown, { passive: true });
+    el.addEventListener('pointerup', handlePointerUp, { passive: true });
+    el.addEventListener('pointerleave', handlePointerUp, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', handleScroll);
+      el.removeEventListener('pointermove', handlePointerMove);
+      el.removeEventListener('pointerdown', handlePointerDown);
+      el.removeEventListener('pointerup', handlePointerUp);
+      el.removeEventListener('pointerleave', handlePointerUp);
+    };
+  }, []);
 
   return (
     <div
       ref={containerRef}
       className="relative w-full aspect-[4/3] md:aspect-[21/9] rounded-[2rem] overflow-hidden cursor-ew-resize select-none bg-white shadow-2xl border border-gray-200 dark:border-white/10 group"
-      onPointerMove={handlePointerMove}
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
-      onPointerLeave={handlePointerUp}
+
       style={{ touchAction: 'pan-y' }}
     >
       {/* Before Image (Messy Spreadsheet) */}
