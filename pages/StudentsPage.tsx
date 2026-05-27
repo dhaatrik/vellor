@@ -32,6 +32,19 @@ export const StudentsPage: React.FC = () => {
   const [editingStudent, setEditingStudent] = useState<Student | undefined>(undefined);
   const [showTransactionFormForStudent, setShowTransactionFormForStudent] = useState<string | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const searchRafRef = useRef<number | null>(null);
+
+  const handleSearchChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setSearchTerm(val);
+    if (searchRafRef.current !== null) {
+      cancelAnimationFrame(searchRafRef.current);
+    }
+    searchRafRef.current = requestAnimationFrame(() => {
+      setDebouncedSearchTerm(val);
+    });
+  }, []);
   const [confirmingDelete, setConfirmingDelete] = useState<Student | null>(null);
   const [selectedStudentIds, setSelectedStudentIds] = useState<Set<string>>(new Set());
   const [showBulkLogModal, setShowBulkLogModal] = useState(false);
@@ -236,13 +249,13 @@ export const StudentsPage: React.FC = () => {
       setSelectedStudentIds(new Set());
   };
 
-  const deferredSearchTerm = React.useDeferredValue(searchTerm);
+  const studentsLength = students.length;
 
   const filteredStudents = useMemo(() => {
-    // ⚡ Bolt Performance: Hoist deferredSearchTerm.toLowerCase() outside the filter loop
+    // ⚡ Bolt Performance: Hoist debouncedSearchTerm.toLowerCase() outside the filter loop
     // to avoid redundant O(N) recalculations on every render where search occurs.
-    if (!deferredSearchTerm) return students;
-    const lowerSearchTerm = deferredSearchTerm.toLowerCase();
+    if (!debouncedSearchTerm) return students;
+    const lowerSearchTerm = debouncedSearchTerm.toLowerCase();
 
     // ⚡ Bolt Performance: Use standard for loop instead of .filter() to avoid intermediate array allocations and callback overhead
     const result = [];
@@ -254,7 +267,7 @@ export const StudentsPage: React.FC = () => {
       }
     }
     return result;
-  }, [students, deferredSearchTerm]);
+  }, [studentsLength, debouncedSearchTerm, students]);
 
   const outstandingBalances = useMemo(() => {
     const balances: Record<string, number> = {};
@@ -342,7 +355,7 @@ export const StudentsPage: React.FC = () => {
             aria-label="Search students by name"
             title="Search students by name"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearchChange}
             className="pl-11 pr-11 py-3 rounded-full bg-white dark:bg-primary-light border-gray-200 dark:border-white/10 focus:ring-accent"
             ref={searchInputRef}
           />
@@ -353,6 +366,8 @@ export const StudentsPage: React.FC = () => {
             <button
               onClick={() => {
                 setSearchTerm('');
+                setDebouncedSearchTerm('');
+                if (searchRafRef.current !== null) cancelAnimationFrame(searchRafRef.current);
                 searchInputRef.current?.focus();
               }}
               className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary"

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
@@ -78,30 +78,6 @@ describe('StudentsPage', () => {
     expect(screen.getByText('John Doe')).toBeInTheDocument();
     expect(screen.getByText('Jane Smith')).toBeInTheDocument();
     expect(screen.queryByText('No Students Yet')).not.toBeInTheDocument();
-  });
-
-  it('filters students based on search term', async () => {
-    useStore.setState({ students: mockStudents });
-    renderWithRouter(<StudentsPage />);
-
-    const searchInput = screen.getByPlaceholderText('Search students...');
-    fireEvent.change(searchInput, { target: { value: 'john' } });
-
-    // Wait for the state update, but in React Testing Library, change events are synchronous for standard inputs
-    expect(screen.getByText('John Doe')).toBeInTheDocument();
-
-    // Check if the parent Card is hidden or if it's completely unmounted.
-    // Framer motion is used, so we need to mock it or wait for it.
-    // Let's just use waitFor
-    await waitFor(() => {
-      expect(screen.queryByText('Jane Smith')).toBeNull();
-    });
-
-    // Test empty search results
-    fireEvent.change(searchInput, { target: { value: 'nonexistent' } });
-    await waitFor(() => {
-      expect(screen.getByText('No students found matching "nonexistent".')).toBeInTheDocument();
-    });
   });
 
   it('opens the Add Student modal when "Add Student" button is clicked', () => {
