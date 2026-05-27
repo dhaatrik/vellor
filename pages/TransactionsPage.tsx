@@ -35,6 +35,19 @@ export const TransactionsPage: React.FC = () => {
   type FilterType = 'all' | 'paid' | 'due' | 'partially-paid' | 'overpaid' | 'unpaid';
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  const searchRafRef = useRef<number | null>(null);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setSearchQuery(val);
+    if (searchRafRef.current !== null) {
+      cancelAnimationFrame(searchRafRef.current);
+    }
+    searchRafRef.current = requestAnimationFrame(() => {
+      setDebouncedSearchQuery(val);
+    });
+  };
   const [dateRange, setDateRange] = useState<{ start: string; end: string }>({ start: '', end: '' });
 
   useEffect(() => {
@@ -127,15 +140,10 @@ export const TransactionsPage: React.FC = () => {
     }
   };
   
-  const sortedTransactions = useMemo(() => {
-    // ⚡ Bolt Performance: Use direct string comparison for ISO 8601 dates to eliminate Date.parse() overhead and intermediate mapping
-    return [...transactions].sort((a, b) => b.date.localeCompare(a.date));
-  }, [transactions]);
-
-  const deferredSearchQuery = React.useDeferredValue(searchQuery);
+  const transactionsLength = transactions.length;
 
   const filteredTransactions = useMemo(() => {
-    const query = deferredSearchQuery.toLowerCase();
+    const query = debouncedSearchQuery.toLowerCase();
     const statusMap = {
       'paid': PaymentStatus.Paid,
       'due': PaymentStatus.Due,
@@ -149,8 +157,8 @@ export const TransactionsPage: React.FC = () => {
     // ⚡ Bolt Performance: Replace Array.prototype.filter() with a pre-allocated/direct for loop
     // to eliminate the overhead of intermediate allocations and callback execution for large arrays.
     const results = [];
-    for (let i = 0, len = sortedTransactions.length; i < len; i++) {
-      const t = sortedTransactions[i];
+    for (let i = 0, len = transactions.length; i < len; i++) {
+      const t = transactions[i];
       let matches = true;
 
       // Apply status filter
@@ -176,8 +184,10 @@ export const TransactionsPage: React.FC = () => {
         results.push(t);
       }
     }
-    return results;
-  }, [sortedTransactions, activeFilter, deferredSearchQuery, dateRange, studentsMap]);
+
+    // Sort in place at the very end to avoid sorting un-matched items
+    return results.sort((a, b) => b.date.localeCompare(a.date));
+  }, [transactionsLength, activeFilter, debouncedSearchQuery, dateRange, studentsMap]);
 
   const parentRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -256,7 +266,7 @@ export const TransactionsPage: React.FC = () => {
               title="Search by student name"
               placeholder="Search by student name..." 
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={handleSearchChange}
               className="w-full pl-10 pr-10 py-2 border border-gray-200 dark:border-white/10 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent sm:text-sm bg-white dark:bg-primary-light transition-all duration-200"
               ref={searchInputRef}
            />
@@ -264,6 +274,8 @@ export const TransactionsPage: React.FC = () => {
              <button
                onClick={() => {
                  setSearchQuery('');
+                 setDebouncedSearchQuery('');
+                 if (searchRafRef.current !== null) cancelAnimationFrame(searchRafRef.current);
                  searchInputRef.current?.focus();
                }}
                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary"

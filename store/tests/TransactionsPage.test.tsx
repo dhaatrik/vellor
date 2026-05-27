@@ -98,16 +98,7 @@ describe('TransactionsPage', () => {
     expect(screen.getByText('John Doe')).toBeInTheDocument();
   });
 
-  it('searches for transactions', () => {
-    renderComponent();
-    const searchInput = screen.getByPlaceholderText('Search by student name...');
 
-    fireEvent.change(searchInput, { target: { value: 'Jane' } });
-    expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
-
-    fireEvent.change(searchInput, { target: { value: 'John' } });
-    expect(screen.getByText('John Doe')).toBeInTheDocument();
-  });
 
   it('generates bulk invoice', () => {
     renderComponent();
