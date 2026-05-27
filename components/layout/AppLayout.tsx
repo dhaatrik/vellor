@@ -99,7 +99,7 @@ export const AppLayout: React.FC = () => {
 
       {/* Sidebar Navigation */}
       <aside
-        className={`w-72 bg-black/30 backdrop-blur-md border-r border-gray-100 dark:border-white/5 flex flex-col z-10 relative
+        className={`will-change-transform transform-gpu contain-layout contain-paint w-72 bg-black/30 backdrop-blur-md border-r border-gray-100 dark:border-white/5 flex flex-col z-10 relative
                    fixed md:static inset-y-0 left-0 z-50
                    transform transition-transform duration-300 ease-in-out
                    ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}

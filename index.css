@@ -33,6 +33,10 @@
 }
 
 @layer utilities {
+  .contain-layout { contain: layout; }
+  .contain-paint { contain: paint; }
+  .contain-style { contain: style; }
+  .content-visibility-auto { content-visibility: auto; }
   .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
     height: 6px;
