@@ -151,3 +151,7 @@
 ## 2026-05-27 - Cache layout measurements and use native ResizeObserver loops
 **Learning:** React synthetic pointer and scroll events do not natively support `{ passive: true }` through direct JSX bindings (`onPointerMove`), which blocks layout and causes forced synchronous reflow loops when paired with `getBoundingClientRect()`.
 **Action:** Always shift high-frequency resize bound measurements to a native `ResizeObserver` listener and register native pointer event listeners manually using `el.addEventListener('pointermove', handler, { passive: true })` inside a `useEffect` layout block.
+
+## 2026-05-27 - CSS Paint Containment for Hardware Acceleration
+**Learning:** High-frequency layout changes and animations can trigger costly recalculations of the entire DOM tree, causing lag on mobile devices. Promoting rapidly shifting containers to distinct compositing sheets and defining structural containment boundaries mitigates this.
+**Action:** When working with frequently shifting UI elements (like modals, toasts, or off-screen slide panels), apply CSS layer promotion (`will-change-transform transform-gpu`) combined with strict containment (`contain-layout contain-paint` or `content-visibility: auto`) to isolate invalidations to the GPU without triggering global reflows.

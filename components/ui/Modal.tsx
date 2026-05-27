@@ -60,7 +60,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: 20 }}
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  className={`bg-white dark:bg-primary rounded-[2rem] shadow-2xl w-full ${maxWidthClass} flex flex-col max-h-[90vh] relative z-10 border border-gray-100 dark:border-white/10 overflow-hidden outline-none pointer-events-auto`}
+                  className={`will-change-transform will-change-opacity transform-gpu contain-layout contain-paint bg-white dark:bg-primary rounded-[2rem] shadow-2xl w-full ${maxWidthClass} flex flex-col max-h-[90vh] relative z-10 border border-gray-100 dark:border-white/10 overflow-hidden outline-none pointer-events-auto`}
                 >
                   {/* Modal Header */}
                   <div className="flex items-center justify-between p-6 sm:px-8 sm:pt-8 sm:pb-6 border-b border-gray-100 dark:border-white/5 flex-shrink-0 bg-gray-50/50 dark:bg-primary-light/20">

@@ -344,6 +344,7 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({ student, o
          <Button variant={activeTab === 'progress' ? 'primary' : 'outline'} onClick={() => setActiveTab('progress')} className="rounded-full px-6 shadow-sm">Academic Progress</Button>
       </motion.div>
 
+      <div className="content-visibility-auto contain-layout contain-paint">
       <AnimatePresence mode="wait">
         {activeTab === 'history' ? (
           <motion.div key="history" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
@@ -367,6 +368,7 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({ student, o
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
       
       {/* Back Button */}
       <motion.div variants={itemVariants} className="flex justify-start pt-2">
