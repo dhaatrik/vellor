@@ -161,3 +161,6 @@
 ## 2026-05-28 - Composite-Only Framer Motion Variants
 **Learning:** Animating layout geometric space properties (e.g. `margin`, `padding`, `width`, `height`, or implicit bounding box modifications inside lists) with Framer Motion triggers expensive browser reflow computations and can cause frame drops.
 **Action:** When creating list entry animations (like historical logs), always map positional intent to composite-safe hardware channels (`x`, `y`, `scale`, `opacity`) using `initial={{ opacity: 0, y: 10 }}` to `animate={{ opacity: 1, y: 0 }}`. Reinforce GPU processing by adding `transform-gpu will-change-[opacity,transform]` to the element's `className`.
+## 2023-10-27 - Containment optimizations
+**Learning:** Adding CSS containment modules via tailwind utilities (`contain-paint contain-layout content-visibility-auto`) to complex layout containers and off-screen tabs allows the browser engine to skip calculating bounding box geometry until intersecting the viewport, significantly optimizing layout computation.
+**Action:** Always identify dense structural parent blocks and hidden layered tabs in application shell architectures to inject containment limits.
