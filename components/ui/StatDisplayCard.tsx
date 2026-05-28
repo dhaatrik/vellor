@@ -70,7 +70,7 @@ export const StatDisplayCard: React.FC<StatDisplayCardProps> = ({
             <div className="flex items-start justify-between relative z-10">
                 <div>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">{title}</p>
-                    <h3 className="text-3xl font-display font-bold text-gray-900 dark:text-white tracking-tight">{value}</h3>
+                    <h3 className="text-3xl font-display font-bold text-gray-900 dark:text-white tracking-tight tabular-nums inline-block min-w-[120px]">{value}</h3>
                 </div>
                 <div className={`flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-2xl ${finalIconBgClass} shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
                     <Icon iconName={iconName} className={`w-6 h-6 ${finalIconColorClass}`} />

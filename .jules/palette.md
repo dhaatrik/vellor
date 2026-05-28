@@ -93,3 +93,7 @@
 ## 2026-05-29 - Framer Motion State Visibility
 **Learning:** Hidden structures undergoing spring closure must explicitly toggle their visibility and aria-hidden attributes to true only after the spring reaches absolute rest.
 **Action:** Always ensure components running layout transitions use Framer Motion's layoutId properly without changing basic HTML rendering blocks, and apply explicit visibility toggles after the rest delta is hit.
+
+## 2026-05-28 - Tabular Numerical Bounds & Typography Isolation
+**Learning:** Using `tabular-nums` directly on text nodes that display dynamically changing numerical values prevents the layout string dimension shifts. Managing customized monospace fonts (`font-mono`) with containment attributes like `display=block` protects the rendering engine from undergoing a layout snap when styles load.
+**Action:** Always inject `tabular-nums` class on elements rendering real-time or variable financial data in transaction rows and statistical readout cards to ensure layout continuity. Additionally, apply `display=block` on customized web font imports to stabilize pre-loaded numeric matrices.
