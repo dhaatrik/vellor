@@ -1,8 +1,10 @@
 import { useRef, useEffect, useState } from 'react';
+import { useSpringVelocity } from '../../hooks/useSpringVelocity';
 
 const CELLS = Array.from({ length: 48 }, (_, i) => i);
 
 export const BeforeAfterSlider = () => {
+  const [, setTarget, setMutator] = useSpringVelocity(50);
   const [sliderPos, setSliderPos] = useState(50);
   const containerRef = useRef<HTMLDivElement>(null);
   const rectRef = useRef<{ left: number; width: number } | null>(null);
@@ -19,6 +21,8 @@ export const BeforeAfterSlider = () => {
     observer.observe(el);
     rectRef.current = el.getBoundingClientRect();
 
+    setMutator(setSliderPos);
+
     const handleScroll = () => {
       if (el) {
         rectRef.current = el.getBoundingClientRect();
@@ -32,7 +36,8 @@ export const BeforeAfterSlider = () => {
       if (!isPointerDown || !rectRef.current) return;
       const rect = rectRef.current;
       const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-      setSliderPos((x / rect.width) * 100);
+      const percentage = (x / rect.width) * 100;
+      setSliderPos(percentage);
     };
 
     const handlePointerDown = (e: PointerEvent) => {
@@ -41,12 +46,14 @@ export const BeforeAfterSlider = () => {
       if (!rectRef.current) return;
       const rect = rectRef.current;
       const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-      setSliderPos((x / rect.width) * 100);
+      const percentage = (x / rect.width) * 100;
+      setSliderPos(percentage);
     };
 
     const handlePointerUp = (e: PointerEvent) => {
       isPointerDown = false;
       el.releasePointerCapture(e.pointerId);
+      setTarget(sliderPos);
     };
 
     el.addEventListener('pointermove', handlePointerMove, { passive: true });
@@ -62,14 +69,14 @@ export const BeforeAfterSlider = () => {
       el.removeEventListener('pointerup', handlePointerUp);
       el.removeEventListener('pointerleave', handlePointerUp);
     };
-  }, []);
+  }, [setMutator, setTarget, sliderPos]);
 
   return (
     <div
       ref={containerRef}
       className="relative w-full aspect-[4/3] md:aspect-[21/9] rounded-[2rem] overflow-hidden cursor-ew-resize select-none bg-white shadow-2xl border border-gray-200 dark:border-white/10 group"
 
-      style={{ touchAction: 'pan-y' }}
+      style={{ touchAction: 'pan-y', '--slider-pos': `${sliderPos}%` } as React.CSSProperties}
     >
       {/* Before Image (Messy Spreadsheet) */}
       <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800 flex items-center justify-center p-4 md:p-8">
@@ -91,7 +98,7 @@ export const BeforeAfterSlider = () => {
       {/* After Image (Vellor Dashboard) */}
       <div
          className="absolute inset-0 bg-white dark:bg-primary-dark overflow-hidden flex items-center justify-center p-4 md:p-8"
-         style={{ clipPath: `inset(0 0 0 ${sliderPos}%)` }}
+         style={{ clipPath: `inset(0 calc(100% - var(--slider-pos)) 0 0)` }}
       >
          <div className="w-full h-full bg-gray-50 dark:bg-primary border border-gray-200 dark:border-white/10 rounded-xl shadow-xl flex flex-col overflow-hidden">
              <img src="/dashboard.png" alt="Vellor OS Dashboard" className="w-full h-full object-cover object-left-top" loading="lazy" decoding="async" />
@@ -101,8 +108,8 @@ export const BeforeAfterSlider = () => {
 
       {/* Slider Handle */}
       <div
-        className="absolute top-0 bottom-0 w-12 flex items-center justify-center -ml-6 z-10"
-        style={{ left: `${sliderPos}%` }}
+        className="absolute top-0 bottom-0 left-0 w-12 flex items-center justify-center -ml-6 z-10 will-change-transform"
+        style={{ transform: `translate3d(calc(var(--slider-pos) / 100 * ${rectRef.current?.width || 0}px), 0, 0)` }}
       >
         <div className="w-1.5 h-full bg-white shadow-[0_0_15px_rgba(0,0,0,0.5)] flex items-center justify-center">
            <div className="w-12 h-12 bg-white rounded-full shadow-2xl border-2 border-gray-200 flex items-center justify-center text-accent ring-4 ring-white/50 backdrop-blur-md transition-transform active:scale-95 group-hover:scale-110 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary">
@@ -113,7 +120,13 @@ export const BeforeAfterSlider = () => {
         </div>
       </div>
       {/* Accessible range input for crawlers and touch devices */}
-      <input type="range" min="0" max="100" value={sliderPos} onChange={(e) => setSliderPos(Number(e.target.value))} className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-50 focus:outline-none" aria-label="Compare messy spreadsheet with Vellor dashboard" />
+      <input type="range" min="0" max="100" value={sliderPos} onChange={(e) => { const v = Number(e.target.value); setSliderPos(v); setTarget(v); }} onKeyDown={(e) => {
+        const step = 5;
+        if (e.key === 'ArrowLeft') { e.preventDefault(); const v = Math.max(0, sliderPos - step); setTarget(v); }
+        else if (e.key === 'ArrowRight') { e.preventDefault(); const v = Math.min(100, sliderPos + step); setTarget(v); }
+        else if (e.key === 'Home') { e.preventDefault(); setTarget(0); }
+        else if (e.key === 'End') { e.preventDefault(); setTarget(100); }
+      }} className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-50 focus:outline-none" aria-label="Compare messy spreadsheet with Vellor dashboard" />
     </div>
   );
 };
