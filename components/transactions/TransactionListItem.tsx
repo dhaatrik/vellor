@@ -55,11 +55,11 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = React.mem
                 )}
                 <div className="text-left sm:text-right">
                     <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Fee</p>
-                    <p className="font-mono font-semibold text-gray-900 dark:text-white">{formatCurrency(transaction.lessonFee, currencySymbol)}</p>
+                    <p className="font-mono font-semibold text-gray-900 dark:text-white tabular-nums inline-block text-right min-w-[80px]">{formatCurrency(transaction.lessonFee, currencySymbol)}</p>
                 </div>
                 <div className="text-left sm:text-right">
                     <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Paid</p>
-                    <p className="font-mono font-semibold text-success">{formatCurrency(transaction.amountPaid, currencySymbol)}</p>
+                    <p className="font-mono font-semibold text-success tabular-nums inline-block text-right min-w-[80px]">{formatCurrency(transaction.amountPaid, currencySymbol)}</p>
                 </div>
                 <div className="self-center">
                     <TransactionStatusBadge status={transaction.status} />
