@@ -85,3 +85,7 @@
 ## 2026-05-27 - Ambient Canvas Sizing for Structural Layouts
 **Learning:** Injecting fixed, absolute ambient layers (like WebGL canvases) behind structural layouts requires decoupling layer controls. Merely assigning a global z-index works, but applying a translucent backdrop layer specifically on surrounding semantic `<main>` and `<aside>` container divs using `backdrop-blur-md` allows full-screen immersive shader layouts without losing necessary interactive state hierarchy for core content flows.
 **Action:** Use unified layer opacity configuration `bg-black/30 backdrop-blur-md border-white/5 z-10 relative` for root content structural groups when introducing screen-wide global composite shader logic on `z-0` beneath them.
+
+## 2026-05-28 - CSS Variables in Physics Interception Loops
+**Learning:** Using React hooks to modify styles via DOM variables (`--slider-pos` and `clip-path: inset(...)`) allows smooth component transitions without triggering heavy paint or layout reflows common to standard DOM `left` mutators.
+**Action:** When working with spring loops and complex elements, utilize `translate3d` and GPU-composited variables bound directly through React inline variables (`style={{ '--var': pos }}`).
