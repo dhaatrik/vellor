@@ -167,3 +167,7 @@
 ## 2026-05-27 - Containment optimizations
 **Learning:** Adding CSS containment modules via tailwind utilities (`contain-paint contain-layout content-visibility-auto`) to complex layout containers and off-screen tabs allows the browser engine to skip calculating bounding box geometry until intersecting the viewport, significantly optimizing layout computation.
 **Action:** Always identify dense structural parent blocks and hidden layered tabs in application shell architectures to inject containment limits.
+
+## 2026-05-29 - Physics Loop Math and Ref Variables
+**Learning:** Using `useRef` rather than React state `useState` for internal values inside high-frequency `requestAnimationFrame` update loops prevents unnecessary and expensive React re-renders, protecting the framerate budget (16.6ms).
+**Action:** When tracking numeric integration states, define mutating values via `useRef` and explicitly call a bound `mutator` callback to surgically patch the DOM, circumventing React's render phase.
