@@ -125,7 +125,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ itemVariants }
                 </button>
               </div>
             </div>
-            <div id="dashboard-chart-panel" className="flex-1 min-h-[200px] w-full">
+            <div id="dashboard-chart-panel" className="flex-1 min-h-[200px] w-full content-visibility-auto">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>

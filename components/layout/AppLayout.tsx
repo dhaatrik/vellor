@@ -253,7 +253,7 @@ export const AppLayout: React.FC = () => {
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar relative">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar relative contain-paint contain-layout">
           {/* React Router Routes for different pages */}
           <Routes>
             <Route path="/dashboard" element={<DashboardPage />} />
