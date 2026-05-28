@@ -172,6 +172,6 @@
 **Learning:** Using `useRef` rather than React state `useState` for internal values inside high-frequency `requestAnimationFrame` update loops prevents unnecessary and expensive React re-renders, protecting the framerate budget (16.6ms).
 **Action:** When tracking numeric integration states, define mutating values via `useRef` and explicitly call a bound `mutator` callback to surgically patch the DOM, circumventing React's render phase.
 
-## 2026-05-28 - Spring Physical Interaction Model for Handles
+## 2026-05-29 - Spring Physical Interaction Model for Handles
 **Learning:** Re-implementing a slider knob target with spring physics (useSpringVelocity) directly provides realistic momentum and bounce without array allocations.
 **Action:** When implementing draggable handles, immediately track touch pointers with 1:1 mapped setters, and re-assign targets during `pointerup` and keyboard events for physically robust motion without blocking frames.
