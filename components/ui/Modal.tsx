@@ -48,7 +48,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
+                  transition={{ type: "spring", stiffness: 220, damping: 29, mass: 1, restDelta: 0.001 }}
                   className="fixed inset-0 bg-gray-900/40 dark:bg-black/60 backdrop-blur-sm pointer-events-auto"
                 />
               </Dialog.Overlay>
@@ -59,7 +59,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
                   initial={{ opacity: 0, scale: 0.95, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  transition={{ type: "spring", stiffness: 220, damping: 29, mass: 1, restDelta: 0.001 }}
                   className={`will-change-transform will-change-opacity transform-gpu antialiased subpixel-antialiased contain-layout contain-paint bg-white dark:bg-primary rounded-[2rem] shadow-2xl w-full ${maxWidthClass} flex flex-col max-h-[90vh] relative z-10 border border-gray-100 dark:border-white/10 overflow-hidden outline-none pointer-events-auto`}
                 >
                   {/* Modal Header */}

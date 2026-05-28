@@ -27,7 +27,7 @@ export const StudentProgressTab: React.FC<StudentProgressTabProps> = ({
 }) => {
 
   const memoizedLogEntries = useMemo(() => {
-    return progressTransactions.map((t, index) => {
+    return progressTransactions.map((t) => {
       const timestamp = formatDate(t.date);
       const gradeStr = t.grade ? ` [GRADE: ${t.grade}]` : '';
       const remarkStr = t.progressRemark ? ` // ${t.progressRemark}` : '';
@@ -39,7 +39,7 @@ export const StudentProgressTab: React.FC<StudentProgressTabProps> = ({
           key={t.id + '-prog'}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.05, duration: 0.3 }}
+          transition={{ type: "spring", stiffness: 220, damping: 29, mass: 1, restDelta: 0.001 }}
           className="py-1 transform-gpu will-change-[opacity,transform]"
         >
           {logLine}

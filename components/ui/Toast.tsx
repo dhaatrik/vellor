@@ -25,11 +25,11 @@ const Toast: React.FC<{ toast: ToastMessage }> = ({ toast }) => {
 
   return (
     <motion.div 
-      layout
+      layout layoutId={`toast-${toast.id}`}
       initial={{ opacity: 0, y: 50, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      exit={{ opacity: 0, scale: 0.9, transition: { type: "spring", stiffness: 220, damping: 29, mass: 1, restDelta: 0.001 } }}
+      transition={{ type: "spring", stiffness: 220, damping: 29, mass: 1, restDelta: 0.001 }}
       className={`will-change-transform will-change-opacity transform-gpu antialiased subpixel-antialiased contain-layout contain-paint max-w-sm w-full bg-white dark:bg-primary/90 backdrop-blur-md shadow-xl rounded-2xl pointer-events-auto border ${styles.bg} overflow-hidden`}
     >
       <div className="p-4">

@@ -44,7 +44,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ progress, color = 'bg-
           className={`${color} h-full rounded-full relative`}
           initial={{ width: 0 }}
           animate={{ width: `${clampedValue}%` }}
-          transition={{ duration: 1, ease: "easeOut" }}
+          transition={{ type: "spring", stiffness: 220, damping: 29, mass: 1, restDelta: 0.001 }}
           role="progressbar"
           aria-valuenow={clampedValue}
           aria-valuemin={0}

@@ -201,7 +201,7 @@ export const SearchModal: React.FC<{ isOpen: boolean; onClose: () => void }> = (
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Command Palette">
       <div className="space-y-4">
-        <div className="relative flex items-center w-full px-4 py-3 bg-primary-dark dark:bg-black rounded-2xl border border-transparent focus-within:border-accent focus-within:ring-1 focus-within:ring-accent transition-all duration-200">
+        <div className="relative flex items-center w-full px-4 py-3 bg-primary-dark dark:bg-black rounded-2xl border border-transparent focus-within:border-accent focus-within:ring-1 focus-within:ring-accent ">
           <span className="text-accent font-mono mr-2 select-none" aria-hidden="true">{'> '}</span>
           <label htmlFor="terminal-search-input" className="sr-only">Terminal search command input</label>
           <input

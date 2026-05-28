@@ -89,3 +89,7 @@
 ## 2026-05-28 - CSS Variables in Physics Interception Loops
 **Learning:** Using React hooks to modify styles via DOM variables (`--slider-pos` and `clip-path: inset(...)`) allows smooth component transitions without triggering heavy paint or layout reflows common to standard DOM `left` mutators.
 **Action:** When working with spring loops and complex elements, utilize `translate3d` and GPU-composited variables bound directly through React inline variables (`style={{ '--var': pos }}`).
+
+## 2026-05-29 - Framer Motion State Visibility
+**Learning:** Hidden structures undergoing spring closure must explicitly toggle their visibility and aria-hidden attributes to true only after the spring reaches absolute rest.
+**Action:** Always ensure components running layout transitions use Framer Motion's layoutId properly without changing basic HTML rendering blocks, and apply explicit visibility toggles after the rest delta is hit.

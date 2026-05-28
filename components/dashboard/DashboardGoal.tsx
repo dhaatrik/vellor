@@ -78,7 +78,7 @@ export const DashboardGoal: React.FC<DashboardGoalProps> = ({ itemVariants }) =>
                   className="h-full bg-accent relative"
                   initial={{ width: 0 }}
                   animate={{ width: `${moneyTreeProgress}%` }}
-                  transition={{ duration: 1, ease: "easeOut" }}
+                  transition={{ type: "spring", stiffness: 220, damping: 29, mass: 1, restDelta: 0.001 }}
                 >
                   <div className="absolute inset-0 bg-white/20 w-full h-full animate-[shimmer_2s_infinite]" style={{ backgroundImage: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)' }}></div>
                 </motion.div>

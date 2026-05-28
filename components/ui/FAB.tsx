@@ -32,7 +32,7 @@ export const FAB: React.FC = () => {
               initial={{ opacity: 0, y: 20, scale: 0.8 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.8 }}
-              transition={{ duration: 0.2 }}
+              transition={{ type: "spring", stiffness: 220, damping: 29, mass: 1, restDelta: 0.001 }}
               className="flex flex-col gap-3 items-end"
             >
               <button
@@ -74,7 +74,7 @@ export const FAB: React.FC = () => {
         >
           <motion.div
             animate={{ rotate: isOpen ? 45 : 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ type: "spring", stiffness: 220, damping: 29, mass: 1, restDelta: 0.001 }}
           >
             <Icon iconName="plus" className="w-6 h-6" />
           </motion.div>

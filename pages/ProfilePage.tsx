@@ -83,7 +83,7 @@ export const ProfilePage: React.FC = () => {
       className="space-y-6 max-w-3xl mx-auto"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+      transition={{ type: "spring", stiffness: 220, damping: 29, mass: 1, restDelta: 0.001 }}
     >
       <div className="mb-8">
         <h1 className="text-4xl font-display font-bold tracking-tight text-gray-900 dark:text-gray-50">Profile & Settings</h1>
