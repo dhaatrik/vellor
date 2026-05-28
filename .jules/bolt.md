@@ -176,6 +176,6 @@
 **Learning:** Re-implementing a slider knob target with spring physics (useSpringVelocity) directly provides realistic momentum and bounce without array allocations.
 **Action:** When implementing draggable handles, immediately track touch pointers with 1:1 mapped setters, and re-assign targets during `pointerup` and keyboard events for physically robust motion without blocking frames.
 
-## 2024-05-29 - Explicit Grid Dimensions for CLS Mitigation
+## 2026-05-30 - Explicit Grid Dimensions for CLS Mitigation
 **Learning:** Flexible containers (e.g., flex-1 flex) in high-frequency React/WebGL render cycles can generate subpixel rounding recalculations causing Layout Shifts (CLS).
 **Action:** When creating primary layout structures, use strict structural template rules (e.g., `grid-cols-[240px_1fr]`) and unalterable minimum height configurations (`min-h-[200px]`) rather than content-driven dimensions to guarantee dimension permanence.
