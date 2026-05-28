@@ -49,7 +49,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ isOpen, onCl
             className="h-full bg-accent"
             initial={{ width: '0%' }}
             animate={{ width: `${(step / 4) * 100}%` }}
-            transition={{ duration: 0.3 }}
+            transition={{ type: "spring", stiffness: 220, damping: 29, mass: 1, restDelta: 0.001 }}
           />
         </div>
 

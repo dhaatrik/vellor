@@ -347,7 +347,7 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({ student, o
       <div className="content-visibility-auto contain-layout contain-paint">
       <AnimatePresence mode="wait">
         {activeTab === 'history' ? (
-          <motion.div key="history" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+          <motion.div key="history" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ type: "spring", stiffness: 220, damping: 29, mass: 1, restDelta: 0.001 }}>
             <StudentHistoryTab
               studentTransactions={studentTransactions}
               totalOwed={totalOwed}
@@ -358,7 +358,7 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({ student, o
             />
           </motion.div>
         ) : (
-          <motion.div key="progress" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+          <motion.div key="progress" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ type: "spring", stiffness: 220, damping: 29, mass: 1, restDelta: 0.001 }}>
             <StudentProgressTab
               gradeChartData={gradeChartData}
               progressTransactions={progressTransactions}

@@ -112,7 +112,7 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ isOpen, onClose, d
             initial={{ opacity: 0, y: '100%' }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            transition={{ type: "spring", stiffness: 220, damping: 29, mass: 1, restDelta: 0.001 }}
             className="relative w-full max-w-md bg-white dark:bg-primary rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden"
           >
             <div className="p-6">

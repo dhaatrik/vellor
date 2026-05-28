@@ -49,7 +49,7 @@ export const NavbarLink: React.FC<NavbarLinkProps> = ({ to, children, iconName, 
               layoutId="navbar-active-bg"
               className="absolute inset-0 bg-accent/20 dark:bg-accent/10 rounded-2xl"
               initial={false}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              transition={{ type: "spring", stiffness: 220, damping: 29, mass: 1, restDelta: 0.001 }}
             />
           )}
           <span className="relative z-10 flex items-center w-full">
