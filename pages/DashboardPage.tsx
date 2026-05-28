@@ -131,7 +131,7 @@ export const DashboardPage: React.FC = () => {
       </div>
       
       {/* Bento Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[minmax(180px,auto)]">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[200px]">
         {/* System Status Telemetry */}
         <motion.div variants={itemVariants} className="col-span-1 md:col-span-2 lg:col-span-4">
           <div className="border border-white/5 bg-black p-4 flex flex-col md:flex-row gap-6 font-mono text-xs text-gray-500">
@@ -211,7 +211,7 @@ export const DashboardPage: React.FC = () => {
                 }
             }}
         >
-          <Card className="h-full border border-white/5 bg-black flex flex-col items-center justify-center text-center relative overflow-hidden hover:border-accent/30 transition-colors">
+          <Card className="h-full min-h-[200px] border border-white/5 bg-black flex flex-col items-center justify-center text-center relative overflow-hidden hover:border-accent/30 transition-colors">
             <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl"></div>
             <div className="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center mb-4 relative z-10">
               <Icon iconName="users" className="w-8 h-8 text-blue-500" />
@@ -224,7 +224,7 @@ export const DashboardPage: React.FC = () => {
         {/* Login Streak */}
         {settings.gamificationEnabled && (
         <motion.div variants={itemVariants} className="col-span-1 lg:col-span-1">
-          <Card className="h-full border border-white/5 bg-black flex flex-col items-center justify-center text-center relative overflow-hidden group">
+          <Card className="h-full min-h-[200px] border border-white/5 bg-black flex flex-col items-center justify-center text-center relative overflow-hidden group">
             <div className="absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl group-hover:bg-orange-500/20 transition-colors duration-500"></div>
             <div className="w-16 h-16 rounded-2xl bg-orange-500/10 flex items-center justify-center mb-4 relative z-10 group-hover:scale-110 transition-transform duration-300">
               <Icon iconName="flame" className="w-8 h-8 text-orange-500" />
@@ -238,7 +238,7 @@ export const DashboardPage: React.FC = () => {
         {/* Total Points */}
         {settings.gamificationEnabled && (
         <motion.div variants={itemVariants} className="col-span-1 lg:col-span-1">
-          <Card className="h-full border border-white/5 bg-black flex flex-col items-center justify-center text-center relative overflow-hidden group">
+          <Card className="h-full min-h-[200px] border border-white/5 bg-black flex flex-col items-center justify-center text-center relative overflow-hidden group">
             <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-yellow-500/10 rounded-full blur-3xl group-hover:bg-yellow-500/20 transition-colors duration-500"></div>
             <div className="w-16 h-16 rounded-2xl bg-yellow-500/10 flex items-center justify-center mb-4 relative z-10 group-hover:scale-110 transition-transform duration-300">
               <Icon iconName="star" className="w-8 h-8 text-yellow-500" />
@@ -251,7 +251,7 @@ export const DashboardPage: React.FC = () => {
 
         {/* Recent Activity */}
         <motion.div variants={itemVariants} className="col-span-1 md:col-span-1 lg:col-span-2 row-span-2">
-          <Card className="h-full border border-white/5 bg-black flex flex-col">
+          <Card className="h-full min-h-[200px] border border-white/5 bg-black flex flex-col">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-display font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <Icon iconName="bolt" className="w-5 h-5 text-yellow-500" />
@@ -321,7 +321,7 @@ export const DashboardPage: React.FC = () => {
 
         {/* Overdue Payments */}
         <motion.div variants={itemVariants} className="col-span-1 lg:col-span-2">
-          <Card className={`h-full border bg-black flex flex-col ${overduePayments.length > 0 ? 'border-danger/30' : 'border-white/5'}`}>
+          <Card className={`h-full min-h-[200px] border bg-black flex flex-col ${overduePayments.length > 0 ? 'border-danger/30' : 'border-white/5'}`}>
             <h3 className="text-lg font-display font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
               <Icon iconName="warning" className={`w-5 h-5 ${overduePayments.length > 0 ? 'text-danger' : 'text-gray-400'}`} />
               Action Needed

@@ -87,7 +87,7 @@ export const AppLayout: React.FC = () => {
 
   return (
     // Main container div, applies theme class for dark/light mode styling
-    <div className={`flex h-screen font-sans ${settings.theme} relative overflow-hidden`}>\n      <TerminalBackground />
+    <div className={`grid grid-cols-1 md:grid-cols-[288px_1fr] h-screen font-sans ${settings.theme} relative overflow-hidden`}>\n      <TerminalBackground />
       {/* Overlay for mobile sidebar (dims background when sidebar is open) */}
       {isMobileSidebarOpen && (
         <div
@@ -99,7 +99,7 @@ export const AppLayout: React.FC = () => {
 
       {/* Sidebar Navigation */}
       <aside
-        className={`will-change-transform transform-gpu contain-layout contain-paint w-72 bg-black/30 backdrop-blur-md border-r border-gray-100 dark:border-white/5 flex flex-col z-10 relative
+        className={`will-change-transform transform-gpu contain-layout contain-paint w-72 md:w-full bg-black/30 backdrop-blur-md border-r border-gray-100 dark:border-white/5 flex flex-col z-10 relative
                    fixed md:static inset-y-0 left-0 z-50
                    transform transition-transform duration-300 ease-in-out
                    ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -205,7 +205,7 @@ export const AppLayout: React.FC = () => {
       </aside>
 
       {/* Main Content Wrapper (includes Topbar and Page Content) */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-black/30 backdrop-blur-md border-l border-white/5 z-10 relative">
+      <div className="flex flex-col min-w-0 overflow-hidden bg-black/30 backdrop-blur-md border-l border-white/5 z-10 relative">
         {/* Topbar */}
         <header className="flex-shrink-0 h-16 bg-white/50 dark:bg-primary-dark/50 backdrop-blur-md border-b border-gray-100 dark:border-white/5 flex items-center justify-between px-4 sm:px-6 z-30 sticky top-0">
           <div className="flex items-center">
