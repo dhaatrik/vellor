@@ -179,3 +179,6 @@
 ## 2026-05-30 - Explicit Grid Dimensions for CLS Mitigation
 **Learning:** Flexible containers (e.g., flex-1 flex) in high-frequency React/WebGL render cycles can generate subpixel rounding recalculations causing Layout Shifts (CLS).
 **Action:** When creating primary layout structures, use strict structural template rules (e.g., `grid-cols-[240px_1fr]`) and unalterable minimum height configurations (`min-h-[200px]`) rather than content-driven dimensions to guarantee dimension permanence.
+## 2026-05-29 - Zero-allocation time differences
+**Learning:** Instantiating `new Date()` and `new Date(dateString)` to calculate relative time differences inside high-frequency render paths (like virtualized lists in `DashboardPage.tsx`) creates unnecessary object allocations and GC spikes.
+**Action:** Use `Date.now()` and `Date.parse(dateString)` to calculate time deltas directly using epoch timestamps instead of instantiating `Date` objects.

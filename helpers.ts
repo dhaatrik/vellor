@@ -77,9 +77,9 @@ export const getPaymentStatusColor = (status: PaymentStatus): 'green' | 'yellow'
  * @returns {string} The formatted relative time string.
  */
 export const formatRelativeTime = (dateString: string): string => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const seconds = Math.round((now.getTime() - date.getTime()) / 1000);
+    const dateTimestamp = Date.parse(dateString);
+    const nowTimestamp = Date.now();
+    const seconds = Math.round((nowTimestamp - dateTimestamp) / 1000);
     const minutes = Math.round(seconds / 60);
     const hours = Math.round(minutes / 60);
     const days = Math.round(hours / 24);
