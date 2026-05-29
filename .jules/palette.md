@@ -101,3 +101,7 @@
 ## 2026-05-29 - Missing ARIA Relationships in Form Tabs
 **Learning:** Found navigation tab buttons in `CSVImportWizard.tsx` acting visually as tabs but lacking `role="tab"`, `role="tablist"`, `aria-selected`, `aria-controls`, and `role="tabpanel"`. These structural ARIA attributes are required for custom tab interfaces to convey their relationship and state to screen readers.
 **Action:** When implementing custom tab interfaces (`role="tab"`), always verify that `role="tablist"` is applied to the container, and `aria-controls` on the tab buttons matches the `id` of the corresponding `role="tabpanel"`.
+
+## 2026-05-29 - Pre-Allocated Layout Footprints
+**Learning:** Switching tabs containing asynchronous streams or list items without strict bounding parameters causes layout jumping. Applying strict boundaries (like `min-h-[400px]`) prevents the layout above or below from snapping upward or shifting out of place during content hydration loops.
+**Action:** When implementing tabs or containers that load dynamically or transition empty states, always use pre-allocated boundary styles on the container rather than allowing variable content heights to thrash the layout structure.

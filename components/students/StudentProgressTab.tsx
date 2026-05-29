@@ -119,7 +119,7 @@ export const StudentProgressTab: React.FC<StudentProgressTabProps> = ({
           {memoizedLogEntries}
         </div>
       ) : (
-        <div className="text-center py-12 bg-gray-50 dark:bg-primary/30 rounded-2xl border border-dashed border-gray-200 dark:border-white/10">
+        <div className="h-[400px] flex flex-col items-center justify-center text-center bg-gray-50 dark:bg-primary/30 rounded-2xl border border-dashed border-gray-200 dark:border-white/10 border-telemetry">
           <div className="w-16 h-16 mx-auto bg-white dark:bg-primary-light rounded-full flex items-center justify-center mb-4 shadow-sm">
             <Icon iconName="star" className="w-8 h-8 text-gray-400" />
           </div>
