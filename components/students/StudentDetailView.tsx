@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Student, Transaction, PaymentStatus } from '../../types';
 import { Button, Card, Icon, Modal, Textarea } from '../ui';
 import { formatCurrency, formatDate, formatPhoneNumber, generateWhatsAppLink, generatePortalLink } from '../../helpers';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { generateProgressReportPDF } from '../../pdf';
 import { useStore } from '../../store';
@@ -344,30 +344,29 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({ student, o
          <Button variant={activeTab === 'progress' ? 'primary' : 'outline'} onClick={() => setActiveTab('progress')} className="rounded-full px-6 shadow-sm">Academic Progress</Button>
       </motion.div>
 
-      <div className="content-visibility-auto contain-layout contain-paint min-h-[400px]">
-      <AnimatePresence mode="wait">
-        {activeTab === 'history' ? (
-          <motion.div key="history" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ type: "spring", stiffness: 220, damping: 29, mass: 1, restDelta: 0.001 }}>
-            <StudentHistoryTab
-              studentTransactions={studentTransactions}
-              totalOwed={totalOwed}
-              totalPaidForStudent={totalPaidForStudent}
-              currencySymbol={currencySymbol}
-              studentId={student.id}
-              onLogPayment={onLogPayment}
-            />
-          </motion.div>
-        ) : (
-          <motion.div key="progress" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ type: "spring", stiffness: 220, damping: 29, mass: 1, restDelta: 0.001 }}>
-            <StudentProgressTab
-              gradeChartData={gradeChartData}
-              progressTransactions={progressTransactions}
-              setShowReportModal={setShowReportModal}
-              formatGrade={formatGrade}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div className="content-visibility-auto contain-layout contain-paint min-h-[600px]">
+      <div className={`contain-paint content-visibility-auto ${activeTab === 'history' ? 'block' : 'hidden'}`}>
+        <motion.div key="history" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ type: "spring", stiffness: 220, damping: 29, mass: 1, restDelta: 0.001 }}>
+          <StudentHistoryTab
+            studentTransactions={studentTransactions}
+            totalOwed={totalOwed}
+            totalPaidForStudent={totalPaidForStudent}
+            currencySymbol={currencySymbol}
+            studentId={student.id}
+            onLogPayment={onLogPayment}
+          />
+        </motion.div>
+      </div>
+      <div className={`contain-paint content-visibility-auto ${activeTab === 'progress' ? 'block' : 'hidden'}`}>
+        <motion.div key="progress" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ type: "spring", stiffness: 220, damping: 29, mass: 1, restDelta: 0.001 }}>
+          <StudentProgressTab
+            gradeChartData={gradeChartData}
+            progressTransactions={progressTransactions}
+            setShowReportModal={setShowReportModal}
+            formatGrade={formatGrade}
+          />
+        </motion.div>
+      </div>
       </div>
       
       {/* Back Button */}

@@ -183,3 +183,6 @@
 ## 2026-05-30 - Zero-allocation time differences
 **Learning:** Instantiating `new Date()` and `new Date(dateString)` to calculate relative time differences inside high-frequency render paths (like virtualized lists in `DashboardPage.tsx`) creates unnecessary object allocations and GC spikes.
 **Action:** Use `Date.now()` and `Date.parse(dateString)` to calculate time deltas directly using epoch timestamps instead of instantiating `Date` objects.
+## 2023-10-27 - Preserve Texture Memory on Tab Switches
+**Learning:** React conditional mounting/unmounting destroys cached GPU textures and forces re-rasterization on every click, hurting performance on complex interfaces like tabs.
+**Action:** To preserve hardware layer textures and avoid re-rasterization during tab switching or similar UI toggles, prefer CSS-based display toggling (e.g., conditionally applying Tailwind's `hidden` and `block` classes) over React conditional mounting/unmounting. When keeping these hidden nodes in the DOM, apply modern CSS containment classes (`contain-paint content-visibility-auto`) to the wrapper element so the browser layout engine can ignore hidden nodes without destroying their memory allocations. When testing these, update RTL queries to check for visibility classes instead of `.not.toBeInTheDocument()`.
