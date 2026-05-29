@@ -97,3 +97,7 @@
 ## 2026-05-28 - Tabular Numerical Bounds & Typography Isolation
 **Learning:** Using `tabular-nums` directly on text nodes that display dynamically changing numerical values prevents the layout string dimension shifts. Managing customized monospace fonts (`font-mono`) with containment attributes like `display=block` protects the rendering engine from undergoing a layout snap when styles load.
 **Action:** Always inject `tabular-nums` class on elements rendering real-time or variable financial data in transaction rows and statistical readout cards to ensure layout continuity. Additionally, apply `display=block` on customized web font imports to stabilize pre-loaded numeric matrices.
+
+## 2026-05-29 - Missing ARIA Relationships in Form Tabs
+**Learning:** Found navigation tab buttons in `CSVImportWizard.tsx` acting visually as tabs but lacking `role="tab"`, `role="tablist"`, `aria-selected`, `aria-controls`, and `role="tabpanel"`. These structural ARIA attributes are required for custom tab interfaces to convey their relationship and state to screen readers.
+**Action:** When implementing custom tab interfaces (`role="tab"`), always verify that `role="tablist"` is applied to the container, and `aria-controls` on the tab buttons matches the `id` of the corresponding `role="tabpanel"`.

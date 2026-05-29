@@ -101,10 +101,13 @@ const MappingStep: React.FC<MappingStepProps> = ({
                 Found {csvDataLength} records. Let's map your columns to Vellor fields.
             </div>
 
-            <div className="flex gap-2 p-1 bg-gray-100 dark:bg-primary/50 rounded-xl">
+            <div className="flex gap-2 p-1 bg-gray-100 dark:bg-primary/50 rounded-xl" role="tablist" aria-label="Field categories">
                 {categories.map(cat => (
                     <button
                         key={cat.id}
+                        role="tab"
+                        aria-selected={activeCategory === cat.id}
+                        aria-controls="csv-mapping-panel"
                         onClick={() => setActiveCategory(cat.id)}
                         className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-bold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary-light ${
                             activeCategory === cat.id 
@@ -118,7 +121,7 @@ const MappingStep: React.FC<MappingStepProps> = ({
                 ))}
             </div>
 
-            <div className="bg-gray-50 dark:bg-primary/50 p-5 rounded-3xl space-y-4 border border-gray-100 dark:border-white/5 max-h-[40vh] overflow-y-auto custom-scrollbar">
+            <div id="csv-mapping-panel" role="tabpanel" className="bg-gray-50 dark:bg-primary/50 p-5 rounded-3xl space-y-4 border border-gray-100 dark:border-white/5 max-h-[40vh] overflow-y-auto custom-scrollbar">
                 {fieldsByCategory[activeCategory].map(({field, label}) => (
                    <div key={field} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-white dark:bg-primary-light rounded-xl border border-gray-200 dark:border-white/10">
                        <span className="text-sm font-bold text-gray-700 dark:text-gray-300 sm:w-1/3 truncate">{label}</span>
