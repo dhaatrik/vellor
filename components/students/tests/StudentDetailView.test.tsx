@@ -111,7 +111,7 @@ describe('StudentDetailView', () => {
     const historyButton = screen.getByText('Lesson History');
     fireEvent.click(historyButton);
 
-    const historyTabContainer = screen.getByTestId('student-history-tab').parentElement.parentElement;
+    const historyTabContainer = screen.getByTestId('student-history-tab').parentElement!.parentElement;
     expect(historyTabContainer).toHaveClass('block');
     expect(historyTabContainer).not.toHaveClass('hidden');
 
@@ -121,7 +121,7 @@ describe('StudentDetailView', () => {
     // After clicking progress, history should be hidden and progress should be block
     expect(historyTabContainer).toHaveClass('hidden');
 
-    const progressTabContainer = screen.getByTestId('student-progress-tab').parentElement.parentElement;
+    const progressTabContainer = screen.getByTestId('student-progress-tab').parentElement!.parentElement;
     expect(progressTabContainer).toHaveClass('block');
     expect(progressTabContainer).not.toHaveClass('hidden');
   });
