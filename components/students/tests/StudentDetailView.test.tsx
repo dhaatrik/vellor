@@ -107,18 +107,22 @@ describe('StudentDetailView', () => {
   it('switches tabs correctly', () => {
     render(<StudentDetailView {...defaultProps} />);
 
-    // Initially should be on 'history' or 'details' depending on implementation
-    // The component defaults to 'history' if we click the history button
-
+    // Initially should be on 'history'
     const historyButton = screen.getByText('Lesson History');
     fireEvent.click(historyButton);
 
-    expect(screen.getByTestId('student-history-tab')).toBeInTheDocument();
+    const historyTabContainer = screen.getByTestId('student-history-tab').parentElement!.parentElement;
+    expect(historyTabContainer).toHaveClass('block');
+    expect(historyTabContainer).not.toHaveClass('hidden');
 
     const progressButton = screen.getByText('Academic Progress');
     fireEvent.click(progressButton);
 
-    expect(screen.queryByTestId('student-history-tab')).not.toBeInTheDocument();
-    expect(screen.getByTestId('student-progress-tab')).toBeInTheDocument();
+    // After clicking progress, history should be hidden and progress should be block
+    expect(historyTabContainer).toHaveClass('hidden');
+
+    const progressTabContainer = screen.getByTestId('student-progress-tab').parentElement!.parentElement;
+    expect(progressTabContainer).toHaveClass('block');
+    expect(progressTabContainer).not.toHaveClass('hidden');
   });
 });
