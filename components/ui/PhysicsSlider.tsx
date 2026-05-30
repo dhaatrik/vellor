@@ -23,12 +23,9 @@ export const PhysicsSlider: React.FC<PhysicsSliderProps> = ({
     return Math.max(0, Math.min(1, (val - min) / (max - min)));
   };
 
-  // Create our spring. Initial position is based on the initial value percentage.
-  const initialPercentage = getPercentageFromValue(value);
-
   // The spring will track percentage (0 to 1) directly, but mapped to px width dynamically during render,
   // or it tracks the px position directly. Tracking px directly is easier for the handle transform.
-  const [settledValue, setTarget, setMutator, currentRef] = useSpringVelocity(0, {
+  const [, setTarget, setMutator] = useSpringVelocity(0, {
     stiffness: 180,
     damping: 26,
     mass: 1
