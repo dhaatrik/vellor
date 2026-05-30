@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback, KeyboardEvent } from 'react';
+import React, { useRef, useEffect, KeyboardEvent } from 'react';
 import { useSpringVelocity } from '../../hooks/useSpringVelocity';
 
 interface PhysicsSliderProps {
@@ -28,7 +28,7 @@ export const PhysicsSlider: React.FC<PhysicsSliderProps> = ({
   const targetPositionRef = useRef(0);
   const lastWidthRef = useRef<number>(0);
 
-  const [setTarget, setMutator] = useSpringVelocity({
+  const [setTarget] = useSpringVelocity({
     target: targetPositionRef.current,
     stiffness: 180,
     damping: 26,
