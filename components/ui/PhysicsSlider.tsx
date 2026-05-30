@@ -25,25 +25,20 @@ export const PhysicsSlider: React.FC<PhysicsSliderProps> = ({
 
   // The spring will track percentage (0 to 1) directly, but mapped to px width dynamically during render,
   // or it tracks the px position directly. Tracking px directly is easier for the handle transform.
-  const [, setTarget, setMutator] = useSpringVelocity(0, {
-    stiffness: 180,
-    damping: 26,
-    mass: 1
-  });
-
+  const targetPositionRef = useRef(0);
   const lastWidthRef = useRef<number>(0);
 
-  const updateHandlePosition = useCallback((xPos: number) => {
-    if (handleRef.current) {
-        // Limit to bounds visually
-        const boundedX = Math.max(0, Math.min(xPos, lastWidthRef.current));
-        handleRef.current.style.transform = `translate3d(${boundedX}px, 0, 0)`;
+  const [setTarget, setMutator] = useSpringVelocity({
+    target: targetPositionRef.current,
+    stiffness: 180,
+    damping: 26,
+    onUpdate: (pos) => {
+      if (handleRef.current) {
+        const boundedX = Math.max(0, Math.min(pos, lastWidthRef.current));
+        handleRef.current.style.transform = `translate3d(${boundedX}px, -50%, 0)`;
+      }
     }
-  }, []);
-
-  useEffect(() => {
-    setMutator(updateHandlePosition);
-  }, [setMutator, updateHandlePosition]);
+  });
 
   // Helper to convert an event's clientX to a local X coordinate within the track
   const getLocalX = (clientX: number) => {
@@ -60,6 +55,7 @@ export const PhysicsSlider: React.FC<PhysicsSliderProps> = ({
         lastWidthRef.current = trackRef.current.getBoundingClientRect().width;
     }
     const localX = getLocalX(e.clientX);
+    targetPositionRef.current = localX;
     setTarget(localX);
     if (handleRef.current) {
         handleRef.current.focus();
@@ -69,6 +65,7 @@ export const PhysicsSlider: React.FC<PhysicsSliderProps> = ({
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDraggingRef.current) return;
     const localX = getLocalX(e.clientX);
+    targetPositionRef.current = localX;
     setTarget(localX);
   };
 
@@ -93,6 +90,7 @@ export const PhysicsSlider: React.FC<PhysicsSliderProps> = ({
         const width = trackRef.current.getBoundingClientRect().width;
         lastWidthRef.current = width;
         const targetX = getPercentageFromValue(value) * width;
+        targetPositionRef.current = targetX;
         setTarget(targetX);
     }
   }, [value, min, max, setTarget]);
@@ -105,6 +103,7 @@ export const PhysicsSlider: React.FC<PhysicsSliderProps> = ({
         lastWidthRef.current = width;
         // Adjust the target based on the current value so it stays in the right spot
         const targetX = getPercentageFromValue(value) * width;
+        targetPositionRef.current = targetX;
         setTarget(targetX);
       }
     };
@@ -150,7 +149,7 @@ export const PhysicsSlider: React.FC<PhysicsSliderProps> = ({
           aria-valuenow={value}
           tabIndex={0}
           onKeyDown={handleKeyDown}
-          className="absolute top-1/2 left-0 w-6 h-6 -mt-3 -ml-3 bg-accent rounded-full shadow-md cursor-grab focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent dark:focus-visible:ring-offset-primary z-10 will-change-transform"
+          className="absolute top-1/2 left-0 w-6 h-6 -ml-3 bg-accent rounded-full shadow-md cursor-grab focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent dark:focus-visible:ring-offset-primary z-10 will-change-transform"
         />
       </div>
     </div>

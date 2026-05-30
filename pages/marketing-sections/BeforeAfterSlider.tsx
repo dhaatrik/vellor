@@ -4,7 +4,7 @@ import { useSpringVelocity } from '../../hooks/useSpringVelocity';
 const CELLS = Array.from({ length: 48 }, (_, i) => i);
 
 export const BeforeAfterSlider = () => {
-  const [, setTarget, setMutator] = useSpringVelocity(50);
+  const [setTarget, setMutator] = useSpringVelocity(50);
   const [sliderPos, setSliderPos] = useState(50);
   const containerRef = useRef<HTMLDivElement>(null);
   const rectRef = useRef<{ left: number; width: number } | null>(null);

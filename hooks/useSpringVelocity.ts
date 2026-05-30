@@ -1,25 +1,33 @@
-import { useRef, useEffect, useCallback, useState } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 
 export interface SpringConfig {
+  target?: number;
   stiffness?: number;
   damping?: number;
   mass?: number;
+  onUpdate?: (currentValue: number) => void;
 }
 
 export type SpringMutator = (currentValue: number) => void;
 
 export const useSpringVelocity = (
-  initialValue: number,
-  config: SpringConfig = {}
+  initialValueOrConfig: number | SpringConfig,
+  configArg: SpringConfig = {}
 ): [
-  number,
   (target: number) => void,
   (mutator: SpringMutator) => void,
   React.MutableRefObject<number>
 ] => {
-  const { stiffness = 180, damping = 26, mass = 1 } = config;
+  const isConfigObj = typeof initialValueOrConfig === 'object';
+  const config = isConfigObj ? initialValueOrConfig : configArg;
+  const initialValue = isConfigObj ? (config.target ?? 0) : initialValueOrConfig;
 
-  const [settledValue, setSettledValue] = useState<number>(initialValue);
+  const { stiffness = 180, damping = 26, mass = 1, onUpdate } = config;
+
+  const onUpdateRef = useRef(onUpdate);
+  useEffect(() => {
+    onUpdateRef.current = onUpdate;
+  }, [onUpdate]);
 
   const currentRef = useRef<number>(initialValue);
   const targetRef = useRef<number>(initialValue);
@@ -56,7 +64,9 @@ export const useSpringVelocity = (
       if (m) {
         m(target);
       }
-      setSettledValue(target);
+      if (onUpdateRef.current) {
+        onUpdateRef.current(target);
+      }
       return;
     }
 
@@ -74,6 +84,9 @@ export const useSpringVelocity = (
     const m = mutatorRef.current;
     if (m) {
       m(newCurrent);
+    }
+    if (onUpdateRef.current) {
+      onUpdateRef.current(newCurrent);
     }
 
     frameRef.current = requestAnimationFrame(tick);
@@ -99,5 +112,5 @@ export const useSpringVelocity = (
     };
   }, []);
 
-  return [settledValue, setTarget, setMutator, currentRef];
+  return [setTarget, setMutator, currentRef];
 };

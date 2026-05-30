@@ -190,3 +190,6 @@
 ## 2026-05-30 - Eliminate array chaining in performance-critical filters
 **Learning:** Chaining array methods like `.filter().sort()` creates intermediate arrays and increases garbage collection overhead, particularly inside high-frequency execution paths like React `useMemo` hooks.
 **Action:** Replace `.filter().sort()` pipelines with single-pass standard `for` loops that manually `.push()` results to a single pre-allocated array and then execute `.sort()` in-place before returning the array.
+## 2026-05-30 - Direct DOM Mutation for High-Frequency Animations
+**Learning:** Using React state (`useState`) to track coordinates for physics-based animations like `useSpringVelocity` triggers continuous re-renders, shredding the 16.67ms frame budget.
+**Action:** When implementing high-frequency UI interactions (e.g., spring velocity hooks, custom sliders), bypass React state updates for position tracking. Use `useRef` and pass an `onUpdate` callback that performs direct DOM mutation (e.g., `elementRef.current.style.transform = 'translate3d(...)'`) to maintain hardware acceleration and avoid render cycle overhead.
