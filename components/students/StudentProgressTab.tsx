@@ -1,8 +1,8 @@
 import type { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Transaction } from '../../types';
-import { Button, Card, Icon } from '../ui';
+import { Button, Card, Icon, PhysicsSlider, Input } from '../ui';
 import { formatDate } from '../../helpers';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -25,6 +25,16 @@ export const StudentProgressTab: React.FC<StudentProgressTabProps> = ({
   setShowReportModal,
   formatGrade,
 }) => {
+
+  const [sessionConfidence, setSessionConfidence] = useState(50);
+  const [sessionNotes, setSessionNotes] = useState('');
+
+  const handleAddProgressLog = () => {
+    // In a real implementation this would save to the store
+    console.log("Logged progress:", { confidence: sessionConfidence, notes: sessionNotes });
+    setSessionNotes('');
+    setSessionConfidence(50);
+  };
 
   const memoizedLogEntries = useMemo(() => {
     return progressTransactions.map((t) => {
@@ -65,7 +75,42 @@ export const StudentProgressTab: React.FC<StudentProgressTabProps> = ({
         </Button>
       </div>
 
-      {gradeChartData.length > 1 && (
+
+      <div className="mb-8 p-4 bg-gray-50 dark:bg-primary-light/5 rounded-3xl border border-gray-100 dark:border-white/5">
+        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
+          <Icon iconName="plus" className="w-4 h-4" />
+          Add Progress Log: Session Confidence
+        </h4>
+        <div className="space-y-6">
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm text-gray-500 dark:text-gray-400">Confidence Rating</span>
+              <span className="text-sm font-bold text-accent">{sessionConfidence}%</span>
+            </div>
+            <PhysicsSlider
+              value={sessionConfidence}
+              onChange={setSessionConfidence}
+              min={1}
+              max={100}
+            />
+          </div>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <Input
+                value={sessionNotes}
+                onChange={(e) => setSessionNotes(e.target.value)}
+                placeholder="Session notes (optional)..."
+                className="w-full"
+              />
+            </div>
+            <Button onClick={handleAddProgressLog} variant="primary" className="rounded-full shrink-0">
+              Log
+            </Button>
+          </div>
+        </div>
+      </div>
+
+{gradeChartData.length > 1 && (
         <div className="h-48 w-full mb-8 mt-2 pr-4 bg-gray-50/50 dark:bg-primary-light/10 p-4 rounded-3xl">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={gradeChartData}>
