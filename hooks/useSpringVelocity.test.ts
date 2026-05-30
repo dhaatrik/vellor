@@ -13,9 +13,9 @@ describe('useSpringVelocity', () => {
 
   it('should initialize correctly', () => {
     const { result } = renderHook(() => useSpringVelocity(0));
-    const [settledValue, setTarget, setMutator, currentRef] = result.current;
+    const [setTarget, setMutator, currentRef] = result.current;
 
-    expect(settledValue).toBe(0);
+
     expect(currentRef.current).toBe(0);
     expect(typeof setTarget).toBe('function');
     expect(typeof setMutator).toBe('function');
@@ -26,10 +26,10 @@ describe('useSpringVelocity', () => {
     const { result } = renderHook(() => useSpringVelocity(0));
 
     act(() => {
-      result.current[2](() => {
+      result.current[1](() => {
         mutatorCalled = true;
       });
-      result.current[1](100);
+      result.current[0](100);
     });
 
     act(() => {
@@ -40,8 +40,8 @@ describe('useSpringVelocity', () => {
       vi.runAllTimers();
     });
 
-    expect(result.current[0]).toBe(100);
-    expect(result.current[3].current).toBe(100);
+
+    expect(result.current[2].current).toBe(100);
     expect(mutatorCalled).toBe(true);
   });
 });
