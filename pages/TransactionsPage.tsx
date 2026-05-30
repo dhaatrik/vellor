@@ -186,7 +186,8 @@ export const TransactionsPage: React.FC = () => {
     }
 
     // Sort in place at the very end to avoid sorting un-matched items
-    return results.sort((a, b) => b.date.localeCompare(a.date));
+    results.sort((a, b) => b.date.localeCompare(a.date));
+    return results;
   }, [transactionsLength, activeFilter, debouncedSearchQuery, dateRange, studentsMap]);
 
   const parentRef = React.useRef<HTMLDivElement | null>(null);
