@@ -187,3 +187,6 @@
 ## 2026-05-30 - Preserve Texture Memory on Tab Switches
 **Learning:** React conditional mounting/unmounting destroys cached GPU textures and forces re-rasterization on every click, hurting performance on complex interfaces like tabs.
 **Action:** To preserve hardware layer textures and avoid re-rasterization during tab switching or similar UI toggles, prefer CSS-based display toggling (e.g., conditionally applying Tailwind's `hidden` and `block` classes) over React conditional mounting/unmounting. When keeping these hidden nodes in the DOM, apply modern CSS containment classes (`contain-paint content-visibility-auto`) to the wrapper element so the browser layout engine can ignore hidden nodes without destroying their memory allocations. When testing these, update RTL queries to check for visibility classes instead of `.not.toBeInTheDocument()`.
+## 2026-05-30 - Eliminate array chaining in performance-critical filters
+**Learning:** Chaining array methods like `.filter().sort()` creates intermediate arrays and increases garbage collection overhead, particularly inside high-frequency execution paths like React `useMemo` hooks.
+**Action:** Replace `.filter().sort()` pipelines with single-pass standard `for` loops that manually `.push()` results to a single pre-allocated array and then execute `.sort()` in-place before returning the array.
