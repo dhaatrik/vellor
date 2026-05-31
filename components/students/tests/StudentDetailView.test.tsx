@@ -7,8 +7,8 @@ import { Student, Transaction } from '../../../types';
 // Mock framer-motion to avoid animation issues in tests
 vi.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, className, onClick }: any) => <div className={className} onClick={onClick}>{children}</div>,
-    button: ({ children, className, onClick }: any) => <button className={className} onClick={onClick}>{children}</button>,
+    div: ({ children, className, onClick, ...props }: any) => <div className={className} onClick={onClick} {...props}>{children}</div>,
+    button: ({ children, className, onClick, ...props }: any) => <button className={className} onClick={onClick} {...props}>{children}</button>,
   },
   AnimatePresence: ({ children }: any) => <>{children}</>,
 }));

@@ -339,13 +339,13 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({ student, o
       )}
 
       {/* Tabs */}
-      <motion.div variants={itemVariants} className="flex gap-2 justify-center sm:justify-start">
-         <Button variant={activeTab === 'history' ? 'primary' : 'outline'} onClick={() => setActiveTab('history')} className="rounded-full px-6 shadow-sm">Lesson History</Button>
-         <Button variant={activeTab === 'progress' ? 'primary' : 'outline'} onClick={() => setActiveTab('progress')} className="rounded-full px-6 shadow-sm">Academic Progress</Button>
+      <motion.div variants={itemVariants} className="flex gap-2 justify-center sm:justify-start" role="tablist" aria-label="Student details tabs">
+         <Button variant={activeTab === 'history' ? 'primary' : 'outline'} onClick={() => setActiveTab('history')} className="rounded-full px-6 shadow-sm" role="tab" aria-selected={activeTab === 'history'} aria-controls="history-tab-panel">Lesson History</Button>
+         <Button variant={activeTab === 'progress' ? 'primary' : 'outline'} onClick={() => setActiveTab('progress')} className="rounded-full px-6 shadow-sm" role="tab" aria-selected={activeTab === 'progress'} aria-controls="progress-tab-panel">Academic Progress</Button>
       </motion.div>
 
       <div className="content-visibility-auto contain-layout contain-paint min-h-[600px]">
-      <div className={`contain-paint content-visibility-auto ${activeTab === 'history' ? 'block' : 'hidden'}`}>
+      <div id="history-tab-panel" role="tabpanel" className={`contain-paint content-visibility-auto ${activeTab === 'history' ? 'block' : 'hidden'}`}>
         <motion.div key="history" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ type: "spring", stiffness: 220, damping: 29, mass: 1, restDelta: 0.001 }}>
           <StudentHistoryTab
             studentTransactions={studentTransactions}
@@ -357,7 +357,7 @@ export const StudentDetailView: React.FC<StudentDetailViewProps> = ({ student, o
           />
         </motion.div>
       </div>
-      <div className={`contain-paint content-visibility-auto ${activeTab === 'progress' ? 'block' : 'hidden'}`}>
+      <div id="progress-tab-panel" role="tabpanel" className={`contain-paint content-visibility-auto ${activeTab === 'progress' ? 'block' : 'hidden'}`}>
         <motion.div key="progress" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ type: "spring", stiffness: 220, damping: 29, mass: 1, restDelta: 0.001 }}>
           <StudentProgressTab
             gradeChartData={gradeChartData}
