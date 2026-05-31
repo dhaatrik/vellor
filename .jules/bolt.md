@@ -195,3 +195,7 @@
 ## 2026-05-30 - Direct DOM Mutation for High-Frequency Animations
 **Learning:** Using React state (`useState`) to track coordinates for physics-based animations like `useSpringVelocity` triggers continuous re-renders, shredding the 16.67ms frame budget.
 **Action:** When implementing high-frequency UI interactions (e.g., spring velocity hooks, custom sliders), bypass React state updates for position tracking. Use `useRef` and pass an `onUpdate` callback that performs direct DOM mutation (e.g., `elementRef.current.style.transform = 'translate3d(...)'`) to maintain hardware acceleration and avoid render cycle overhead.
+
+## 2026-05-31 - Fast Date Sorting
+**Learning:** `String.prototype.localeCompare()` carries massive internationalization overhead and generates significant garbage collection during high-frequency sorting. ISO 8601 date strings naturally sort perfectly using direct lexical string comparison.
+**Action:** When sorting arrays of ISO 8601 date strings, replace `.sort((a,b) => b.date.localeCompare(a.date))` with direct operators `.sort((a,b) => b.date < a.date ? -1 : (b.date > a.date ? 1 : 0))` to eliminate i18n parsing overhead.

@@ -186,7 +186,8 @@ export const TransactionsPage: React.FC = () => {
     }
 
     // Sort in place at the very end to avoid sorting un-matched items
-    results.sort((a, b) => b.date.localeCompare(a.date));
+    // ⚡ Bolt Performance: Use direct string comparison for ISO dates to avoid localeCompare overhead
+    results.sort((a, b) => b.date < a.date ? -1 : (b.date > a.date ? 1 : 0));
     return results;
   }, [transactionsLength, activeFilter, debouncedSearchQuery, dateRange, studentsMap]);
 
