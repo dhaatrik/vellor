@@ -231,7 +231,7 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
         result.push(t);
       }
     }
-    return result.sort((a, b) => b.date.localeCompare(a.date));
+    return result.sort((a, b) => b.date < a.date ? -1 : (b.date > a.date ? 1 : 0));
   },
 
   getTransactionById: (() => {
