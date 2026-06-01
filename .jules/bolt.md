@@ -198,3 +198,6 @@
 ## 2026-05-30 - Direct string comparison for ISO 8601 sorting
 **Learning:** Using `String.prototype.localeCompare()` for sorting ISO 8601 date strings introduces unnecessary internationalization overhead, making it ~6x slower than direct comparison operators (`<` and `>`) in JavaScript.
 **Action:** Always sort ISO 8601 strings (which are lexicographically strictly monotonic with time) using direct `<` and `>` operators (e.g. `.sort((a, b) => b.date < a.date ? -1 : (b.date > a.date ? 1 : 0))`) instead of `.localeCompare()`.
+## 2025-02-20 - Redundant Dictionary Lookups After Array Searches
+**Learning:** In scenarios where a full object needs to be accessed based on a string property (like a name), iterating over an array to find the object's ID only to immediately use that ID for an O(1) dictionary lookup is an unnecessary performance overhead.
+**Action:** When manually filtering or searching through an array, directly retain and use the object reference (e.g., `student = s`) found in the iteration rather than extracting the ID to fetch it again later.
