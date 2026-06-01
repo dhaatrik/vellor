@@ -1,4 +1,5 @@
 import { StateCreator } from 'zustand';
+import localforage from 'localforage';
 import { AppState, TransactionSlice } from './types';
 import { Transaction, TransactionFormData, PaymentStatus } from '../types';
 import { generateId } from '../helpers';
@@ -250,6 +251,18 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
       return transactionMap.get(transactionId);
     };
   })(),
+
+
+  loadTransactions: async () => {
+    try {
+      const data = await localforage.getItem<string>('vellor-transactions');
+      if (data) {
+         set({ transactions: JSON.parse(data) });
+      }
+    } catch (error) {
+      get().addToast('Failed to load transactions.', 'error');
+    }
+  },
 
   exportTransactionsCSV: () => {
     try {

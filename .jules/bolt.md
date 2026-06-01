@@ -235,3 +235,6 @@
 ## 2026-06-01 - Test Coverage for Data Normalization Logic
 **Learning:** Core form input data sanitization paths (such as removing non-digit characters in `PhoneInput.tsx`) represent the application edge, yet are often excluded from happy path interaction testing. Lacking testing for empty input objects and string type mismatches leads to untracked edge case regressions.
 **Action:** When adding or verifying UI component logic, always include test assertions covering empty value propagation (e.g. `value: ''`), character removal routines (Regex replace verification), and max-length boundary limits for numeric/formatted inputs.
+## 2026-06-01 - [Mocking Storage with Zustand]
+**Learning:** Testing error paths for components relying on indexedDB or localforage with Zustand can be effectively done by using `vi.mock('localforage')` and then verifying the resulting store updates or UI feedback (like error toasts) appropriately.
+**Action:** When asked to verify an error path requiring indexedDB mock in a missing function scenario, either test the generic persist engine or explicitly add the targeted data-loading function to cleanly test the expected error handling mechanism.

@@ -1,3 +1,4 @@
+import localforage from 'localforage';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useStore } from '../../store';
 import { PaymentStatus } from '../../types';
@@ -6,6 +7,15 @@ import { PaymentStatus } from '../../types';
 vi.mock('canvas-confetti', () => {
     return { default: vi.fn() };
 });
+
+
+vi.mock('localforage', () => ({
+  default: {
+    getItem: vi.fn(),
+    setItem: vi.fn(),
+    removeItem: vi.fn()
+  }
+}));
 
 describe('createTransactionSlice', () => {
   beforeEach(() => {
@@ -284,6 +294,31 @@ describe('createTransactionSlice', () => {
       });
 
       expect(updatedTransaction).toBeUndefined();
+    });
+  });
+
+
+  describe('loadTransactions', () => {
+    it('catches indexedDB exceptions and triggers an error toast', async () => {
+      // Setup spy for toast
+      const addToastSpy = vi.spyOn(useStore.getState(), 'addToast');
+
+      // Force an exception by mocking localforage
+      vi.mocked(localforage.getItem).mockRejectedValueOnce(new Error('Simulated indexedDB error'));
+
+      // Call the target loadTransactions function
+      await useStore.getState().loadTransactions();
+
+      // Make assertions against the resulting state (verify error toast is fired)
+      expect(addToastSpy).toHaveBeenCalledWith('Failed to load transactions.', 'error');
+
+      addToastSpy.mockRestore();
+    });
+
+    it('loads transactions successfully without errors', async () => {
+      vi.mocked(localforage.getItem).mockResolvedValueOnce(JSON.stringify([{ id: 'mock-id' }]));
+      await useStore.getState().loadTransactions();
+      expect(useStore.getState().transactions[0].id).toBe('mock-id');
     });
   });
 
