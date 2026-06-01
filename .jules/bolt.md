@@ -198,3 +198,7 @@
 ## 2026-05-30 - Direct string comparison for ISO 8601 sorting
 **Learning:** Using `String.prototype.localeCompare()` for sorting ISO 8601 date strings introduces unnecessary internationalization overhead, making it ~6x slower than direct comparison operators (`<` and `>`) in JavaScript.
 **Action:** Always sort ISO 8601 strings (which are lexicographically strictly monotonic with time) using direct `<` and `>` operators (e.g. `.sort((a, b) => b.date < a.date ? -1 : (b.date > a.date ? 1 : 0))`) instead of `.localeCompare()`.
+
+## 2026-06-01 - Replace O(N^2) Array Reductions with Cached Running Totals
+**Learning:** During bulk operations (like importing multiple transactions), iterating over the entire array inside a loop to calculate aggregates (like total due per student) results in an O(N*M) or O(N^2) time complexity.
+**Action:** Replace nested array reductions with cached O(1) properties on the parent entity. Use state updates or Maps locally to track running totals during bulk inserts before flushing the final result to the state.

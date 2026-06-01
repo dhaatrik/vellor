@@ -42,6 +42,7 @@ export const createStudentSlice: StateCreator<AppState, [], [], StudentSlice> = 
           ...sanitizedStudentData,
           searchName: `${sanitizedStudentData.firstName} ${sanitizedStudentData.lastName}`.toLowerCase(),
           id: crypto.randomUUID(),
+          balance: 0,
           createdAt: now,
         });
     }
@@ -86,6 +87,7 @@ export const createStudentSlice: StateCreator<AppState, [], [], StudentSlice> = 
       ...sanitizedStudentData,
       searchName: `${sanitizedStudentData.firstName} ${sanitizedStudentData.lastName}`.toLowerCase(),
       id: generateId(),
+      balance: 0,
       createdAt: new Date().toISOString(),
     };
     
@@ -149,6 +151,10 @@ export const createStudentSlice: StateCreator<AppState, [], [], StudentSlice> = 
                 updatedTuitionData.subjects = studentData.tuition.subjects.map(subject => sanitizeString(subject));
              }
              studentToUpdate.tuition = updatedTuitionData;
+          }
+
+          if (studentData.balance !== undefined) {
+             studentToUpdate.balance = studentData.balance;
           }
 
           updatedStudent = studentToUpdate;
