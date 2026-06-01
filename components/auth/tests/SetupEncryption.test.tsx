@@ -101,4 +101,33 @@ describe('SetupEncryption', () => {
       expect(crypto.deriveKey).toHaveBeenCalled();
     });
   });
+
+  it('handles crypto errors during first-time setup', async () => {
+    // Setup for "first time"
+    localStorage.removeItem('vellor-salt');
+
+    // Mock deriveKey to throw an error
+    (crypto.deriveKey as any).mockRejectedValue(new Error('Crypto failed'));
+
+    const mockOnUnlocked = vi.fn();
+    render(<SetupEncryption onUnlocked={mockOnUnlocked} />);
+
+    // Wait for the form to appear
+    await screen.findByText('Set Master Password');
+
+    // Type a valid password
+    const input = screen.getByPlaceholderText('Master Password');
+    await userEvent.type(input, 'validpassword123');
+
+    // Click set password
+    const button = screen.getByRole('button', { name: 'Set Password & Start' });
+    await userEvent.click(button);
+
+    // Verify error handling
+    await waitFor(() => {
+      expect(screen.getByText('Incorrect password or decryption failed. If you reset your cache, you must wipe the site data.')).toBeInTheDocument();
+      expect(mockSetMasterKey).toHaveBeenCalledWith(null);
+      expect(mockOnUnlocked).not.toHaveBeenCalled();
+    });
+  });
 });

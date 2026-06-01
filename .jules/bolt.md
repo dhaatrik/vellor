@@ -195,9 +195,19 @@
 ## 2026-05-30 - Direct DOM Mutation for High-Frequency Animations
 **Learning:** Using React state (`useState`) to track coordinates for physics-based animations like `useSpringVelocity` triggers continuous re-renders, shredding the 16.67ms frame budget.
 **Action:** When implementing high-frequency UI interactions (e.g., spring velocity hooks, custom sliders), bypass React state updates for position tracking. Use `useRef` and pass an `onUpdate` callback that performs direct DOM mutation (e.g., `elementRef.current.style.transform = 'translate3d(...)'`) to maintain hardware acceleration and avoid render cycle overhead.
+
 ## 2026-05-30 - Direct string comparison for ISO 8601 sorting
 **Learning:** Using `String.prototype.localeCompare()` for sorting ISO 8601 date strings introduces unnecessary internationalization overhead, making it ~6x slower than direct comparison operators (`<` and `>`) in JavaScript.
 **Action:** Always sort ISO 8601 strings (which are lexicographically strictly monotonic with time) using direct `<` and `>` operators (e.g. `.sort((a, b) => b.date < a.date ? -1 : (b.date > a.date ? 1 : 0))`) instead of `.localeCompare()`.
+
 ## 2026-05-30 - Test error paths for base64 encoding
 **Learning:** React components handling base64 decode and JSON parsing via URL parameters require testing the error boundary states, otherwise parsing errors may surface unhandled errors during deployment.
 **Action:** When working on components that ingest and decode URL parameters via `atob` and `JSON.parse`, ensure test coverage includes invalid base64 payloads and invalid JSON payloads to trigger and verify the application's expected fallback states (e.g. "Invalid Link").
+
+## 2026-06-01 - 100% Branch Coverage for crypto.ts
+**Learning:** In order to achieve 100% branch coverage for `crypto.ts`, all logical execution paths inside `try/catch` block or conditionally checked parameters such as `schema ? schema.parse(...) : ...` must be explicitly verified.
+**Action:** When working on missing test coverage, use the coverage output tool (like Vitest's coverage-final.json) to precisely identify missing branch evaluations, and supply inputs to test files that hit edge cases.
+
+## 2025-06-01 - Vitest Testing for PhysicsSlider
+**Learning:** Testing components utilizing `requestAnimationFrame` hooks like `useSpringVelocity` can be problematic in JSDOM due to lacking robust frame implementations. Mocking DOM geometry methods like `getBoundingClientRect` is critical to testing drag events because JSDOM nodes do not render and natively yield sizing zero properties.
+**Action:** Mock complex animation hooks with simpler behavior during tests to verify core component behaviors without flaky animation timeouts. Ensure layout properties (`getBoundingClientRect`) are thoroughly mocked when testing pointer interaction to enable accurate geometric calculations.

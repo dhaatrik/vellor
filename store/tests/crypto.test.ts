@@ -228,6 +228,14 @@ describe('decryptObject', () => {
     // Decrypting with anotherKey should fail
     await expect(decryptObject(encrypted, anotherKey)).rejects.toThrow();
   });
+
+  it("successfully decrypts an object without schema validation", async () => {
+    const data = { secret: "message" };
+    const encrypted = await encryptObject(data, validKey);
+    const decrypted = await decryptObject(encrypted, validKey);
+    expect(decrypted).toEqual(data);
+  });
+
   it("successfully decrypts an object and applies schema validation", async () => {
     const data = { secret: "message" };
     const encrypted = await encryptObject(data, validKey);
@@ -267,6 +275,22 @@ describe('deriveKey', () => {
     expect(key.usages).toContain('encrypt');
     expect(key.usages).toContain('decrypt');
     expect(key.extractable).toBe(true);
+  });
+
+
+  it('successfully derives a key with an empty password', async () => {
+    const salt = generateSalt();
+    const key = await deriveKey('', salt);
+    expect(key).toBeDefined();
+    expect(key.type).toBe('secret');
+  });
+
+  it('successfully derives a key with an empty salt', async () => {
+    const password = 'test-password';
+    const salt = new Uint8Array(0);
+    const key = await deriveKey(password, salt);
+    expect(key).toBeDefined();
+    expect(key.type).toBe('secret');
   });
 
   it('derives the same key for the same password and salt', async () => {
