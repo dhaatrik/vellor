@@ -103,6 +103,8 @@ export interface Student {
   notes?: string;
   /** The ISO date string representing when the student's profile was created. */
   createdAt: string;
+  /** The cached total due balance for the student. */
+  balance?: number;
 }
 
 /**
