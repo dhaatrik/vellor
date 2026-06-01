@@ -104,7 +104,7 @@ export const AppLayout: React.FC = () => {
                    transform transition-transform duration-300 ease-in-out
                    ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                    md:translate-x-0`} // Manages sidebar visibility and animation
-        aria-label="Main Navigation"
+        data-testid="sidebar-navigation" aria-label="Main Navigation"
       >
         {/* Sidebar Header: Logo, App Name */}
         <div className="px-6 py-6">
