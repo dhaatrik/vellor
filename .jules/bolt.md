@@ -236,6 +236,10 @@
 **Learning:** Core form input data sanitization paths (such as removing non-digit characters in `PhoneInput.tsx`) represent the application edge, yet are often excluded from happy path interaction testing. Lacking testing for empty input objects and string type mismatches leads to untracked edge case regressions.
 **Action:** When adding or verifying UI component logic, always include test assertions covering empty value propagation (e.g. `value: ''`), character removal routines (Regex replace verification), and max-length boundary limits for numeric/formatted inputs.
 
+## 2026-06-01 - [Mocking Storage with Zustand]
+**Learning:** Testing error paths for components relying on indexedDB or localforage with Zustand can be effectively done by using `vi.mock('localforage')` and then verifying the resulting store updates or UI feedback (like error toasts) appropriately.
+**Action:** When asked to verify an error path requiring indexedDB mock in a missing function scenario, either test the generic persist engine or explicitly add the targeted data-loading function to cleanly test the expected error handling mechanism.
+
 ## 2026-06-01 - Replace O(N^2) Array Reductions with Cached Running Totals
 **Learning:** During bulk operations (like importing multiple transactions), iterating over the entire array inside a loop to calculate aggregates (like total due per student) results in an O(N*M) or O(N^2) time complexity.
 **Action:** Replace nested array reductions with cached O(1) properties on the parent entity. Use state updates or Maps locally to track running totals during bulk inserts before flushing the final result to the state.

@@ -17,6 +17,7 @@ export interface TransactionSlice {
   deleteTransaction: (transactionId: string) => void;
   getTransactionById: (transactionId: string) => Transaction | undefined;
   getTransactionsByStudent: (studentId: string) => Transaction[];
+  loadTransactions: () => Promise<void>;
   exportTransactionsCSV: () => void;
 }
 
