@@ -104,6 +104,10 @@ describe('Helpers', () => {
             expect(generateWhatsAppLink({ countryCode: '', number: 'javascript:alert(1)' })).toBe('#');
             expect(generateWhatsAppLink({ countryCode: 'javascript:', number: 'alert(1)' })).toBe('#');
             expect(generateWhatsAppLink({ countryCode: '+1', number: 'data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==' })).toBe('#');
+
+            // URL-encoded and whitespace/control-character bypass attempts
+            expect(generateWhatsAppLink({ countryCode: 'javascript%0a:', number: 'alert(1)' })).toBe('#');
+            expect(generateWhatsAppLink({ countryCode: ' javascript\n:', number: 'alert(1)' })).toBe('#');
         });
 
         it('handles undefined countryCode gracefully', () => {

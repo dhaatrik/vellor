@@ -195,9 +195,39 @@
 ## 2026-05-30 - Direct DOM Mutation for High-Frequency Animations
 **Learning:** Using React state (`useState`) to track coordinates for physics-based animations like `useSpringVelocity` triggers continuous re-renders, shredding the 16.67ms frame budget.
 **Action:** When implementing high-frequency UI interactions (e.g., spring velocity hooks, custom sliders), bypass React state updates for position tracking. Use `useRef` and pass an `onUpdate` callback that performs direct DOM mutation (e.g., `elementRef.current.style.transform = 'translate3d(...)'`) to maintain hardware acceleration and avoid render cycle overhead.
+
 ## 2026-05-30 - Direct string comparison for ISO 8601 sorting
 **Learning:** Using `String.prototype.localeCompare()` for sorting ISO 8601 date strings introduces unnecessary internationalization overhead, making it ~6x slower than direct comparison operators (`<` and `>`) in JavaScript.
 **Action:** Always sort ISO 8601 strings (which are lexicographically strictly monotonic with time) using direct `<` and `>` operators (e.g. `.sort((a, b) => b.date < a.date ? -1 : (b.date > a.date ? 1 : 0))`) instead of `.localeCompare()`.
+
+## 2026-05-30 - Eliminate N+1 store lookups in export loops
+**Learning:** Calling `getStudentById()` within an export loop iterations (e.g. `transactions.length` times) creates an O(N*M) time complexity bottleneck (or at best significant function call overhead) causing massive latency on large datasets.
+**Action:** When performing cross-entity lookups inside a loop, pre-compute a lookup `Map` (e.g. `new Map()` mapping IDs to entities) outside the loop to reduce lookups to O(1) and improve overall complexity.
+
+## 2026-05-30 - Redundant Dictionary Lookups After Array Searches
+**Learning:** In scenarios where a full object needs to be accessed based on a string property (like a name), iterating over an array to find the object's ID only to immediately use that ID for an O(1) dictionary lookup is an unnecessary performance overhead.
+**Action:** When manually filtering or searching through an array, directly retain and use the object reference (e.g., `student = s`) found in the iteration rather than extracting the ID to fetch it again later.
+
+## 2026-05-30 - Test error paths for base64 encoding
+**Learning:** React components handling base64 decode and JSON parsing via URL parameters require testing the error boundary states, otherwise parsing errors may surface unhandled errors during deployment.
+**Action:** When working on components that ingest and decode URL parameters via `atob` and `JSON.parse`, ensure test coverage includes invalid base64 payloads and invalid JSON payloads to trigger and verify the application's expected fallback states (e.g. "Invalid Link").
+
+## 2026-06-01 - 100% Branch Coverage for crypto.ts
+**Learning:** In order to achieve 100% branch coverage for `crypto.ts`, all logical execution paths inside `try/catch` block or conditionally checked parameters such as `schema ? schema.parse(...) : ...` must be explicitly verified.
+**Action:** When working on missing test coverage, use the coverage output tool (like Vitest's coverage-final.json) to precisely identify missing branch evaluations, and supply inputs to test files that hit edge cases.
+
+## 2026-06-01 - Vitest Testing for PhysicsSlider
+**Learning:** Testing components utilizing `requestAnimationFrame` hooks like `useSpringVelocity` can be problematic in JSDOM due to lacking robust frame implementations. Mocking DOM geometry methods like `getBoundingClientRect` is critical to testing drag events because JSDOM nodes do not render and natively yield sizing zero properties.
+**Action:** Mock complex animation hooks with simpler behavior during tests to verify core component behaviors without flaky animation timeouts. Ensure layout properties (`getBoundingClientRect`) are thoroughly mocked when testing pointer interaction to enable accurate geometric calculations.
+
+## 2026-06-01 - Cover decryptObject error paths
+**Learning:** Testing crypto logic error paths provides confidence in security features by ensuring failure behaves as expected instead of leaking details.
+**Action:** Always test unhappy paths (e.g., corrupted ciphertexts, bad keys, or bad formats) for crypto helpers to ensure correct error messaging and safety mechanisms.
+
+## 2026-06-01 - Integration Testing UI Wizard Components
+**Learning:** For components relying on multiple steps with animation transitions (`AnimatePresence` in framer-motion), using `await waitFor()` on `screen.getByText` assertions accurately allows assertions to pass as elements become visible asynchronously without breaking tests compared to immediate UI assertions.
+**Action:** When testing multi-step React components using framer-motion, wrap intermediate state assertions in `waitFor` from `@testing-library/react`.
+
 ## 2026-06-01 - Test Coverage for Data Normalization Logic
 **Learning:** Core form input data sanitization paths (such as removing non-digit characters in `PhoneInput.tsx`) represent the application edge, yet are often excluded from happy path interaction testing. Lacking testing for empty input objects and string type mismatches leads to untracked edge case regressions.
 **Action:** When adding or verifying UI component logic, always include test assertions covering empty value propagation (e.g. `value: ''`), character removal routines (Regex replace verification), and max-length boundary limits for numeric/formatted inputs.
