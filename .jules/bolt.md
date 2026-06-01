@@ -219,3 +219,7 @@
 ## 2026-06-01 - Vitest Testing for PhysicsSlider
 **Learning:** Testing components utilizing `requestAnimationFrame` hooks like `useSpringVelocity` can be problematic in JSDOM due to lacking robust frame implementations. Mocking DOM geometry methods like `getBoundingClientRect` is critical to testing drag events because JSDOM nodes do not render and natively yield sizing zero properties.
 **Action:** Mock complex animation hooks with simpler behavior during tests to verify core component behaviors without flaky animation timeouts. Ensure layout properties (`getBoundingClientRect`) are thoroughly mocked when testing pointer interaction to enable accurate geometric calculations.
+
+## 2026-06-01 - Cover decryptObject error paths
+**Learning:** Testing crypto logic error paths provides confidence in security features by ensuring failure behaves as expected instead of leaking details.
+**Action:** Always test unhappy paths (e.g., corrupted ciphertexts, bad keys, or bad formats) for crypto helpers to ensure correct error messaging and safety mechanisms.

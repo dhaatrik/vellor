@@ -252,7 +252,7 @@ describe('decryptObject', () => {
     const encrypted = await encryptObject(data, validKey);
 
     // Decrypting with anotherKey should fail
-    await expect(decryptObject(encrypted, anotherKey)).rejects.toThrow();
+    await expect(decryptObject(encrypted, anotherKey)).rejects.toThrow('Failed to decrypt data. Invalid password or corrupted data.');
   });
 
   it("successfully decrypts an object without schema validation", async () => {
@@ -274,7 +274,22 @@ describe('decryptObject', () => {
     const data = { secret: 123 as any };
     const encrypted = await encryptObject(data, validKey);
     const schema = z.object({ secret: z.string() });
-    await expect(decryptObject(encrypted, validKey, schema)).rejects.toThrow();
+    await expect(decryptObject(encrypted, validKey, schema)).rejects.toThrow('Failed to decrypt data. Invalid password or corrupted data.');
+  });
+
+
+  it("throws an error for corrupted ciphertext data", async () => {
+    const data = { secret: "123" };
+    const encrypted = await encryptObject(data, validKey);
+
+    // Corrupt the ciphertext slightly
+    const parsed = JSON.parse(atob(encrypted));
+    if (parsed.ct && parsed.ct.length > 0) {
+      parsed.ct[0] ^= 1; // flip a bit
+    }
+    const corruptedBase64 = btoa(JSON.stringify(parsed));
+
+    await expect(decryptObject(corruptedBase64, validKey)).rejects.toThrow("Failed to decrypt data. Invalid password or corrupted data.");
   });
 });
 
