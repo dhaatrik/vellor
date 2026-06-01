@@ -223,3 +223,7 @@
 ## 2026-06-01 - Cover decryptObject error paths
 **Learning:** Testing crypto logic error paths provides confidence in security features by ensuring failure behaves as expected instead of leaking details.
 **Action:** Always test unhappy paths (e.g., corrupted ciphertexts, bad keys, or bad formats) for crypto helpers to ensure correct error messaging and safety mechanisms.
+
+## 2026-06-01 - Integration Testing UI Wizard Components
+**Learning:** For components relying on multiple steps with animation transitions (`AnimatePresence` in framer-motion), using `await waitFor()` on `screen.getByText` assertions accurately allows assertions to pass as elements become visible asynchronously without breaking tests compared to immediate UI assertions.
+**Action:** When testing multi-step React components using framer-motion, wrap intermediate state assertions in `waitFor` from `@testing-library/react`.
