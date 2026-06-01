@@ -116,3 +116,7 @@
 ## 2026-06-01 - Accessible Tab Navigation
 **Learning:** When adding ARIA attributes or custom HTML props to Framer Motion components (e.g., `motion.div`) in the Vellor project, be aware that existing `framer-motion` mocks in Vitest (like in `StudentDetailView.test.tsx`) may drop these attributes by only forwarding `className`, `onClick`, and `children`. You must update the mock to spread `...props` if your tests rely on querying these elements by their ARIA roles.
 **Action:** When working on accessibility for animated elements, check the component's test file to ensure the `framer-motion` mock properly spreads rest parameters (`...props`) so that ARIA roles and labels are passed to the DOM in test environments.
+
+## 2026-06-01 - Integration Testing UI Wizard Components
+**Learning:** For components relying on multiple steps with animation transitions (`AnimatePresence` in framer-motion), using `await waitFor()` on `screen.getByText` assertions accurately allows assertions to pass as elements become visible asynchronously without breaking tests compared to immediate UI assertions.
+**Action:** When testing multi-step React components using framer-motion, wrap intermediate state assertions in `waitFor` from `@testing-library/react`.
