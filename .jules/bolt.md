@@ -198,3 +198,6 @@
 ## 2026-05-30 - Direct string comparison for ISO 8601 sorting
 **Learning:** Using `String.prototype.localeCompare()` for sorting ISO 8601 date strings introduces unnecessary internationalization overhead, making it ~6x slower than direct comparison operators (`<` and `>`) in JavaScript.
 **Action:** Always sort ISO 8601 strings (which are lexicographically strictly monotonic with time) using direct `<` and `>` operators (e.g. `.sort((a, b) => b.date < a.date ? -1 : (b.date > a.date ? 1 : 0))`) instead of `.localeCompare()`.
+## 2026-05-30 - Eliminate N+1 store lookups in export loops
+**Learning:** Calling `getStudentById()` within an export loop iterations (e.g. `transactions.length` times) creates an O(N*M) time complexity bottleneck (or at best significant function call overhead) causing massive latency on large datasets.
+**Action:** When performing cross-entity lookups inside a loop, pre-compute a lookup `Map` (e.g. `new Map()` mapping IDs to entities) outside the loop to reduce lookups to O(1) and improve overall complexity.
