@@ -74,17 +74,6 @@ describe('PortalPage', () => {
     expect(screen.getByText('Invalid Link')).toBeInTheDocument();
   });
 
-  it('renders "Invalid Link" when data is valid base64 but invalid JSON', () => {
-    const invalidJsonData = btoa('invalid json');
-    render(
-      <MemoryRouter initialEntries={[`/portal?data=${invalidJsonData}`]}>
-        <PortalPage />
-      </MemoryRouter>
-    );
-
-    expect(screen.getByText('Invalid Link')).toBeInTheDocument();
-  });
-
   it('renders portal content correctly with valid data', () => {
     render(
       <MemoryRouter initialEntries={[`/portal?data=${encodedData}`]}>
