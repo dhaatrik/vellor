@@ -198,3 +198,6 @@
 ## 2026-05-30 - Direct string comparison for ISO 8601 sorting
 **Learning:** Using `String.prototype.localeCompare()` for sorting ISO 8601 date strings introduces unnecessary internationalization overhead, making it ~6x slower than direct comparison operators (`<` and `>`) in JavaScript.
 **Action:** Always sort ISO 8601 strings (which are lexicographically strictly monotonic with time) using direct `<` and `>` operators (e.g. `.sort((a, b) => b.date < a.date ? -1 : (b.date > a.date ? 1 : 0))`) instead of `.localeCompare()`.
+## 2026-06-01 - Test Coverage for Data Normalization Logic
+**Learning:** Core form input data sanitization paths (such as removing non-digit characters in `PhoneInput.tsx`) represent the application edge, yet are often excluded from happy path interaction testing. Lacking testing for empty input objects and string type mismatches leads to untracked edge case regressions.
+**Action:** When adding or verifying UI component logic, always include test assertions covering empty value propagation (e.g. `value: ''`), character removal routines (Regex replace verification), and max-length boundary limits for numeric/formatted inputs.
