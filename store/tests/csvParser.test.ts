@@ -136,5 +136,19 @@ describe('csvParser', () => {
             expect(result.errors[0]).toEqual({ row: 3, error: 'Missing first name' });
             expect(result.entities).toHaveLength(2);
         });
+
+        it('should catch unexpected errors without crashing', () => {
+            const rows = [
+                { 'First Name': 'John', 'Email': 'john@example.com' },
+                null as unknown as Record<string, string>, // This will cause a TypeError
+                { 'First Name': 'Bob', 'Email': 'bob@example.com' }
+            ];
+            const result = bulkMapCSVRows(rows, mapping);
+            expect(result.successCount).toBe(2);
+            expect(result.errorCount).toBe(1);
+            expect(result.errors[0].row).toBe(3);
+            expect(result.errors[0].error).toMatch(/Cannot read properties of null|null has no properties|Cannot read property/);
+            expect(result.entities).toHaveLength(2);
+        });
     });
 });
