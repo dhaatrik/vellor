@@ -154,6 +154,19 @@ describe('createDataManagementSlice', () => {
   });
 
   describe('importData', () => {
+
+    it('shows error toast when importing malformed JSON', async () => {
+      const addToastMock = useStore.getState().addToast;
+      const malformedJson = "{ invalid: 'json' }";
+      const mockFile = new File([malformedJson], 'backup.json', { type: 'application/json' });
+
+      await useStore.getState().importData(mockFile);
+
+      expect(addToastMock).toHaveBeenCalledWith(
+        expect.stringContaining('Import failed:'),
+        'error'
+      );
+    });
     it('shows error toast on incorrect password during import', async () => {
       const addToastMock = useStore.getState().addToast;
 
