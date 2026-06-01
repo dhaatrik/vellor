@@ -90,15 +90,55 @@ describe('createDataManagementSlice', () => {
       expect(addToastMock).toHaveBeenCalledWith('Data exported successfully!', 'success');
     });
 
-    it('catches errors and shows error toast', () => {
+    it('catches errors and shows error toast', async () => {
       const addToastMock = useStore.getState().addToast;
 
-      // Stub JSON.stringify to throw an error
-      vi.spyOn(JSON, 'stringify').mockImplementationOnce(() => {
-        throw new Error('Mock JSON Stringify Error');
+      // Force a failure in the URL creation (simulating file system / download failure)
+      global.URL.createObjectURL = vi.fn().mockImplementationOnce(() => {
+        throw new Error('Mock URL.createObjectURL Error');
       });
 
-      useStore.getState().exportData();
+      await useStore.getState().exportData();
+
+      expect(addToastMock).toHaveBeenCalledWith('Failed to export data.', 'error');
+    });
+
+    it('successfully creates an encrypted export Blob when password is provided', async () => {
+      const addToastMock = useStore.getState().addToast;
+      const generateSaltSpy = vi.spyOn(crypto, 'generateSalt').mockReturnValue(new Uint8Array([1, 2, 3]));
+      const deriveKeySpy = vi.spyOn(crypto, 'deriveKey').mockResolvedValue('mock-key' as any);
+      const encryptObjectSpy = vi.spyOn(crypto, 'encryptObject').mockResolvedValue('encrypted-data');
+
+      await useStore.getState().exportData('my-password');
+
+      expect(generateSaltSpy).toHaveBeenCalled();
+      expect(deriveKeySpy).toHaveBeenCalledWith('my-password', expect.any(Uint8Array));
+      expect(encryptObjectSpy).toHaveBeenCalled();
+
+      // Verify Blob and URL creation
+      expect(createObjectURLMock).toHaveBeenCalled();
+      const blobArg = createObjectURLMock.mock.calls[0][0];
+      expect(blobArg).toBeInstanceOf(Blob);
+
+      // We need to parse the JSON string passed to Blob to check its structure
+      const blobText = await blobArg.text();
+      const parsedPayload = JSON.parse(blobText);
+
+      expect(parsedPayload.__vellor_encrypted).toBe(true);
+      expect(parsedPayload.salt).toEqual([1, 2, 3]);
+      expect(parsedPayload.data).toBe('encrypted-data');
+
+      // Verify toast
+      expect(addToastMock).toHaveBeenCalledWith('Data exported successfully!', 'success');
+    });
+
+    it('catches errors during encrypted export', async () => {
+      const addToastMock = useStore.getState().addToast;
+
+      // Mock deriveKey to throw
+      vi.spyOn(crypto, 'deriveKey').mockRejectedValueOnce(new Error('Crypto Error'));
+
+      await useStore.getState().exportData('my-password');
 
       expect(addToastMock).toHaveBeenCalledWith('Failed to export data.', 'error');
     });
@@ -114,6 +154,19 @@ describe('createDataManagementSlice', () => {
   });
 
   describe('importData', () => {
+
+    it('shows error toast when importing malformed JSON', async () => {
+      const addToastMock = useStore.getState().addToast;
+      const malformedJson = "{ invalid: 'json' }";
+      const mockFile = new File([malformedJson], 'backup.json', { type: 'application/json' });
+
+      await useStore.getState().importData(mockFile);
+
+      expect(addToastMock).toHaveBeenCalledWith(
+        expect.stringContaining('Import failed:'),
+        'error'
+      );
+    });
     it('shows error toast on incorrect password during import', async () => {
       const addToastMock = useStore.getState().addToast;
 

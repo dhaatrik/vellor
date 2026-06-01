@@ -281,10 +281,17 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
             return str;
         };
 
+        // ⚡ Bolt Performance: Pre-compute student map to avoid N+1 query inside loop
+        const students = state.students || [];
+        const studentMap = new Map();
+        for (let i = 0, len = students.length; i < len; i++) {
+            studentMap.set(students[i].id, students[i]);
+        }
+
         const rows = [header.join(',')];
         for (let i = 0, len = transactions.length; i < len; i++) {
             const t = transactions[i];
-            const student = get().getStudentById(t.studentId);
+            const student = studentMap.get(t.studentId);
             const studentName = student ? `${student.firstName} ${student.lastName}` : 'Unknown Student';
             
             rows.push(
