@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
 import { importKeyFromBase64, exportKeyToBase64, generateSalt, decryptObject, encryptObject, jsonReviver, deriveKey } from '../../src/crypto';
 import { z } from "zod";
 
@@ -27,6 +27,32 @@ describe('generateSalt', () => {
 
     // They shouldn't be exactly the same
     expect(salt1).not.toEqual(salt2);
+  });
+
+  it('calls crypto.getRandomValues with a 16-byte Uint8Array', () => {
+    const originalGetRandomValues = crypto.getRandomValues.bind(crypto);
+    const spy = vi.fn(originalGetRandomValues);
+
+    // Replace temporarily
+    Object.defineProperty(globalThis.crypto, 'getRandomValues', {
+      value: spy,
+      configurable: true,
+      writable: true,
+    });
+
+    generateSalt();
+
+    expect(spy).toHaveBeenCalledTimes(1);
+    const arg = spy.mock.calls[0][0];
+    expect(arg).toBeInstanceOf(Uint8Array);
+    expect((arg as Uint8Array).length).toBe(16);
+
+    // Restore original
+    Object.defineProperty(globalThis.crypto, 'getRandomValues', {
+      value: originalGetRandomValues,
+      configurable: true,
+      writable: true,
+    });
   });
 });
 
