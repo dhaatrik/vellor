@@ -227,3 +227,7 @@
 ## 2026-06-01 - Integration Testing UI Wizard Components
 **Learning:** For components relying on multiple steps with animation transitions (`AnimatePresence` in framer-motion), using `await waitFor()` on `screen.getByText` assertions accurately allows assertions to pass as elements become visible asynchronously without breaking tests compared to immediate UI assertions.
 **Action:** When testing multi-step React components using framer-motion, wrap intermediate state assertions in `waitFor` from `@testing-library/react`.
+
+## 2026-06-01 - Test Coverage for Data Normalization Logic
+**Learning:** Core form input data sanitization paths (such as removing non-digit characters in `PhoneInput.tsx`) represent the application edge, yet are often excluded from happy path interaction testing. Lacking testing for empty input objects and string type mismatches leads to untracked edge case regressions.
+**Action:** When adding or verifying UI component logic, always include test assertions covering empty value propagation (e.g. `value: ''`), character removal routines (Regex replace verification), and max-length boundary limits for numeric/formatted inputs.
