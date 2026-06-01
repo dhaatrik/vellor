@@ -200,6 +200,10 @@
 **Learning:** Using `String.prototype.localeCompare()` for sorting ISO 8601 date strings introduces unnecessary internationalization overhead, making it ~6x slower than direct comparison operators (`<` and `>`) in JavaScript.
 **Action:** Always sort ISO 8601 strings (which are lexicographically strictly monotonic with time) using direct `<` and `>` operators (e.g. `.sort((a, b) => b.date < a.date ? -1 : (b.date > a.date ? 1 : 0))`) instead of `.localeCompare()`.
 
+## 2026-05-30 - Eliminate N+1 store lookups in export loops
+**Learning:** Calling `getStudentById()` within an export loop iterations (e.g. `transactions.length` times) creates an O(N*M) time complexity bottleneck (or at best significant function call overhead) causing massive latency on large datasets.
+**Action:** When performing cross-entity lookups inside a loop, pre-compute a lookup `Map` (e.g. `new Map()` mapping IDs to entities) outside the loop to reduce lookups to O(1) and improve overall complexity.
+
 ## 2026-05-30 - Redundant Dictionary Lookups After Array Searches
 **Learning:** In scenarios where a full object needs to be accessed based on a string property (like a name), iterating over an array to find the object's ID only to immediately use that ID for an O(1) dictionary lookup is an unnecessary performance overhead.
 **Action:** When manually filtering or searching through an array, directly retain and use the object reference (e.g., `student = s`) found in the iteration rather than extracting the ID to fetch it again later.
@@ -212,6 +216,6 @@
 **Learning:** In order to achieve 100% branch coverage for `crypto.ts`, all logical execution paths inside `try/catch` block or conditionally checked parameters such as `schema ? schema.parse(...) : ...` must be explicitly verified.
 **Action:** When working on missing test coverage, use the coverage output tool (like Vitest's coverage-final.json) to precisely identify missing branch evaluations, and supply inputs to test files that hit edge cases.
 
-## 2025-06-01 - Vitest Testing for PhysicsSlider
+## 2026-06-01 - Vitest Testing for PhysicsSlider
 **Learning:** Testing components utilizing `requestAnimationFrame` hooks like `useSpringVelocity` can be problematic in JSDOM due to lacking robust frame implementations. Mocking DOM geometry methods like `getBoundingClientRect` is critical to testing drag events because JSDOM nodes do not render and natively yield sizing zero properties.
 **Action:** Mock complex animation hooks with simpler behavior during tests to verify core component behaviors without flaky animation timeouts. Ensure layout properties (`getBoundingClientRect`) are thoroughly mocked when testing pointer interaction to enable accurate geometric calculations.
