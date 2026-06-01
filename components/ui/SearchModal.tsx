@@ -7,7 +7,6 @@ import { PaymentStatus } from '../../types';
 export const SearchModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
   const [query, setQuery] = useState('');
   const students = useStore(s => s.students);
-  const getStudentById = useStore(s => s.getStudentById);
   const addTransaction = useStore(s => s.addTransaction);
   const exportTransactionsCSV = useStore(s => s.exportTransactionsCSV);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -69,19 +68,17 @@ export const SearchModal: React.FC<{ isOpen: boolean; onClose: () => void }> = (
               const studentName = args.slice(nameStart + 1, nameEnd);
 
               // Find student ID first (to use O(1) lookup as required)
-              let studentId = '';
+              let student = null;
               const lowerName = studentName.toLowerCase();
               for (let i = 0, len = students.length; i < len; i++) {
                 const s = students[i];
                 if ((s.firstName + ' ' + s.lastName).toLowerCase() === lowerName) {
-                  studentId = s.id;
+                  student = s;
                   break;
                 }
               }
 
-              if (studentId) {
-                const student = getStudentById(studentId);
-                if (student) {
+              if (student) {
                   const shareText = `Student Portal for ${student.firstName} ${student.lastName}`;
                   navigator.clipboard.writeText(shareText).then(() => {
                     // Need visual feedback per memory
@@ -91,7 +88,6 @@ export const SearchModal: React.FC<{ isOpen: boolean; onClose: () => void }> = (
                   });
                   setQuery('');
                   onClose();
-                }
               }
             }
           }
@@ -136,19 +132,19 @@ export const SearchModal: React.FC<{ isOpen: boolean; onClose: () => void }> = (
                 i = nextSpace;
             }
 
-            let studentId = '';
+            let student = null;
             const lowerName = studentName.toLowerCase();
             for (let i = 0, len = students.length; i < len; i++) {
               const s = students[i];
               if ((s.firstName + ' ' + s.lastName).toLowerCase() === lowerName) {
-                studentId = s.id;
+                student = s;
                 break;
               }
             }
 
-            if (studentId) {
+            if (student) {
                 addTransaction({
-                    studentId,
+                    studentId: student.id,
 
                     date: new Date().toISOString(),
                     lessonFee: parseFloat(feeStr) || 0,
