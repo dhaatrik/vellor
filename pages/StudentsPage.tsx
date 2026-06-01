@@ -209,10 +209,16 @@ export const StudentsPage: React.FC = () => {
       const unpaidStudentIds = Object.keys(firstUnpaidMap);
       const toExportStudents = [];
       const toExportTransactions = [];
+
+      const studentMap: Record<string, Student> = Object.create(null);
+      for (let i = 0; i < students.length; i++) {
+          studentMap[students[i].id] = students[i];
+      }
+
       for (let i = 0; i < unpaidStudentIds.length; i++) {
           const studentId = unpaidStudentIds[i];
           const t = firstUnpaidMap[studentId];
-          const student = getStudentById(studentId);
+          const student = studentMap[studentId];
           if (student) {
               toExportStudents.push(student);
               toExportTransactions.push(t);
