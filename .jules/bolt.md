@@ -198,3 +198,6 @@
 ## 2026-05-30 - Direct string comparison for ISO 8601 sorting
 **Learning:** Using `String.prototype.localeCompare()` for sorting ISO 8601 date strings introduces unnecessary internationalization overhead, making it ~6x slower than direct comparison operators (`<` and `>`) in JavaScript.
 **Action:** Always sort ISO 8601 strings (which are lexicographically strictly monotonic with time) using direct `<` and `>` operators (e.g. `.sort((a, b) => b.date < a.date ? -1 : (b.date > a.date ? 1 : 0))`) instead of `.localeCompare()`.
+## 2025-02-23 - Integration Testing UI Wizard Components
+**Learning:** For components relying on multiple steps with animation transitions (`AnimatePresence` in framer-motion), using `await waitFor()` on `screen.getByText` assertions accurately allows assertions to pass as elements become visible asynchronously without breaking tests compared to immediate UI assertions.
+**Action:** When testing multi-step React components using framer-motion, wrap intermediate state assertions in `waitFor` from `@testing-library/react`.
