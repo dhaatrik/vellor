@@ -3,7 +3,7 @@ import { AppState, TransactionSlice } from './types';
 import { Transaction, TransactionFormData, PaymentStatus } from '../types';
 import { generateId } from '../helpers';
 import { POINTS_ALLOCATION } from '../constants';
-import { sanitizeString, determinePaymentStatus } from '../helpers';
+import { sanitizeString, determinePaymentStatus, calculateTransactionDue } from '../helpers';
 
 export const createTransactionSlice: StateCreator<AppState, [], [], TransactionSlice> = (set, get) => ({
   transactions: [],
@@ -41,22 +41,8 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
     if(student && (status === PaymentStatus.Paid || status === PaymentStatus.Overpaid)){
         // ⚡ Bolt Performance: Consolidate multiple passes (.filter, .some, .reduce) over the transactions array
         // into a single O(N) for loop to reduce intermediate allocations and iteration overhead.
-        const allTransactions = get().transactions;
-        let wasOverdue = false;
-        let totalDueForStudent = 0;
-
-        for (let i = 0; i < allTransactions.length; i++) {
-             const t = allTransactions[i];
-             if (t.studentId === newTransaction.studentId && t.id !== newTransaction.id) {
-                 if (t.status === PaymentStatus.Due) {
-                     wasOverdue = true;
-                     totalDueForStudent += t.lessonFee;
-                 } else if (t.status === PaymentStatus.PartiallyPaid) {
-                     wasOverdue = true;
-                     totalDueForStudent += (t.lessonFee - t.amountPaid);
-                 }
-             }
-        }
+        let totalDueForStudent = student.balance || 0;
+        let wasOverdue = totalDueForStudent > 0;
 
         if(wasOverdue){
             if (totalDueForStudent - newTransaction.amountPaid <= 0) {
@@ -65,6 +51,12 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
         }
     }
     
+    // Update cached student balance
+    if (student) {
+        const transactionDue = calculateTransactionDue(newTransaction.status, newTransaction.lessonFee, newTransaction.amountPaid);
+        get().updateStudent(student.id, { balance: (student.balance || 0) + transactionDue });
+    }
+
     get().checkAndAwardAchievements();
     return newTransaction;
   },
@@ -112,37 +104,35 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
           get().addPoints(pointsToAdd, `Logged bulk payments on time`);
         }
 
-        const allTransactions = get().transactions;
-        // Batch process overdue checks for performance instead of per student
+        // Batch process overdue checks and balance updates
+        const studentBalances = new Map<string, number>();
+
         for (let j = 0; j < newTransactions.length; j++) {
           const newTransaction = newTransactions[j];
-          if (newTransaction.status === PaymentStatus.Paid || newTransaction.status === PaymentStatus.Overpaid) {
-            const student = get().getStudentById(newTransaction.studentId);
-            if (student) {
-              let wasOverdue = false;
-              let totalDueForStudent = 0;
+          const student = get().getStudentById(newTransaction.studentId);
 
-              for (let i = 0; i < allTransactions.length; i++) {
-                const t = allTransactions[i];
-                if (t.studentId === newTransaction.studentId && t.id !== newTransaction.id) {
-                  if (t.status === PaymentStatus.Due) {
-                    wasOverdue = true;
-                    totalDueForStudent += t.lessonFee;
-                  } else if (t.status === PaymentStatus.PartiallyPaid) {
-                    wasOverdue = true;
-                    totalDueForStudent += (t.lessonFee - t.amountPaid);
-                  }
-                }
-              }
+          if (student) {
+            // Read either from the running total or the student record
+            let currentBalance = studentBalances.has(student.id) ? studentBalances.get(student.id)! : (student.balance || 0);
 
+            if (newTransaction.status === PaymentStatus.Paid || newTransaction.status === PaymentStatus.Overpaid) {
+              let wasOverdue = currentBalance > 0;
               if (wasOverdue) {
-                if (totalDueForStudent - newTransaction.amountPaid <= 0) {
+                if (currentBalance - newTransaction.amountPaid <= 0) {
                   studentsOverdueCleared++;
                 }
               }
             }
+
+            const transactionDue = calculateTransactionDue(newTransaction.status, newTransaction.lessonFee, newTransaction.amountPaid);
+            studentBalances.set(student.id, currentBalance + transactionDue);
           }
         }
+
+        // Apply balance updates
+        studentBalances.forEach((newBalance, studentId) => {
+           get().updateStudent(studentId, { balance: newBalance });
+        });
 
         if (studentsOverdueCleared > 0) {
           get().addPoints(POINTS_ALLOCATION.CLEAR_OVERDUE * studentsOverdueCleared, `Cleared overdue payments for ${studentsOverdueCleared} students`);
@@ -196,6 +186,15 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
                  setTimeout(() => get().addPoints(POINTS_ALLOCATION.CLEAR_OVERDUE, `Cleared overdue status for transaction ${updatedTransaction?.id}`), 0);
             }
 
+            if (student) {
+                const oldDue = calculateTransactionDue(t.status, t.lessonFee, t.amountPaid);
+                const newDue = calculateTransactionDue(updatedTransaction.status, updatedTransaction.lessonFee, updatedTransaction.amountPaid);
+                const balanceDiff = newDue - oldDue;
+                if (balanceDiff !== 0) {
+                    setTimeout(() => get().updateStudent(student.id, { balance: (student.balance || 0) + balanceDiff }), 0);
+                }
+            }
+
             newTransactions[i] = updatedTransaction;
             return { transactions: newTransactions };
         }
@@ -211,6 +210,17 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
   },
 
   deleteTransaction: (transactionId) => {
+    const transactionToDelete = get().getTransactionById(transactionId);
+    if (transactionToDelete) {
+        const student = get().getStudentById(transactionToDelete.studentId);
+        if (student) {
+            const dueToRemove = calculateTransactionDue(transactionToDelete.status, transactionToDelete.lessonFee, transactionToDelete.amountPaid);
+            if (dueToRemove > 0) {
+                get().updateStudent(student.id, { balance: (student.balance || 0) - dueToRemove });
+            }
+        }
+    }
+
     set(state => {
       // ⚡ Bolt Performance: Use native .filter() which is internally optimized in modern JS engines
       // and significantly more readable than manual slice+push loops for array removal

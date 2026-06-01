@@ -180,3 +180,15 @@ export const determinePaymentStatus = (amountPaid: number, lessonFee: number, cu
   }
   return PaymentStatus.Due;
 };
+
+/**
+ * Calculates the total due amount from a transaction based on its status.
+ */
+export const calculateTransactionDue = (status: PaymentStatus, lessonFee: number, amountPaid: number): number => {
+    if (status === PaymentStatus.Due) {
+        return lessonFee;
+    } else if (status === PaymentStatus.PartiallyPaid) {
+        return lessonFee - amountPaid;
+    }
+    return 0;
+};
