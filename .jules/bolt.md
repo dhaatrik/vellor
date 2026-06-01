@@ -198,3 +198,6 @@
 ## 2026-05-30 - Direct string comparison for ISO 8601 sorting
 **Learning:** Using `String.prototype.localeCompare()` for sorting ISO 8601 date strings introduces unnecessary internationalization overhead, making it ~6x slower than direct comparison operators (`<` and `>`) in JavaScript.
 **Action:** Always sort ISO 8601 strings (which are lexicographically strictly monotonic with time) using direct `<` and `>` operators (e.g. `.sort((a, b) => b.date < a.date ? -1 : (b.date > a.date ? 1 : 0))`) instead of `.localeCompare()`.
+## 2024-05-18 - Cover decryptObject error paths
+**Learning:** Testing crypto logic error paths provides confidence in security features by ensuring failure behaves as expected instead of leaking details.
+**Action:** Always test unhappy paths (e.g., corrupted ciphertexts, bad keys, or bad formats) for crypto helpers to ensure correct error messaging and safety mechanisms.
