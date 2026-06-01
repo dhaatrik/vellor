@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AppLayout } from '../AppLayout';
+import { Theme } from "../../../types";
 import { useStore } from '../../../store';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
@@ -26,8 +27,8 @@ const mockLogout = vi.fn();
 
 beforeEach(() => {
   useStore.setState({
-    settings: { userName: 'Test User', theme: 'light', brandColor: '#3b82f6', useSystemTheme: false, currencySymbol: '$', isOffline: false, hasCompletedOnboarding: true, autoBackup: false, developerMode: false },
-    gamification: { level: 1, levelName: 'Novice Tutor', points: 50, streak: 5 },
+    settings: { userName: 'Test User', theme: Theme.Light, brandColor: '#3b82f6', currencySymbol: '$', hasCompletedOnboarding: true },
+    gamification: { level: 1, levelName: 'Novice Tutor', points: 50, streak: 5, lastActiveDate: null },
     achievements: [],
     logout: mockLogout,
     addToast: vi.fn(),
