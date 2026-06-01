@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
 import { importKeyFromBase64, exportKeyToBase64, generateSalt, decryptObject, encryptObject, jsonReviver, deriveKey } from '../../src/crypto';
 import { z } from "zod";
 
@@ -27,6 +27,32 @@ describe('generateSalt', () => {
 
     // They shouldn't be exactly the same
     expect(salt1).not.toEqual(salt2);
+  });
+
+  it('calls crypto.getRandomValues with a 16-byte Uint8Array', () => {
+    const originalGetRandomValues = crypto.getRandomValues.bind(crypto);
+    const spy = vi.fn(originalGetRandomValues);
+
+    // Replace temporarily
+    Object.defineProperty(globalThis.crypto, 'getRandomValues', {
+      value: spy,
+      configurable: true,
+      writable: true,
+    });
+
+    generateSalt();
+
+    expect(spy).toHaveBeenCalledTimes(1);
+    const arg = spy.mock.calls[0][0];
+    expect(arg).toBeInstanceOf(Uint8Array);
+    expect((arg as Uint8Array).length).toBe(16);
+
+    // Restore original
+    Object.defineProperty(globalThis.crypto, 'getRandomValues', {
+      value: originalGetRandomValues,
+      configurable: true,
+      writable: true,
+    });
   });
 });
 
@@ -226,8 +252,16 @@ describe('decryptObject', () => {
     const encrypted = await encryptObject(data, validKey);
 
     // Decrypting with anotherKey should fail
-    await expect(decryptObject(encrypted, anotherKey)).rejects.toThrow();
+    await expect(decryptObject(encrypted, anotherKey)).rejects.toThrow('Failed to decrypt data. Invalid password or corrupted data.');
   });
+
+  it("successfully decrypts an object without schema validation", async () => {
+    const data = { secret: "message" };
+    const encrypted = await encryptObject(data, validKey);
+    const decrypted = await decryptObject(encrypted, validKey);
+    expect(decrypted).toEqual(data);
+  });
+
   it("successfully decrypts an object and applies schema validation", async () => {
     const data = { secret: "message" };
     const encrypted = await encryptObject(data, validKey);
@@ -240,7 +274,22 @@ describe('decryptObject', () => {
     const data = { secret: 123 as any };
     const encrypted = await encryptObject(data, validKey);
     const schema = z.object({ secret: z.string() });
-    await expect(decryptObject(encrypted, validKey, schema)).rejects.toThrow();
+    await expect(decryptObject(encrypted, validKey, schema)).rejects.toThrow('Failed to decrypt data. Invalid password or corrupted data.');
+  });
+
+
+  it("throws an error for corrupted ciphertext data", async () => {
+    const data = { secret: "123" };
+    const encrypted = await encryptObject(data, validKey);
+
+    // Corrupt the ciphertext slightly
+    const parsed = JSON.parse(atob(encrypted));
+    if (parsed.ct && parsed.ct.length > 0) {
+      parsed.ct[0] ^= 1; // flip a bit
+    }
+    const corruptedBase64 = btoa(JSON.stringify(parsed));
+
+    await expect(decryptObject(corruptedBase64, validKey)).rejects.toThrow("Failed to decrypt data. Invalid password or corrupted data.");
   });
 });
 
@@ -267,6 +316,22 @@ describe('deriveKey', () => {
     expect(key.usages).toContain('encrypt');
     expect(key.usages).toContain('decrypt');
     expect(key.extractable).toBe(true);
+  });
+
+
+  it('successfully derives a key with an empty password', async () => {
+    const salt = generateSalt();
+    const key = await deriveKey('', salt);
+    expect(key).toBeDefined();
+    expect(key.type).toBe('secret');
+  });
+
+  it('successfully derives a key with an empty salt', async () => {
+    const password = 'test-password';
+    const salt = new Uint8Array(0);
+    const key = await deriveKey(password, salt);
+    expect(key).toBeDefined();
+    expect(key.type).toBe('secret');
   });
 
   it('derives the same key for the same password and salt', async () => {

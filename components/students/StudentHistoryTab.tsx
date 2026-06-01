@@ -1,5 +1,5 @@
-import React from 'react';
-import { Transaction } from '../../types';
+import React, { useState, useMemo } from 'react';
+import { Transaction, PaymentStatus } from '../../types';
 import { Button, Card, Icon } from '../ui';
 import { formatCurrency, formatDate } from '../../helpers';
 import { TransactionStatusBadge } from '../transactions/TransactionStatusBadge';
@@ -21,13 +21,43 @@ export const StudentHistoryTab: React.FC<StudentHistoryTabProps> = ({
   studentId,
   onLogPayment,
 }) => {
+  const [filter, setFilter] = useState<'all' | 'paid' | 'due' | 'partially-paid'>('all');
+
+  const filteredTransactions = useMemo(() => {
+    return studentTransactions.filter(t => {
+      if (filter === 'all') return true;
+      if (filter === 'paid') return t.status === PaymentStatus.Paid;
+      if (filter === 'due') return t.status === PaymentStatus.Due;
+      if (filter === 'partially-paid') return t.status === PaymentStatus.PartiallyPaid;
+      return true;
+    });
+  }, [studentTransactions, filter]);
+
   return (
     <Card className="border-gray-100 dark:border-white/5">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h3 className="text-lg font-display font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-          <Icon iconName="clock" className="w-5 h-5 text-gray-400" />
-          History
-        </h3>
+        <div className="flex items-center justify-between w-full sm:w-auto gap-4">
+          <h3 className="text-lg font-display font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+            <Icon iconName="clock" className="w-5 h-5 text-gray-400" />
+            History
+          </h3>
+
+          {studentTransactions.length > 0 && (
+            <div className="flex items-center gap-2">
+              <select
+                aria-label="Filter transactions"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value as any)}
+                className="text-sm bg-white dark:bg-primary-light border border-gray-200 dark:border-white/10 rounded-lg px-2 py-1.5 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-accent/50"
+              >
+                <option value="all">All</option>
+                <option value="paid">Paid</option>
+                <option value="due">Due</option>
+                <option value="partially-paid">Partially Paid</option>
+              </select>
+            </div>
+          )}
+        </div>
         <div className="flex flex-wrap gap-4 bg-gray-50 dark:bg-primary/50 p-3 rounded-2xl w-full sm:w-auto">
           <div>
             <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-0.5">
@@ -53,9 +83,9 @@ export const StudentHistoryTab: React.FC<StudentHistoryTabProps> = ({
         </div>
       </div>
 
-      {studentTransactions.length > 0 ? (
+      {filteredTransactions.length > 0 ? (
         <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-          {studentTransactions.map((t) => (
+          {filteredTransactions.map((t) => (
             <div
               key={t.id}
               className="p-4 bg-gray-50 dark:bg-primary/30 rounded-2xl border border-gray-100 dark:border-white/5 hover:border-gray-200 dark:hover:border-white/10 transition-colors"
@@ -109,16 +139,18 @@ export const StudentHistoryTab: React.FC<StudentHistoryTabProps> = ({
             <Icon iconName="document-text" className="w-8 h-8 text-gray-400" />
           </div>
           <p className="text-gray-500 dark:text-gray-400 font-medium">
-            No transactions logged yet.
+            {filter === 'all' ? 'No transactions logged yet.' : 'No transactions found for this filter.'}
           </p>
-          <Button
-            onClick={() => onLogPayment(studentId)}
-            variant="ghost"
-            size="sm"
-            className="mt-4 text-accent"
-          >
-            Log their first lesson
-          </Button>
+          {filter === 'all' && (
+            <Button
+              onClick={() => onLogPayment(studentId)}
+              variant="ghost"
+              size="sm"
+              className="mt-4 text-accent"
+            >
+              Log their first lesson
+            </Button>
+          )}
         </div>
       )}
     </Card>

@@ -1,7 +1,17 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ProgressBar } from '../../components/ui/ProgressBar';
+
+vi.mock('framer-motion', () => ({
+  motion: {
+    div: ({ children, animate, initial, transition, ...props }: any) => (
+      <div style={animate} {...props}>
+        {children}
+      </div>
+    ),
+  },
+}));
 
 describe('ProgressBar component', () => {
   it('renders correctly with default props', () => {
@@ -36,6 +46,7 @@ describe('ProgressBar component', () => {
     render(<ProgressBar {...props} />);
     const progressbar = screen.getByRole('progressbar');
     expect(progressbar).toHaveAttribute('aria-valuenow', '0');
+    expect(progressbar).toHaveStyle({ width: '0%' });
   });
 
   it('clamps value > 100 to 100', () => {
@@ -43,6 +54,21 @@ describe('ProgressBar component', () => {
     render(<ProgressBar {...props} />);
     const progressbar = screen.getByRole('progressbar');
     expect(progressbar).toHaveAttribute('aria-valuenow', '100');
+    expect(progressbar).toHaveStyle({ width: '100%' });
+  });
+
+  it('renders width 0% for exactly 0 progress', () => {
+    render(<ProgressBar progress={0} />);
+    const progressbar = screen.getByRole('progressbar');
+    expect(progressbar).toHaveAttribute('aria-valuenow', '0');
+    expect(progressbar).toHaveStyle({ width: '0%' });
+  });
+
+  it('renders width 100% for exactly 100 progress', () => {
+    render(<ProgressBar progress={100} />);
+    const progressbar = screen.getByRole('progressbar');
+    expect(progressbar).toHaveAttribute('aria-valuenow', '100');
+    expect(progressbar).toHaveStyle({ width: '100%' });
   });
 
   it('applies custom colorClass', () => {

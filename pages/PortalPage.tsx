@@ -1,11 +1,31 @@
 import React, { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { z } from 'zod';
 import { Card, Icon } from '../components/ui';
 import { formatCurrency, formatDate } from '../helpers';
 import { TransactionStatusBadge } from '../components/transactions/TransactionStatusBadge';
 import { jsonReviver } from '../src/crypto';
-import { Transaction } from '../types';
+import { PaymentStatus } from '../types';
+const portalDataSchema = z.object({
+  tutorName: z.string(),
+  currencySymbol: z.string(),
+  student: z.object({
+    firstName: z.string(),
+    lastName: z.string(),
+    subjects: z.array(z.string()),
+  }),
+  transactions: z.array(z.object({
+    id: z.string(),
+    date: z.union([z.string(), z.date()]).transform(val => typeof val === 'string' ? val : val.toISOString()),
+    lessonFee: z.number(),
+    amountPaid: z.number(),
+    status: z.nativeEnum(PaymentStatus),
+    grade: z.string().optional(),
+    progressRemark: z.string().optional(),
+    attendance: z.string().optional(),
+  }))
+});
 
 const containerVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -41,7 +61,8 @@ export const PortalPage: React.FC = () => {
       // or exposed to backend vulnerabilities. Using `btoa`/`atob` here provides a stateless,
       // offline-friendly mechanism for sharing snapshots without needing a centralized database.
       const decodedStr = decodeURIComponent(atob(dataParam));
-      return JSON.parse(decodedStr, jsonReviver);
+      const parsedJson = JSON.parse(decodedStr, jsonReviver);
+      return portalDataSchema.parse(parsedJson);
     } catch {
       return null;
     }
@@ -65,10 +86,7 @@ export const PortalPage: React.FC = () => {
     );
   }
 
-  const { tutorName, currencySymbol, student: rawStudent, transactions: rawTransactions } = parsedData;
-
-  const student = typeof rawStudent === 'object' && rawStudent !== null ? rawStudent : {};
-  const transactions = Array.isArray(rawTransactions) ? rawTransactions : [];
+  const { tutorName, currencySymbol, student, transactions } = parsedData;
 
   const { totalOwed, totalLessons, presentCount } = useMemo(() => {
     let owed = 0;
@@ -77,13 +95,13 @@ export const PortalPage: React.FC = () => {
 
     for (let i = 0; i < total; i++) {
       const t = transactions[i];
-      if (t?.status === 'Due') {
+      if (t.status === 'Due') {
         owed += (t.lessonFee || 0);
-      } else if (t?.status === 'Partially Paid') {
+      } else if (t.status === 'Partially Paid') {
         owed += ((t.lessonFee || 0) - (t.amountPaid || 0));
       }
       
-      if (t?.attendance === 'Present') {
+      if (t.attendance === 'Present') {
         present++;
       }
     }
@@ -202,7 +220,7 @@ export const PortalPage: React.FC = () => {
              
              {transactions.length > 0 ? (
                <div className="space-y-6 relative">
-                  {transactions.slice(0, 10).map((t: Transaction, idx: number) => (
+                  {transactions.slice(0, 10).map((t, idx) => (
                      <motion.div 
                         key={t.id} 
                         initial={{ opacity: 0, x: -10 }}

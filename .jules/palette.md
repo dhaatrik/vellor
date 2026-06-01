@@ -116,3 +116,6 @@
 ## 2026-06-01 - Accessible Tab Navigation
 **Learning:** When adding ARIA attributes or custom HTML props to Framer Motion components (e.g., `motion.div`) in the Vellor project, be aware that existing `framer-motion` mocks in Vitest (like in `StudentDetailView.test.tsx`) may drop these attributes by only forwarding `className`, `onClick`, and `children`. You must update the mock to spread `...props` if your tests rely on querying these elements by their ARIA roles.
 **Action:** When working on accessibility for animated elements, check the component's test file to ensure the `framer-motion` mock properly spreads rest parameters (`...props`) so that ARIA roles and labels are passed to the DOM in test environments.
+## 2026-06-01 - 100% Branch Coverage for crypto.ts
+**Learning:** In order to achieve 100% branch coverage for `crypto.ts`, all logical execution paths inside `try/catch` block or conditionally checked parameters such as `schema ? schema.parse(...) : ...` must be explicitly verified.
+**Action:** When working on missing test coverage, use the coverage output tool (like Vitest's coverage-final.json) to precisely identify missing branch evaluations, and supply inputs to test files that hit edge cases.

@@ -1,22 +1,26 @@
-import { renderHook } from '@testing-library/react';
-import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
-import { useStore } from '../../store';
-import * as globalHover from '../../helpers/globalHover';
-import { PaymentStatus, Transaction } from '../../types';
-import { vi, describe, it, expect, beforeEach, afterEach, Mock } from 'vitest';
+import { renderHook } from "@testing-library/react";
+import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts";
+import { useStore } from "../../store";
+import * as globalHover from "../../helpers/globalHover";
+import { PaymentStatus, Transaction } from "../../types";
+import { vi, describe, it, expect, beforeEach, afterEach, Mock } from "vitest";
 
 // Mock dependencies
-vi.mock('../../store', () => ({
+vi.mock("../../store", () => ({
   useStore: vi.fn(),
 }));
 
 // We must mock the properties directly on the module object
-vi.mock('../../helpers/globalHover', () => ({
-  get currentHoveredTransactionId() { return null; },
-  get currentHoveredStudentId() { return null; }
+vi.mock("../../helpers/globalHover", () => ({
+  get currentHoveredTransactionId() {
+    return null;
+  },
+  get currentHoveredStudentId() {
+    return null;
+  },
 }));
 
-describe('useKeyboardShortcuts', () => {
+describe("useKeyboardShortcuts", () => {
   let onOpenSearch: Mock;
   let onOpenQuickLog: Mock;
   let onOpenHelp: Mock;
@@ -36,32 +40,43 @@ describe('useKeyboardShortcuts', () => {
     vi.mocked(useStore).mockReturnValue({
       transactions: [],
       updateTransaction: mockUpdateTransaction,
-        getTransactionById: vi.fn((id) => (useStore as unknown as Mock).mock.results[0].value.transactions.find((tx: any) => tx.id === id)),
+      getTransactionById: vi.fn((id) =>
+        (useStore as unknown as Mock).mock.results[0].value.transactions.find(
+          (tx: any) => tx.id === id,
+        ),
+      ),
       addToast: mockAddToast,
     });
 
-    originalPlatform = Object.getOwnPropertyDescriptor(navigator, 'platform')?.value;
+    originalPlatform = Object.getOwnPropertyDescriptor(
+      navigator,
+      "platform",
+    )?.value;
 
     // Default to a non-Mac platform
-    Object.defineProperty(navigator, 'platform', {
-      value: 'Win32',
-      configurable: true
+    Object.defineProperty(navigator, "platform", {
+      value: "Win32",
+      configurable: true,
     });
   });
 
   afterEach(() => {
     vi.clearAllMocks();
-    Object.defineProperty(navigator, 'platform', {
+    Object.defineProperty(navigator, "platform", {
       value: originalPlatform,
-      configurable: true
+      configurable: true,
     });
     // Reset mocked getters manually if possible, or just re-stub
-    vi.spyOn(globalHover, 'currentHoveredTransactionId', 'get').mockReturnValue(null);
-    vi.spyOn(globalHover, 'currentHoveredStudentId', 'get').mockReturnValue(null);
+    vi.spyOn(globalHover, "currentHoveredTransactionId", "get").mockReturnValue(
+      null,
+    );
+    vi.spyOn(globalHover, "currentHoveredStudentId", "get").mockReturnValue(
+      null,
+    );
   });
 
   const fireKeyDown = (key: string, options: Partial<KeyboardEvent> = {}) => {
-    const event = new KeyboardEvent('keydown', {
+    const event = new KeyboardEvent("keydown", {
       key,
       bubbles: true,
       ...options,
@@ -69,90 +84,120 @@ describe('useKeyboardShortcuts', () => {
     window.dispatchEvent(event);
   };
 
-  it('triggers onOpenSearch with Ctrl+K on Windows/Linux', () => {
-    renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
+  it("triggers onOpenSearch with Ctrl+K on Windows/Linux", () => {
+    renderHook(() =>
+      useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+    );
 
-    fireKeyDown('k', { ctrlKey: true });
+    fireKeyDown("k", { ctrlKey: true });
     expect(onOpenSearch).toHaveBeenCalledTimes(1);
 
-    fireKeyDown('K', { ctrlKey: true }); // uppercase test
+    fireKeyDown("K", { ctrlKey: true }); // uppercase test
     expect(onOpenSearch).toHaveBeenCalledTimes(2);
   });
 
-  it('triggers onOpenSearch with Cmd+K on Mac', () => {
-    Object.defineProperty(navigator, 'platform', { value: 'MacIntel', configurable: true });
-    renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
+  it("triggers onOpenSearch with Cmd+K on Mac", () => {
+    Object.defineProperty(navigator, "platform", {
+      value: "MacIntel",
+      configurable: true,
+    });
+    renderHook(() =>
+      useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+    );
 
-    fireKeyDown('k', { metaKey: true });
+    fireKeyDown("k", { metaKey: true });
     expect(onOpenSearch).toHaveBeenCalledTimes(1);
   });
 
-  it('triggers onOpenQuickLog with Cmd+L on Mac', () => {
-    Object.defineProperty(navigator, 'platform', { value: 'MacIntel', configurable: true });
-    renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
+  it("triggers onOpenQuickLog with Cmd+L on Mac", () => {
+    Object.defineProperty(navigator, "platform", {
+      value: "MacIntel",
+      configurable: true,
+    });
+    renderHook(() =>
+      useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+    );
 
-    fireKeyDown('l', { metaKey: true });
+    fireKeyDown("l", { metaKey: true });
     expect(onOpenQuickLog).toHaveBeenCalledTimes(1);
   });
 
-  it('triggers onOpenHelp with Cmd+/ on Mac', () => {
-    Object.defineProperty(navigator, 'platform', { value: 'MacIntel', configurable: true });
-    renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
+  it("triggers onOpenHelp with Cmd+/ on Mac", () => {
+    Object.defineProperty(navigator, "platform", {
+      value: "MacIntel",
+      configurable: true,
+    });
+    renderHook(() =>
+      useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+    );
 
-    fireKeyDown('/', { metaKey: true });
+    fireKeyDown("/", { metaKey: true });
     expect(onOpenHelp).toHaveBeenCalledTimes(1);
   });
 
-  it('ignores Cmd modifier on Windows/Linux', () => {
+  it("ignores Cmd modifier on Windows/Linux", () => {
     // navigator.platform is already set to 'Win32' in beforeEach
-    renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
+    renderHook(() =>
+      useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+    );
 
-    fireKeyDown('k', { metaKey: true });
+    fireKeyDown("k", { metaKey: true });
     expect(onOpenSearch).not.toHaveBeenCalled();
 
-    fireKeyDown('l', { metaKey: true });
+    fireKeyDown("l", { metaKey: true });
     expect(onOpenQuickLog).not.toHaveBeenCalled();
 
-    fireKeyDown('/', { metaKey: true });
+    fireKeyDown("/", { metaKey: true });
     expect(onOpenHelp).not.toHaveBeenCalled();
   });
 
-  it('ignores Ctrl modifier on Mac', () => {
-    Object.defineProperty(navigator, 'platform', { value: 'MacIntel', configurable: true });
-    renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
+  it("ignores Ctrl modifier on Mac", () => {
+    Object.defineProperty(navigator, "platform", {
+      value: "MacIntel",
+      configurable: true,
+    });
+    renderHook(() =>
+      useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+    );
 
-    fireKeyDown('k', { ctrlKey: true });
+    fireKeyDown("k", { ctrlKey: true });
     expect(onOpenSearch).not.toHaveBeenCalled();
 
-    fireKeyDown('l', { ctrlKey: true });
+    fireKeyDown("l", { ctrlKey: true });
     expect(onOpenQuickLog).not.toHaveBeenCalled();
 
-    fireKeyDown('/', { ctrlKey: true });
+    fireKeyDown("/", { ctrlKey: true });
     expect(onOpenHelp).not.toHaveBeenCalled();
   });
 
-  it('triggers onOpenQuickLog with Ctrl+L on Windows/Linux', () => {
-    renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
+  it("triggers onOpenQuickLog with Ctrl+L on Windows/Linux", () => {
+    renderHook(() =>
+      useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+    );
 
-    fireKeyDown('l', { ctrlKey: true });
+    fireKeyDown("l", { ctrlKey: true });
     expect(onOpenQuickLog).toHaveBeenCalledTimes(1);
   });
 
-  it('triggers onOpenHelp with Ctrl+/ on Windows/Linux', () => {
-    renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
+  it("triggers onOpenHelp with Ctrl+/ on Windows/Linux", () => {
+    renderHook(() =>
+      useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+    );
 
-    fireKeyDown('/', { ctrlKey: true });
+    fireKeyDown("/", { ctrlKey: true });
     expect(onOpenHelp).toHaveBeenCalledTimes(1);
   });
 
-  it('ignores shortcuts if typed inside an input field', () => {
-    renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
+  it("ignores shortcuts if typed inside an input field", () => {
+    renderHook(() =>
+      useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+    );
 
-    const input = document.createElement('input');
+    const input = document.createElement("input");
     document.body.appendChild(input);
 
-    const event = new KeyboardEvent('keydown', {
-      key: 'k',
+    const event = new KeyboardEvent("keydown", {
+      key: "k",
       ctrlKey: true,
       bubbles: true,
     });
@@ -162,14 +207,16 @@ describe('useKeyboardShortcuts', () => {
     document.body.removeChild(input);
   });
 
-  it('ignores shortcuts if typed inside a textarea', () => {
-    renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
+  it("ignores shortcuts if typed inside a textarea", () => {
+    renderHook(() =>
+      useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+    );
 
-    const textarea = document.createElement('textarea');
+    const textarea = document.createElement("textarea");
     document.body.appendChild(textarea);
 
-    const event = new KeyboardEvent('keydown', {
-      key: 'l',
+    const event = new KeyboardEvent("keydown", {
+      key: "l",
       ctrlKey: true,
       bubbles: true,
     });
@@ -179,14 +226,16 @@ describe('useKeyboardShortcuts', () => {
     document.body.removeChild(textarea);
   });
 
-  it('ignores shortcuts if typed inside a select element', () => {
-    renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
+  it("ignores shortcuts if typed inside a select element", () => {
+    renderHook(() =>
+      useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+    );
 
-    const select = document.createElement('select');
+    const select = document.createElement("select");
     document.body.appendChild(select);
 
-    const event = new KeyboardEvent('keydown', {
-      key: 'k',
+    const event = new KeyboardEvent("keydown", {
+      key: "k",
       ctrlKey: true,
       bubbles: true,
     });
@@ -196,181 +245,463 @@ describe('useKeyboardShortcuts', () => {
     document.body.removeChild(select);
   });
 
-  it('ignores plain keypresses without modifier keys', () => {
-    renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
-    fireKeyDown('k');
+  it("ignores Shift+P if typed inside an input field", () => {
+    const mockTx: Transaction = {
+      id: "tx-1",
+      studentId: "st-1",
+      date: "2023-01-01",
+      lessonDuration: 60,
+      lessonFee: 100,
+      amountPaid: 0,
+      status: PaymentStatus.Due,
+      createdAt: "2023-01-01T00:00:00Z",
+    };
+
+    (useStore as unknown as Mock).mockReturnValue({
+      transactions: [mockTx],
+      updateTransaction: mockUpdateTransaction,
+      getTransactionById: vi.fn((id) =>
+        (useStore as unknown as Mock).mock.results[0].value.transactions.find(
+          (tx: any) => tx.id === id,
+        ),
+      ),
+      addToast: mockAddToast,
+    });
+    vi.spyOn(globalHover, "currentHoveredTransactionId", "get").mockReturnValue(
+      "tx-1",
+    );
+
+    renderHook(() =>
+      useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+    );
+
+    const input = document.createElement("input");
+    document.body.appendChild(input);
+
+    const event = new KeyboardEvent("keydown", {
+      key: "p",
+      shiftKey: true,
+      bubbles: true,
+    });
+    input.dispatchEvent(event);
+
+    expect(mockUpdateTransaction).not.toHaveBeenCalled();
+    document.body.removeChild(input);
+  });
+  it("ignores plain keypresses without modifier keys", () => {
+    renderHook(() =>
+      useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+    );
+    fireKeyDown("k");
     expect(onOpenSearch).not.toHaveBeenCalled();
   });
 
-  it('ignores unknown keyboard shortcuts with modifier keys', () => {
-    renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
-    fireKeyDown('x', { ctrlKey: true });
+  it("ignores Alt modifier keypresses", () => {
+    renderHook(() =>
+      useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+    );
+    fireKeyDown("k", { altKey: true });
+    fireKeyDown("l", { altKey: true });
+    fireKeyDown("/", { altKey: true });
+    expect(onOpenSearch).not.toHaveBeenCalled();
+    expect(onOpenQuickLog).not.toHaveBeenCalled();
+    expect(onOpenHelp).not.toHaveBeenCalled();
+  });
+  it("ignores unknown keyboard shortcuts with modifier keys", () => {
+    renderHook(() =>
+      useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+    );
+    fireKeyDown("x", { ctrlKey: true });
     expect(onOpenSearch).not.toHaveBeenCalled();
   });
 
-  describe('Shift+P logic', () => {
-    it('marks hovered transaction as paid if hovered (Shift+P)', () => {
+  describe("Shift+P logic", () => {
+    it("marks hovered transaction as paid if hovered (Shift+P)", () => {
       const mockTx: Transaction = {
-        id: 'tx-1',
-        studentId: 'st-1',
-        date: '2023-01-01',
+        id: "tx-1",
+        studentId: "st-1",
+        date: "2023-01-01",
         lessonDuration: 60,
         lessonFee: 100,
         amountPaid: 0,
         status: PaymentStatus.Due,
-        createdAt: '2023-01-01T00:00:00Z',
+        createdAt: "2023-01-01T00:00:00Z",
       };
 
       (useStore as unknown as Mock).mockReturnValue({
         transactions: [mockTx],
         updateTransaction: mockUpdateTransaction,
-        getTransactionById: vi.fn((id) => (useStore as unknown as Mock).mock.results[0].value.transactions.find((tx: any) => tx.id === id)),
+        getTransactionById: vi.fn((id) =>
+          (useStore as unknown as Mock).mock.results[0].value.transactions.find(
+            (tx: any) => tx.id === id,
+          ),
+        ),
         addToast: mockAddToast,
       });
 
-      vi.spyOn(globalHover, 'currentHoveredTransactionId', 'get').mockReturnValue('tx-1');
+      vi.spyOn(
+        globalHover,
+        "currentHoveredTransactionId",
+        "get",
+      ).mockReturnValue("tx-1");
 
-      renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
+      renderHook(() =>
+        useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+      );
 
-      fireKeyDown('p', { shiftKey: true });
+      fireKeyDown("p", { shiftKey: true });
 
-      expect(mockUpdateTransaction).toHaveBeenCalledWith('tx-1', {
+      expect(mockUpdateTransaction).toHaveBeenCalledWith("tx-1", {
         amountPaid: 100,
         status: PaymentStatus.Paid,
       });
-      expect(mockAddToast).toHaveBeenCalledWith('Transaction marked as paid!', 'success');
+      expect(mockAddToast).toHaveBeenCalledWith(
+        "Transaction marked as paid!",
+        "success",
+      );
     });
 
-    it('does nothing if hovered transaction is already paid (Shift+P)', () => {
+    it("does nothing if hovered transaction is overpaid (Shift+P)", () => {
       const mockTx: Transaction = {
-        id: 'tx-1',
-        studentId: 'st-1',
-        date: '2023-01-01',
+        id: "tx-1",
+        studentId: "st-1",
+        date: "2023-01-01",
+        lessonDuration: 60,
+        lessonFee: 100,
+        amountPaid: 150,
+        status: PaymentStatus.Overpaid,
+        createdAt: "2023-01-01T00:00:00Z",
+      };
+
+      (useStore as unknown as Mock).mockReturnValue({
+        transactions: [mockTx],
+        updateTransaction: mockUpdateTransaction,
+        getTransactionById: vi.fn((id) =>
+          (useStore as unknown as Mock).mock.results[0].value.transactions.find(
+            (tx: any) => tx.id === id,
+          ),
+        ),
+        addToast: mockAddToast,
+      });
+
+      vi.spyOn(
+        globalHover,
+        "currentHoveredTransactionId",
+        "get",
+      ).mockReturnValue("tx-1");
+
+      renderHook(() =>
+        useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+      );
+
+      fireKeyDown("p", { shiftKey: true });
+
+      expect(mockUpdateTransaction).not.toHaveBeenCalled();
+      expect(mockAddToast).not.toHaveBeenCalled();
+    });
+
+    it("marks hovered transaction as paid if partially paid (Shift+P)", () => {
+      const mockTx: Transaction = {
+        id: "tx-1",
+        studentId: "st-1",
+        date: "2023-01-01",
+        lessonDuration: 60,
+        lessonFee: 100,
+        amountPaid: 50,
+        status: PaymentStatus.PartiallyPaid,
+        createdAt: "2023-01-01T00:00:00Z",
+      };
+
+      (useStore as unknown as Mock).mockReturnValue({
+        transactions: [mockTx],
+        updateTransaction: mockUpdateTransaction,
+        getTransactionById: vi.fn((id) =>
+          (useStore as unknown as Mock).mock.results[0].value.transactions.find(
+            (tx: any) => tx.id === id,
+          ),
+        ),
+        addToast: mockAddToast,
+      });
+
+      vi.spyOn(
+        globalHover,
+        "currentHoveredTransactionId",
+        "get",
+      ).mockReturnValue("tx-1");
+
+      renderHook(() =>
+        useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+      );
+
+      fireKeyDown("p", { shiftKey: true });
+
+      expect(mockUpdateTransaction).toHaveBeenCalledWith("tx-1", {
+        amountPaid: 100,
+        status: PaymentStatus.Paid,
+      });
+      expect(mockAddToast).toHaveBeenCalledWith(
+        "Transaction marked as paid!",
+        "success",
+      );
+    });
+
+    it("ignores p keypress without shift (e.g. Ctrl+P, Alt+P, just P)", () => {
+      const mockTx: Transaction = {
+        id: "tx-1",
+        studentId: "st-1",
+        date: "2023-01-01",
+        lessonDuration: 60,
+        lessonFee: 100,
+        amountPaid: 0,
+        status: PaymentStatus.Due,
+        createdAt: "2023-01-01T00:00:00Z",
+      };
+
+      (useStore as unknown as Mock).mockReturnValue({
+        transactions: [mockTx],
+        updateTransaction: mockUpdateTransaction,
+        getTransactionById: vi.fn((id) =>
+          (useStore as unknown as Mock).mock.results[0].value.transactions.find(
+            (tx: any) => tx.id === id,
+          ),
+        ),
+        addToast: mockAddToast,
+      });
+
+      vi.spyOn(
+        globalHover,
+        "currentHoveredTransactionId",
+        "get",
+      ).mockReturnValue("tx-1");
+
+      renderHook(() =>
+        useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+      );
+
+      fireKeyDown("p");
+      fireKeyDown("p", { ctrlKey: true });
+      fireKeyDown("p", { metaKey: true });
+      fireKeyDown("p", { altKey: true });
+
+      expect(mockUpdateTransaction).not.toHaveBeenCalled();
+      expect(mockAddToast).not.toHaveBeenCalled();
+    });
+    it("does nothing if hovered transaction is already paid (Shift+P)", () => {
+      const mockTx: Transaction = {
+        id: "tx-1",
+        studentId: "st-1",
+        date: "2023-01-01",
         lessonDuration: 60,
         lessonFee: 100,
         amountPaid: 100,
         status: PaymentStatus.Paid,
-        createdAt: '2023-01-01T00:00:00Z',
+        createdAt: "2023-01-01T00:00:00Z",
       };
 
       (useStore as unknown as Mock).mockReturnValue({
         transactions: [mockTx],
         updateTransaction: mockUpdateTransaction,
-        getTransactionById: vi.fn((id) => (useStore as unknown as Mock).mock.results[0].value.transactions.find((tx: any) => tx.id === id)),
+        getTransactionById: vi.fn((id) =>
+          (useStore as unknown as Mock).mock.results[0].value.transactions.find(
+            (tx: any) => tx.id === id,
+          ),
+        ),
         addToast: mockAddToast,
       });
 
-      vi.spyOn(globalHover, 'currentHoveredTransactionId', 'get').mockReturnValue('tx-1');
+      vi.spyOn(
+        globalHover,
+        "currentHoveredTransactionId",
+        "get",
+      ).mockReturnValue("tx-1");
 
-      renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
+      renderHook(() =>
+        useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+      );
 
-      fireKeyDown('p', { shiftKey: true });
+      fireKeyDown("p", { shiftKey: true });
 
       expect(mockUpdateTransaction).not.toHaveBeenCalled();
       expect(mockAddToast).not.toHaveBeenCalled();
     });
 
-    it('does nothing if neither transaction nor student is hovered (Shift+P)', () => {
+    it("does nothing if neither transaction nor student is hovered (Shift+P)", () => {
       (useStore as unknown as Mock).mockReturnValue({
         transactions: [],
         updateTransaction: mockUpdateTransaction,
-        getTransactionById: vi.fn((id) => (useStore as unknown as Mock).mock.results[0].value.transactions.find((tx: any) => tx.id === id)),
+        getTransactionById: vi.fn((id) =>
+          (useStore as unknown as Mock).mock.results[0].value.transactions.find(
+            (tx: any) => tx.id === id,
+          ),
+        ),
         addToast: mockAddToast,
       });
 
-      vi.spyOn(globalHover, 'currentHoveredTransactionId', 'get').mockReturnValue(null);
-      vi.spyOn(globalHover, 'currentHoveredStudentId', 'get').mockReturnValue(null);
+      vi.spyOn(
+        globalHover,
+        "currentHoveredTransactionId",
+        "get",
+      ).mockReturnValue(null);
+      vi.spyOn(globalHover, "currentHoveredStudentId", "get").mockReturnValue(
+        null,
+      );
 
-      renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
+      renderHook(() =>
+        useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+      );
 
-      fireKeyDown('p', { shiftKey: true });
+      fireKeyDown("p", { shiftKey: true });
 
       expect(mockUpdateTransaction).not.toHaveBeenCalled();
       expect(mockAddToast).not.toHaveBeenCalled();
     });
 
-    it('does nothing if hovered transaction is not found (Shift+P)', () => {
+    it("does nothing if hovered transaction is not found (Shift+P)", () => {
       (useStore as unknown as Mock).mockReturnValue({
         transactions: [],
         updateTransaction: mockUpdateTransaction,
-        getTransactionById: vi.fn((id) => (useStore as unknown as Mock).mock.results[0].value.transactions.find((tx: any) => tx.id === id)),
+        getTransactionById: vi.fn((id) =>
+          (useStore as unknown as Mock).mock.results[0].value.transactions.find(
+            (tx: any) => tx.id === id,
+          ),
+        ),
         addToast: mockAddToast,
       });
 
-      vi.spyOn(globalHover, 'currentHoveredTransactionId', 'get').mockReturnValue('tx-1');
+      vi.spyOn(
+        globalHover,
+        "currentHoveredTransactionId",
+        "get",
+      ).mockReturnValue("tx-1");
 
-      renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
+      renderHook(() =>
+        useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+      );
 
-      fireKeyDown('p', { shiftKey: true });
+      fireKeyDown("p", { shiftKey: true });
 
       expect(mockUpdateTransaction).not.toHaveBeenCalled();
       expect(mockAddToast).not.toHaveBeenCalled();
     });
 
-    it('marks all due transactions for hovered student as paid (Shift+P)', () => {
+    it("marks all due transactions for hovered student as paid (Shift+P)", () => {
       const mockTx1: Transaction = {
-        id: 'tx-1', studentId: 'st-1', date: '2023-01-01', lessonDuration: 60,
-        lessonFee: 50, amountPaid: 0, status: PaymentStatus.Due, createdAt: '2023-01-01T00:00:00Z',
+        id: "tx-1",
+        studentId: "st-1",
+        date: "2023-01-01",
+        lessonDuration: 60,
+        lessonFee: 50,
+        amountPaid: 0,
+        status: PaymentStatus.Due,
+        createdAt: "2023-01-01T00:00:00Z",
       };
       const mockTx2: Transaction = {
-        id: 'tx-2', studentId: 'st-1', date: '2023-01-02', lessonDuration: 60,
-        lessonFee: 50, amountPaid: 20, status: PaymentStatus.PartiallyPaid, createdAt: '2023-01-02T00:00:00Z',
+        id: "tx-2",
+        studentId: "st-1",
+        date: "2023-01-02",
+        lessonDuration: 60,
+        lessonFee: 50,
+        amountPaid: 20,
+        status: PaymentStatus.PartiallyPaid,
+        createdAt: "2023-01-02T00:00:00Z",
       };
       const mockTx3: Transaction = {
-        id: 'tx-3', studentId: 'st-2', date: '2023-01-03', lessonDuration: 60,
-        lessonFee: 50, amountPaid: 0, status: PaymentStatus.Due, createdAt: '2023-01-03T00:00:00Z', // different student
+        id: "tx-3",
+        studentId: "st-2",
+        date: "2023-01-03",
+        lessonDuration: 60,
+        lessonFee: 50,
+        amountPaid: 0,
+        status: PaymentStatus.Due,
+        createdAt: "2023-01-03T00:00:00Z", // different student
       };
 
       (useStore as unknown as Mock).mockReturnValue({
         transactions: [mockTx1, mockTx2, mockTx3],
         updateTransaction: mockUpdateTransaction,
-        getTransactionById: vi.fn((id) => (useStore as unknown as Mock).mock.results[0].value.transactions.find((tx: any) => tx.id === id)),
+        getTransactionById: vi.fn((id) =>
+          (useStore as unknown as Mock).mock.results[0].value.transactions.find(
+            (tx: any) => tx.id === id,
+          ),
+        ),
         addToast: mockAddToast,
       });
 
-      vi.spyOn(globalHover, 'currentHoveredStudentId', 'get').mockReturnValue('st-1');
+      vi.spyOn(globalHover, "currentHoveredStudentId", "get").mockReturnValue(
+        "st-1",
+      );
 
-      renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
+      renderHook(() =>
+        useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+      );
 
-      fireKeyDown('p', { shiftKey: true });
+      fireKeyDown("p", { shiftKey: true });
 
       expect(mockUpdateTransaction).toHaveBeenCalledTimes(2);
-      expect(mockUpdateTransaction).toHaveBeenCalledWith('tx-1', { amountPaid: 50, status: PaymentStatus.Paid });
-      expect(mockUpdateTransaction).toHaveBeenCalledWith('tx-2', { amountPaid: 50, status: PaymentStatus.Paid });
+      expect(mockUpdateTransaction).toHaveBeenCalledWith("tx-1", {
+        amountPaid: 50,
+        status: PaymentStatus.Paid,
+      });
+      expect(mockUpdateTransaction).toHaveBeenCalledWith("tx-2", {
+        amountPaid: 50,
+        status: PaymentStatus.Paid,
+      });
 
-      expect(mockAddToast).toHaveBeenCalledWith('Marked 2 lesson(s) as paid!', 'success');
+      expect(mockAddToast).toHaveBeenCalledWith(
+        "Marked 2 lesson(s) as paid!",
+        "success",
+      );
     });
 
-    it('shows info toast if hovered student has no due transactions (Shift+P)', () => {
+    it("shows info toast if hovered student has no due transactions (Shift+P)", () => {
       const mockTx: Transaction = {
-        id: 'tx-1', studentId: 'st-1', date: '2023-01-01', lessonDuration: 60,
-        lessonFee: 50, amountPaid: 50, status: PaymentStatus.Paid, createdAt: '2023-01-01T00:00:00Z',
+        id: "tx-1",
+        studentId: "st-1",
+        date: "2023-01-01",
+        lessonDuration: 60,
+        lessonFee: 50,
+        amountPaid: 50,
+        status: PaymentStatus.Paid,
+        createdAt: "2023-01-01T00:00:00Z",
       };
 
       (useStore as unknown as Mock).mockReturnValue({
         transactions: [mockTx],
         updateTransaction: mockUpdateTransaction,
-        getTransactionById: vi.fn((id) => (useStore as unknown as Mock).mock.results[0].value.transactions.find((tx: any) => tx.id === id)),
+        getTransactionById: vi.fn((id) =>
+          (useStore as unknown as Mock).mock.results[0].value.transactions.find(
+            (tx: any) => tx.id === id,
+          ),
+        ),
         addToast: mockAddToast,
       });
 
-      vi.spyOn(globalHover, 'currentHoveredStudentId', 'get').mockReturnValue('st-1');
+      vi.spyOn(globalHover, "currentHoveredStudentId", "get").mockReturnValue(
+        "st-1",
+      );
 
-      renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
+      renderHook(() =>
+        useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+      );
 
-      fireKeyDown('p', { shiftKey: true });
+      fireKeyDown("p", { shiftKey: true });
 
       expect(mockUpdateTransaction).not.toHaveBeenCalled();
-      expect(mockAddToast).toHaveBeenCalledWith('No due lessons found for this student.', 'info');
+      expect(mockAddToast).toHaveBeenCalledWith(
+        "No due lessons found for this student.",
+        "info",
+      );
     });
   });
 
-  it('cleans up event listener on unmount', () => {
-    const { unmount } = renderHook(() => useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp));
+  it("cleans up event listener on unmount", () => {
+    const { unmount } = renderHook(() =>
+      useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
+    );
 
     unmount();
 
-    fireKeyDown('k', { ctrlKey: true });
+    fireKeyDown("k", { ctrlKey: true });
     expect(onOpenSearch).not.toHaveBeenCalled();
   });
 });
