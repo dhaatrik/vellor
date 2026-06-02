@@ -105,6 +105,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ itemVariants }
               <div className="flex bg-black border border-[#333333] rounded-sm p-[2px]" role="tablist" aria-label="Chart view options">
                 <button
                   role="tab"
+                  id="tab-income"
                   aria-selected={activeChart === 'income'}
                   aria-controls="dashboard-chart-panel"
                   aria-label="View Income Overview"
@@ -115,6 +116,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ itemVariants }
                 </button>
                 <button
                   role="tab"
+                  id="tab-students"
                   aria-selected={activeChart === 'students'}
                   aria-controls="dashboard-chart-panel"
                   aria-label="View Student Growth"
@@ -125,7 +127,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ itemVariants }
                 </button>
               </div>
             </div>
-            <div id="dashboard-chart-panel" className="flex-1 min-h-[200px] w-full content-visibility-auto">
+            <div id="dashboard-chart-panel" role="tabpanel" aria-labelledby={activeChart === 'income' ? 'tab-income' : 'tab-students'} className="flex-1 min-h-[200px] w-full content-visibility-auto">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
