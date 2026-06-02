@@ -48,6 +48,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({ label, name, er
         className={`${baseStyle} ${error ? errorStyle : ""} ${className || ""}`}
         aria-invalid={!!error}
         aria-describedby={describedBy}
+        aria-required={required}
         required={required}
         {...props}
       />

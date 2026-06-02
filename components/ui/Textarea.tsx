@@ -44,6 +44,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(({ label,
         className={`${baseStyle} ${error ? errorStyle : ""} ${className || ""}`}
         aria-invalid={!!error}
         aria-describedby={errorId}
+        aria-required={required}
         required={required}
         {...props}
       />
