@@ -67,7 +67,8 @@ export const createGamificationSlice: StateCreator<AppState, [], [], Gamificatio
       let hasLoyalScholar = false;
 
       const now = Date.now();
-      const nowString = new Date(now - 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // One day ago
+      const yesterdayDate = new Date(now - 24 * 60 * 60 * 1000);
+      const nowString = `${yesterdayDate.getFullYear()}-${String(yesterdayDate.getMonth() + 1).padStart(2, '0')}-${String(yesterdayDate.getDate()).padStart(2, '0')}`; // One day ago
       const currentMonth = new Date().getMonth();
       const currentYear = new Date().getFullYear();
 
