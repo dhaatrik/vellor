@@ -427,11 +427,11 @@ export const StudentsPage: React.FC = () => {
         </motion.div>
       )}
 
-      <Modal isOpen={showStudentForm} onClose={() => { setShowStudentForm(false); setEditingStudent(undefined); }} title={editingStudent ? 'Edit Student' : 'Add New Student'}>
+      <Modal isOpen={showStudentForm} onClose={() => { setShowStudentForm(false); setEditingStudent(undefined); }} title={editingStudent ? 'Edit Student' : 'Add New Student'} maxWidthClass="max-w-2xl">
         <StudentForm student={editingStudent} onSave={handleSaveStudent} onClose={() => { setShowStudentForm(false); setEditingStudent(undefined); }} />
       </Modal>
       
-      <Modal isOpen={!!showTransactionFormForStudent} onClose={() => setShowTransactionFormForStudent(undefined)} title="Log Lesson">
+      <Modal isOpen={!!showTransactionFormForStudent} onClose={() => setShowTransactionFormForStudent(undefined)} title="Log Lesson" maxWidthClass="max-w-2xl">
         {showTransactionFormForStudent && (
           <TransactionForm
             students={students}

@@ -380,7 +380,7 @@ export const TransactionsPage: React.FC = () => {
         </motion.div>
       )}
 
-      <Modal isOpen={showForm} onClose={() => { setShowForm(false); setEditingTransaction(undefined); }} title={editingTransaction ? 'Edit Transaction' : 'Log New Lesson'}>
+      <Modal isOpen={showForm} onClose={() => { setShowForm(false); setEditingTransaction(undefined); }} title={editingTransaction ? 'Edit Transaction' : 'Log New Lesson'} maxWidthClass="max-w-2xl">
         <TransactionForm
           transaction={editingTransaction}
           students={students}
