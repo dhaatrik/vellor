@@ -9,7 +9,6 @@ import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 vi.mock('../../../pages/DashboardPage', () => ({ DashboardPage: () => <div data-testid="dashboard-page">Dashboard Content</div> }));
 vi.mock('../../../pages/StudentsPage', () => ({ StudentsPage: () => <div data-testid="students-page">Students Content</div> }));
 vi.mock('../../../pages/TransactionsPage', () => ({ TransactionsPage: () => <div data-testid="transactions-page">Transactions Content</div> }));
-vi.mock('../../../pages/CalendarPage', () => ({ CalendarPage: () => <div data-testid="calendar-page">Calendar Content</div> }));
 vi.mock('../../../pages/SettingsPage', () => ({ SettingsPage: () => <div data-testid="settings-page">Settings Content</div> }));
 vi.mock('../../../pages/AchievementsPage', () => ({ AchievementsPage: () => <div data-testid="achievements-page">Achievements Content</div> }));
 vi.mock('../../../pages/ProfilePage', () => ({ ProfilePage: () => <div data-testid="profile-page">Profile Content</div> }));
