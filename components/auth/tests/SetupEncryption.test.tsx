@@ -25,6 +25,11 @@ vi.mock('../../../src/crypto', () => ({
   importKeyFromBase64: vi.fn(),
 }));
 
+// Mock useCybertext to return the input string directly to prevent scrambled text during test execution
+vi.mock('../../../hooks/useCybertext', () => ({
+  useCybertext: vi.fn((text: string) => text),
+}));
+
 describe('SetupEncryption', () => {
   let mockSetMasterKey: any;
 

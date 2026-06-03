@@ -129,33 +129,33 @@ export const DashboardPage: React.FC = () => {
           <Button variant="primary" onClick={() => navigate('/transactions', {state: { openAddTransactionModal: true }})} leftIcon="plus" className="rounded-full shadow-lg shadow-accent/20">Log Lesson</Button>
         </div>
       </div>
-      
+      {/* System Status Telemetry */}
+      <motion.div variants={itemVariants} className="w-full mb-4">
+        <div className="border border-white/5 bg-black p-4 flex flex-col md:flex-row gap-6 font-mono text-xs text-gray-500">
+          <div className="flex gap-2 items-center">
+            <span className="text-accent animate-pulse">●</span>
+            <span>CORE_ENGINE: ZUSTAND_PERSIST_PERSISTENT</span>
+          </div>
+          <div className="flex gap-2 items-center">
+            <span className="text-accent animate-pulse">●</span>
+            <span>CRYPTO_VAULT: AES-GCM_LOCALFORAGE_LOCKED</span>
+          </div>
+          <div className="flex gap-2 items-center">
+            <span className="text-accent animate-pulse">●</span>
+            <span>BACKUP_ENTROPY: {
+              (() => {
+                const lastBackup = localStorage.getItem('lastBackupDate');
+                if (!lastBackup) return 'UNKNOWN';
+                const daysSinceBackup = (Date.now() - Date.parse(lastBackup)) / (1000 * 3600 * 24);
+                return daysSinceBackup > 7 ? 'CRITICAL' : 'NOMINAL';
+              })()
+            }</span>
+          </div>
+        </div>
+      </motion.div>
+
       {/* Bento Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[200px]">
-        {/* System Status Telemetry */}
-        <motion.div variants={itemVariants} className="col-span-1 md:col-span-2 lg:col-span-4">
-          <div className="border border-white/5 bg-black p-4 flex flex-col md:flex-row gap-6 font-mono text-xs text-gray-500">
-            <div className="flex gap-2 items-center">
-              <span className="text-accent animate-pulse">●</span>
-              <span>CORE_ENGINE: ZUSTAND_PERSIST_PERSISTENT</span>
-            </div>
-            <div className="flex gap-2 items-center">
-              <span className="text-accent animate-pulse">●</span>
-              <span>CRYPTO_VAULT: AES-GCM_LOCALFORAGE_LOCKED</span>
-            </div>
-            <div className="flex gap-2 items-center">
-              <span className="text-accent animate-pulse">●</span>
-              <span>BACKUP_ENTROPY: {
-                (() => {
-                  const lastBackup = localStorage.getItem('lastBackupDate');
-                  if (!lastBackup) return 'UNKNOWN';
-                  const daysSinceBackup = (Date.now() - Date.parse(lastBackup)) / (1000 * 3600 * 24);
-                  return daysSinceBackup > 7 ? 'CRITICAL' : 'NOMINAL';
-                })()
-              }</span>
-            </div>
-          </div>
-        </motion.div>
 
         
         {/* Stats Row */}

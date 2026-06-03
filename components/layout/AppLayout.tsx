@@ -87,7 +87,8 @@ export const AppLayout: React.FC = () => {
 
   return (
     // Main container div, applies theme class for dark/light mode styling
-    <div className={`grid grid-cols-1 md:grid-cols-[288px_1fr] h-screen font-sans ${settings.theme} relative overflow-hidden`}>\n      <TerminalBackground />
+    <div className={`h-screen font-sans ${settings.theme} relative overflow-hidden`}>
+      <TerminalBackground />
       {/* Overlay for mobile sidebar (dims background when sidebar is open) */}
       {isMobileSidebarOpen && (
         <div
@@ -97,15 +98,16 @@ export const AppLayout: React.FC = () => {
         ></div>
       )}
 
-      {/* Sidebar Navigation */}
-      <aside
-        className={`will-change-transform transform-gpu contain-layout contain-paint w-72 md:w-full bg-black/30 backdrop-blur-md border-r border-gray-100 dark:border-white/5 flex flex-col z-10 relative
-                   fixed md:static inset-y-0 left-0 z-50
-                   transform transition-transform duration-300 ease-in-out
-                   ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-                   md:translate-x-0`} // Manages sidebar visibility and animation
-        data-testid="sidebar-navigation" aria-label="Main Navigation"
-      >
+      <div className="grid grid-cols-1 md:grid-cols-[288px_1fr] h-full w-full">
+        {/* Sidebar Navigation */}
+        <aside
+          className={`will-change-transform transform-gpu contain-layout contain-paint w-72 md:w-full bg-black/30 backdrop-blur-md border-r border-gray-100 dark:border-white/5 flex flex-col z-10 relative
+                     fixed md:static inset-y-0 left-0 z-50
+                     transform transition-transform duration-300 ease-in-out
+                     ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                     md:translate-x-0`} // Manages sidebar visibility and animation
+          data-testid="sidebar-navigation" aria-label="Main Navigation"
+        >
         {/* Sidebar Header: Logo, App Name */}
         <div className="px-6 py-6">
           <div className="flex justify-between items-center">
@@ -273,6 +275,7 @@ export const AppLayout: React.FC = () => {
           <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
           <QuickLogModal isOpen={isQuickLogOpen} onClose={() => setIsQuickLogOpen(false)} />
         </main>
+      </div>
       </div>
 
       {/* Target points modal */}
