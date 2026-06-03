@@ -65,10 +65,6 @@ export const SettingsPage: React.FC = () => {
     }));
   };
 
-  const handleSaveBranding = () => {
-    updateSettings({ brandColor: formData.brandColor, brandLogoBase64: formData.brandLogoBase64 });
-  };
-
   const handleSaveInvoice = () => {
     updateSettings({ invoiceLogoBase64: formData.invoiceLogoBase64, invoiceTemplate: formData.invoiceTemplate });
   };
@@ -128,17 +124,6 @@ export const SettingsPage: React.FC = () => {
     }
   };
 
-  const handleBrandLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setFormData(prev => ({ ...prev, brandLogoBase64: reader.result as string }));
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleRemoveBrandLogo = () => setFormData(prev => ({ ...prev, brandLogoBase64: undefined }));
-
   const handleRemoveLogo = () => setFormData(prev => ({ ...prev, invoiceLogoBase64: undefined }));
 
   return (
@@ -152,51 +137,6 @@ export const SettingsPage: React.FC = () => {
         <h1 className="text-4xl font-display font-bold tracking-tight text-gray-900 dark:text-gray-50">Settings</h1>
         <p className="text-gray-500 dark:text-gray-400 mt-1">Configure application preferences, invoices, and data.</p>
       </div>
-
-      <Card title="Custom Branding" titleIcon="brush">
-        <div className="space-y-6">
-           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="brandColorInput" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ml-1">Brand Accent Color</label>
-                <div className="flex items-center gap-4">
-                  <input 
-                    id="brandColorInput"
-                    type="color" 
-                    name="brandColor"
-                    value={formData.brandColor || '#8b5cf6'}
-                    onChange={handleChange}
-                    className="w-12 h-12 rounded-xl border border-gray-200 dark:border-white/10 cursor-pointer overflow-hidden p-0 bg-transparent"
-                  />
-                  <div className="text-sm text-gray-500 font-mono">{formData.brandColor || '#8b5cf6'}</div>
-                </div>
-                <p className="text-xs text-gray-500 mt-2">Personalize the application's primary color.</p>
-              </div>
-
-              <div>
-                 <span id="appLogoLabel" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ml-1">App Logo (Square)</span>
-                 <div className="flex items-center gap-4">
-                   {formData.brandLogoBase64 ? (
-                     <div className="relative w-16 h-16 rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden bg-white shadow-sm">
-                       <img src={formData.brandLogoBase64} alt="App Logo" className="w-full h-full object-cover" />
-                       <button onClick={handleRemoveBrandLogo} className="absolute top-0 right-0 bg-danger text-white rounded-bl-xl p-1 hover:bg-danger/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary" aria-label="Remove app logo" title="Remove app logo">
-                         <Icon iconName="x-mark" className="w-3 h-3" />
-                       </button>
-                     </div>
-                   ) : (
-                     <label htmlFor="appLogoInput" className="cursor-pointer px-4 py-2 border border-dashed border-gray-300 dark:border-white/20 rounded-xl text-sm font-medium hover:border-accent hover:text-accent transition-colors">
-                        Upload Logo
-                        <input id="appLogoInput" type="file" accept="image/*" aria-labelledby="appLogoLabel" className="hidden" onChange={handleBrandLogoUpload} />
-                     </label>
-                   )}
-                 </div>
-                 <p className="text-xs text-gray-500 mt-2">Replaces the default graduation cap icon.</p>
-              </div>
-           </div>
-           <div className="pt-4 flex justify-end">
-              <Button onClick={handleSaveBranding} variant="primary" leftIcon="check-circle" className="rounded-full shadow-md shadow-accent/10">Save Branding</Button>
-           </div>
-        </div>
-      </Card>
 
       <Card title="Invoice Settings" titleIcon="document-text">
         <div className="space-y-6">

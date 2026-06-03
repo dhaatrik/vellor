@@ -28,12 +28,14 @@ export const BeforeAfterSlider = () => {
     window.addEventListener('resize', updateRect, { passive: true });
 
     setMutator((val) => {
-      currentPosRef.current = val;
-      if (containerRef.current) {
-        containerRef.current.style.setProperty('--slider-pos', `${val}%`);
-      }
-      if (inputRef.current) {
-        inputRef.current.value = String(val);
+      if (!isPointerDownRef.current) {
+        currentPosRef.current = val;
+        if (containerRef.current) {
+          containerRef.current.style.setProperty('--slider-pos', `${val}%`);
+        }
+        if (inputRef.current) {
+          inputRef.current.value = String(val);
+        }
       }
     });
 
@@ -44,12 +46,10 @@ export const BeforeAfterSlider = () => {
     };
   }, [setMutator]);
 
-  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    isPointerDownRef.current = true;
-    e.currentTarget.setPointerCapture(e.pointerId);
+  const updatePosition = (clientX: number) => {
     if (!rectRef.current) return;
     const rect = rectRef.current;
-    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
     const percentage = (x / rect.width) * 100;
     
     currentPosRef.current = percentage;
@@ -61,19 +61,16 @@ export const BeforeAfterSlider = () => {
     }
   };
 
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    isPointerDownRef.current = true;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    inputRef.current?.focus();
+    updatePosition(e.clientX);
+  };
+
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isPointerDownRef.current || !rectRef.current) return;
-    const rect = rectRef.current;
-    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-    const percentage = (x / rect.width) * 100;
-    
-    currentPosRef.current = percentage;
-    if (containerRef.current) {
-      containerRef.current.style.setProperty('--slider-pos', `${percentage}%`);
-    }
-    if (inputRef.current) {
-      inputRef.current.value = String(percentage);
-    }
+    if (!isPointerDownRef.current) return;
+    updatePosition(e.clientX);
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -159,7 +156,7 @@ export const BeforeAfterSlider = () => {
           else if (e.key === 'Home') { e.preventDefault(); setTarget(0); }
           else if (e.key === 'End') { e.preventDefault(); setTarget(100); }
         }}
-        className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-50 focus:outline-none"
+        className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-50 focus:outline-none pointer-events-none"
         aria-label="Compare messy spreadsheet with Vellor dashboard"
       />
     </div>

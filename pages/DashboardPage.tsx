@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore, useData } from '../store';
-import { Button, Card, StatDisplayCard, Icon, ConfirmationModal, OnboardingWizard } from '../components/ui';
+import { Button, Card, StatDisplayCard, Icon, ConfirmationModal } from '../components/ui';
 import { formatCurrency, formatDate, formatRelativeTime } from '../helpers';
 import { motion } from 'framer-motion';
 import { useVirtualizer } from '@tanstack/react-virtual';
@@ -53,8 +53,6 @@ export const DashboardPage: React.FC = () => {
     }
   }, []); // Run only once on mount
 
-  const updateSettings = useStore(s => s.updateSettings);
-
   const activityParentRef = React.useRef<HTMLDivElement>(null);
   const rowVirtualizerActivity = useVirtualizer({
     count: activityLog.length,
@@ -97,10 +95,6 @@ export const DashboardPage: React.FC = () => {
       initial="hidden"
       animate="visible"
     >
-      <OnboardingWizard 
-        isOpen={!settings.hasCompletedOnboarding} 
-        onClose={() => updateSettings({ hasCompletedOnboarding: true })} 
-      />
 
       {isInstallable && (
          <div className="bg-gradient-to-r from-accent/10 to-blue-500/10 border border-accent/20 rounded-3xl p-5 flex items-center justify-between shadow-sm">

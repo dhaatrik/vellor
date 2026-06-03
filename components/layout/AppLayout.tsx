@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, Link } from 'react-router-dom';
 import { useStore } from '../../store';
-import { NavbarLink, Icon, Button, FAB, LegalModals, Modal, SearchModal, TerminalBackground } from '../ui';
+import { NavbarLink, Icon, Button, FAB, LegalModals, Modal, SearchModal, TerminalBackground, OnboardingWizard } from '../ui';
 import { useReminders } from '../../useReminders';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { QuickLogModal } from '../transactions/QuickLogModal';
@@ -9,7 +9,6 @@ import { DashboardPage } from '../../pages/DashboardPage';
 import { StudentsPage } from '../../pages/StudentsPage';
 import { BackupPromptModal } from '../BackupPromptModal';
 import { TransactionsPage } from '../../pages/TransactionsPage';
-import { CalendarPage } from '../../pages/CalendarPage';
 import { SettingsPage } from '../../pages/SettingsPage';
 import { AchievementsPage } from '../../pages/AchievementsPage';
 import { ProfilePage } from '../../pages/ProfilePage';
@@ -22,6 +21,7 @@ export const AppLayout: React.FC = () => {
   const gamification = useStore(s => s.gamification);
   const achievements = useStore(s => s.achievements);
   const logout = useStore(s => s.logout);
+  const updateSettings = useStore(s => s.updateSettings);
   // State for managing the visibility of the sidebar on mobile devices
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -143,7 +143,6 @@ export const AppLayout: React.FC = () => {
         <nav className="flex-grow px-4 py-2 space-y-1 overflow-y-auto custom-scrollbar">
           <NavbarLink to="/dashboard" iconName="chart-bar" onClick={handleNavLinkClick}>Dashboard</NavbarLink>
           <NavbarLink to="/students" iconName="users" onClick={handleNavLinkClick}>Students</NavbarLink>
-          <NavbarLink to="/calendar" iconName="calendar" onClick={handleNavLinkClick}>Calendar</NavbarLink>
           <NavbarLink to="/transactions" iconName="banknotes" onClick={handleNavLinkClick}>Transactions</NavbarLink>
           <NavbarLink to="/achievements" iconName="sparkles" onClick={handleNavLinkClick}>
             Achievements
@@ -262,7 +261,6 @@ export const AppLayout: React.FC = () => {
             <Route path="/students" element={<StudentsPage />} />
             {/* Route for viewing a specific student's details */}
             <Route path="/students/:studentId" element={<StudentsPage />} />
-            <Route path="/calendar" element={<CalendarPage />} />
             <Route path="/transactions" element={<TransactionsPage />} />
             <Route path="/achievements" element={<AchievementsPage />} />
             <Route path="/profile" element={<ProfilePage />} />
@@ -271,7 +269,6 @@ export const AppLayout: React.FC = () => {
             {/* Fallback route: navigates to dashboard for any unmatched paths */}
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
-          <FAB />
           <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
           <QuickLogModal isOpen={isQuickLogOpen} onClose={() => setIsQuickLogOpen(false)} />
         </main>
@@ -322,6 +319,15 @@ export const AppLayout: React.FC = () => {
 
       {/* Automated Backup Prompt */}
       <BackupPromptModal />
+
+      {/* FAB Quick Action Button */}
+      <FAB />
+
+      {/* Onboarding walkthrough wizard */}
+      <OnboardingWizard 
+        isOpen={!settings.hasCompletedOnboarding} 
+        onClose={() => updateSettings({ hasCompletedOnboarding: true })} 
+      />
     </div>
   );
 };
