@@ -1,82 +1,101 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect } from 'react';
 import { useSpringVelocity } from '../../hooks/useSpringVelocity';
 
 const CELLS = Array.from({ length: 48 }, (_, i) => i);
 
 export const BeforeAfterSlider = () => {
   const [setTarget, setMutator] = useSpringVelocity(50);
-  const [sliderPos, setSliderPos] = useState(50);
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const rectRef = useRef<{ left: number; width: number } | null>(null);
+  const isPointerDownRef = useRef(false);
+  const currentPosRef = useRef(50);
 
+  // Handle Resize, Scroll and Mount positioning
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
 
-    const observer = new ResizeObserver(() => {
-      if (el) {
-        rectRef.current = el.getBoundingClientRect();
+    const updateRect = () => {
+      rectRef.current = el.getBoundingClientRect();
+    };
+
+    const observer = new ResizeObserver(updateRect);
+    observer.observe(el);
+    updateRect();
+
+    window.addEventListener('scroll', updateRect, { passive: true });
+    window.addEventListener('resize', updateRect, { passive: true });
+
+    setMutator((val) => {
+      currentPosRef.current = val;
+      if (containerRef.current) {
+        containerRef.current.style.setProperty('--slider-pos', `${val}%`);
+      }
+      if (inputRef.current) {
+        inputRef.current.value = String(val);
       }
     });
-    observer.observe(el);
-    rectRef.current = el.getBoundingClientRect();
-
-    setMutator(setSliderPos);
-
-    const handleScroll = () => {
-      if (el) {
-        rectRef.current = el.getBoundingClientRect();
-      }
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
-    let isPointerDown = false;
-
-    const handlePointerMove = (e: PointerEvent) => {
-      if (!isPointerDown || !rectRef.current) return;
-      const rect = rectRef.current;
-      const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-      const percentage = (x / rect.width) * 100;
-      setSliderPos(percentage);
-    };
-
-    const handlePointerDown = (e: PointerEvent) => {
-      isPointerDown = true;
-      el.setPointerCapture(e.pointerId);
-      if (!rectRef.current) return;
-      const rect = rectRef.current;
-      const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-      const percentage = (x / rect.width) * 100;
-      setSliderPos(percentage);
-    };
-
-    const handlePointerUp = (e: PointerEvent) => {
-      isPointerDown = false;
-      el.releasePointerCapture(e.pointerId);
-      setTarget(sliderPos);
-    };
-
-    el.addEventListener('pointermove', handlePointerMove, { passive: true });
-    el.addEventListener('pointerdown', handlePointerDown, { passive: true });
-    el.addEventListener('pointerup', handlePointerUp, { passive: true });
-    el.addEventListener('pointerleave', handlePointerUp, { passive: true });
 
     return () => {
       observer.disconnect();
-      window.removeEventListener('scroll', handleScroll);
-      el.removeEventListener('pointermove', handlePointerMove);
-      el.removeEventListener('pointerdown', handlePointerDown);
-      el.removeEventListener('pointerup', handlePointerUp);
-      el.removeEventListener('pointerleave', handlePointerUp);
+      window.removeEventListener('scroll', updateRect);
+      window.removeEventListener('resize', updateRect);
     };
-  }, [setMutator, setTarget, sliderPos]);
+  }, [setMutator]);
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    isPointerDownRef.current = true;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    if (!rectRef.current) return;
+    const rect = rectRef.current;
+    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    const percentage = (x / rect.width) * 100;
+    
+    currentPosRef.current = percentage;
+    if (containerRef.current) {
+      containerRef.current.style.setProperty('--slider-pos', `${percentage}%`);
+    }
+    if (inputRef.current) {
+      inputRef.current.value = String(percentage);
+    }
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isPointerDownRef.current || !rectRef.current) return;
+    const rect = rectRef.current;
+    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    const percentage = (x / rect.width) * 100;
+    
+    currentPosRef.current = percentage;
+    if (containerRef.current) {
+      containerRef.current.style.setProperty('--slider-pos', `${percentage}%`);
+    }
+    if (inputRef.current) {
+      inputRef.current.value = String(percentage);
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isPointerDownRef.current) return;
+    isPointerDownRef.current = false;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch (err) {
+      // Ignore potential capture errors
+    }
+    setTarget(currentPosRef.current);
+  };
 
   return (
     <div
       ref={containerRef}
       className="relative w-full aspect-[4/3] md:aspect-[21/9] rounded-[2rem] overflow-hidden cursor-ew-resize select-none bg-white shadow-2xl border border-gray-200 dark:border-white/10 group"
-
-      style={{ touchAction: 'pan-y', '--slider-pos': `${sliderPos}%` } as React.CSSProperties}
+      style={{ touchAction: 'pan-y', '--slider-pos': '50%' } as React.CSSProperties}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
     >
       {/* Before Image (Messy Spreadsheet) */}
       <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800 flex items-center justify-center p-4 md:p-8">
@@ -108,8 +127,8 @@ export const BeforeAfterSlider = () => {
 
       {/* Slider Handle */}
       <div
-        className="absolute top-0 bottom-0 left-0 w-12 flex items-center justify-center -ml-6 z-10 will-change-transform"
-        style={{ transform: `translate3d(calc(var(--slider-pos) / 100 * ${rectRef.current?.width || 0}px), 0, 0)` }}
+        className="absolute top-0 bottom-0 w-12 flex items-center justify-center -ml-6 z-10 will-change-transform"
+        style={{ left: `var(--slider-pos)` }}
       >
         <div className="w-1.5 h-full bg-white shadow-[0_0_15px_rgba(0,0,0,0.5)] flex items-center justify-center">
            <div className="w-12 h-12 bg-white rounded-full shadow-2xl border-2 border-gray-200 flex items-center justify-center text-accent ring-4 ring-white/50 backdrop-blur-md transition-transform active:scale-95 group-hover:scale-110 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary">
@@ -119,14 +138,30 @@ export const BeforeAfterSlider = () => {
            </div>
         </div>
       </div>
+
       {/* Accessible range input for crawlers and touch devices */}
-      <input type="range" min="0" max="100" value={sliderPos} onChange={(e) => { const v = Number(e.target.value); setSliderPos(v); setTarget(v); }} onKeyDown={(e) => {
-        const step = 5;
-        if (e.key === 'ArrowLeft') { e.preventDefault(); const v = Math.max(0, sliderPos - step); setTarget(v); }
-        else if (e.key === 'ArrowRight') { e.preventDefault(); const v = Math.min(100, sliderPos + step); setTarget(v); }
-        else if (e.key === 'Home') { e.preventDefault(); setTarget(0); }
-        else if (e.key === 'End') { e.preventDefault(); setTarget(100); }
-      }} className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-50 focus:outline-none" aria-label="Compare messy spreadsheet with Vellor dashboard" />
+      <input
+        ref={inputRef}
+        type="range"
+        min="0"
+        max="100"
+        defaultValue="50"
+        onChange={(e) => {
+          const v = Number(e.target.value);
+          currentPosRef.current = v;
+          setTarget(v);
+        }}
+        onKeyDown={(e) => {
+          const step = 5;
+          let v = currentPosRef.current;
+          if (e.key === 'ArrowLeft') { e.preventDefault(); v = Math.max(0, v - step); setTarget(v); }
+          else if (e.key === 'ArrowRight') { e.preventDefault(); v = Math.min(100, v + step); setTarget(v); }
+          else if (e.key === 'Home') { e.preventDefault(); setTarget(0); }
+          else if (e.key === 'End') { e.preventDefault(); setTarget(100); }
+        }}
+        className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-50 focus:outline-none"
+        aria-label="Compare messy spreadsheet with Vellor dashboard"
+      />
     </div>
   );
 };

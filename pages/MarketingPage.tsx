@@ -8,6 +8,7 @@ import { Button, Icon } from '../components/ui';
 import { BeforeAfterSlider } from './marketing-sections/BeforeAfterSlider';
 import { MagneticButton } from './marketing-sections/MagneticButton';
 import { PremiumFeaturesSection } from './marketing-sections/PremiumFeaturesSection';
+import { SavingsCalculator } from './marketing-sections/SavingsCalculator';
 import { founderStoryParagraphs, schemaData } from './marketing-sections/content';
 
 const data = [
@@ -34,7 +35,6 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
   const [isTermsOpen, setIsTermsOpen] = React.useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = React.useState(false);
   const [isAdviceOpen, setIsAdviceOpen] = React.useState(false);
-  const [monthlyCost, setMonthlyCost] = React.useState(35);
   const [isManifestoExpanded, setIsManifestoExpanded] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [isMac, setIsMac] = React.useState(false);
@@ -537,129 +537,10 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
 
 
 
-      {/* White-Label Customization */}
-      <section data-pomelli-section="white-label" className="py-24 px-4 bg-gray-50 dark:bg-primary relative z-20 border-t border-gray-100 dark:border-white/5 overflow-hidden">
-         <div className="max-w-6xl mx-auto flex flex-col items-center">
-             <div className="text-center mb-16">
-                 <div className="w-16 h-16 bg-white dark:bg-white/5 rounded-full mx-auto flex items-center justify-center mb-6 shadow-sm border border-gray-100 dark:border-white/10 text-gray-700 dark:text-gray-400">
-                     <Icon iconName="brush" className="w-8 h-8" />
-                 </div>
-                 <h2 className="text-3xl md:text-4xl font-bold mb-4 font-display text-gray-900 dark:text-white tracking-tighter">Your Brand, Your Rules</h2>
-                 <p className="text-gray-500 dark:text-gray-400 text-lg max-w-2xl mx-auto text-pretty">Vellor gets out of your way. Customize the UI to match your business aesthetic instantly.</p>
-             </div>
-             
-             {/* Demo UI with Custom Color Context */}
-             <div className="w-full max-w-4xl bg-white dark:bg-primary-dark rounded-[2rem] shadow-xl border border-gray-200 dark:border-white/10 relative overflow-hidden flex flex-col md:flex-row group" style={{ '--color-accent': 'var(--custom-brand, #8b5cf6)' } as React.CSSProperties}>
-                 {/* Sidebar Mock */}
-                 <div className="w-full md:w-64 bg-gray-50 dark:bg-primary border-b md:border-b-0 md:border-r border-gray-200 dark:border-white/10 p-6 flex flex-col gap-6 rounded-t-3xl md:rounded-l-3xl md:rounded-tr-none z-10 relative">
-                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-xl bg-[var(--color-accent)] transition-colors duration-500 text-white flex items-center justify-center shadow-md"><Icon iconName="academic-cap" className="w-5 h-5"/></div>
-                        <span className="font-bold text-gray-900 dark:text-white text-lg">My Academy</span>
-                     </div>
-                     
-                     <div className="space-y-4">
-                        <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Themes</div>
-                        <div className="flex gap-2">
-                           {['#8b5cf6', '#10b981', '#f43f5e', '#3b82f6'].map(color => (
-                               <button 
-                                 key={color} 
-                                 onClick={(e) => {
-                                    const parent = (e.currentTarget as HTMLElement).closest('[style*="--color-accent"]');
-                                    if(parent) (parent as HTMLElement).style.setProperty('--custom-brand', color);
-                                 }}
-                                 className="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 shadow-sm hover:scale-110 transition-transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
-                                 style={{ backgroundColor: color }}
-                                 aria-label={`Switch theme color to ${color}`}
-                                 title={`Switch theme color to ${color}`}
-                               />
-                           ))}
-                        </div>
-                     </div>
-                     <div className="mt-auto hidden md:block text-xs text-gray-500 dark:text-gray-400 leading-relaxed">Click a color above to see the entire UI adapt seamlessly to your brand.</div>
-                 </div>
-                 {/* Main Content Mock */}
-                 <div className="flex-1 p-6 md:p-8 bg-white dark:bg-primary-dark relative">
-                     <div className="flex justify-between items-center border-b border-gray-100 dark:border-white/5 pb-4 mb-6">
-                         <h3 className="text-xl font-bold text-gray-900 dark:text-white">Dashboard Overview</h3>
-                         <div className="bg-[var(--color-accent)]/10 text-[var(--color-accent)] px-3 py-1.5 rounded-lg text-sm font-bold transition-colors duration-500 border border-[var(--color-accent)]/20">Premium</div>
-                     </div>
-                     <div className="grid grid-cols-2 gap-4 mb-6">
-                         <div className="p-4 rounded-xl border border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-primary relative overflow-hidden group-hover:border-[var(--color-accent)]/30 transition-colors duration-500">
-                             <div className="text-gray-500 text-sm">Monthly Revenue</div>
-                             <div className="text-2xl font-bold text-gray-900 dark:text-white mt-1">$4,250</div>
-                             <Icon iconName="trending-up" className="absolute bottom-4 right-4 w-12 h-12 text-[var(--color-accent)] opacity-10 transition-colors duration-500" />
-                         </div>
-                         <div className="p-4 rounded-xl border border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-primary relative overflow-hidden group-hover:border-[var(--color-accent)]/30 transition-colors duration-500">
-                             <div className="text-gray-500 text-sm">Active Students</div>
-                             <div className="text-2xl font-bold text-gray-900 dark:text-white mt-1">24</div>
-                             <Icon iconName="users" className="absolute bottom-4 right-4 w-12 h-12 text-[var(--color-accent)] opacity-10 transition-colors duration-500" />
-                         </div>
-                     </div>
-                     <button className="w-full py-3 rounded-xl bg-[var(--color-accent)] text-white font-bold shadow-lg shadow-[var(--color-accent)]/30 opacity-90 hover:opacity-100 transition-all duration-500">
-                         Log New Lesson
-                     </button>
-                 </div>
-             </div>
-         </div>
-      </section>
+
 
       {/* Interactive Savings Calculator */}
-      <section data-pomelli-section="savings-calculator" data-pomelli-value-prop="lifetime-free-savings" data-crawler-intent="conversion" className="py-24 px-4 bg-white dark:bg-primary-dark/50 relative z-20 border-t border-gray-100 dark:border-white/5">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 font-display text-gray-900 dark:text-white tracking-tighter">The Cost of the Status Quo</h2>
-            <p className="text-gray-500 dark:text-gray-400 text-lg mb-12 text-pretty">See how much you'd save by switching to Vellor from any paid tutoring software.</p>
-          </motion.div>
-
-          <div className="bg-gray-50 dark:bg-primary rounded-3xl p-8 md:p-12 border border-gray-100 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.12)] ring-1 ring-inset ring-white/10">
-            <div className="mb-8">
-              <label className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4 block">What you currently pay per month</label>
-              <motion.div key={monthlyCost} initial={{ scale: 1.1, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-5xl font-bold font-display text-accent mb-6">${monthlyCost}</motion.div>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={monthlyCost}
-                onChange={(e) => setMonthlyCost(Number(e.target.value))}
-                className="w-full h-3 bg-gray-200 dark:bg-white/10 rounded-full appearance-none cursor-pointer accent-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-primary"
-                aria-label="Current monthly software cost"
-              />
-              <div className="flex justify-between text-sm text-gray-400 mt-2">
-                <span>$0</span>
-                <span>$100/mo</span>
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-6 mt-8">
-              {[
-                { label: "1-Year Savings", value: monthlyCost * 12 },
-                { label: "3-Year Savings", value: monthlyCost * 36 },
-                { label: "5-Year Savings", value: monthlyCost * 60 },
-              ].map((item) => (
-                <motion.div
-                  key={item.label}
-                  className="bg-white dark:bg-primary-dark p-6 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm"
-                  initial={{ scale: 0.95, opacity: 0 }}
-                  whileInView={{ scale: 1, opacity: 1 }}
-                  viewport={{ once: true }}
-                >
-                  <div className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">{item.label}</div>
-                  <motion.div
-                    key={item.value}
-                    initial={{ scale: 1.2, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="text-3xl md:text-4xl font-bold font-display text-accent"
-                  >
-                    ${item.value.toLocaleString()}
-                  </motion.div>
-                </motion.div>
-              ))}
-            </div>
-
-            <p className="mt-8 text-gray-500 dark:text-gray-400 text-sm">That's money back in your pocket. Vellor is <strong className="text-accent">free forever</strong>.</p>
-          </div>
-        </div>
-      </section>
+      <SavingsCalculator />
 
       {/* Educator's Manifesto */}
       <section data-pomelli-section="founder-story" data-crawler-intent="trust" className="py-24 px-4 bg-gray-50 dark:bg-primary relative z-20 border-t border-gray-100 dark:border-white/5">
