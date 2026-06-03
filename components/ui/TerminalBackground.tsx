@@ -34,8 +34,8 @@ void main() {
     float gridAlpha = max(lines.x, lines.y);
 
     vec3 bgColor = vec3(0.0, 0.0, 0.0);
-    // Absolute minimal alpha of neon green token rgba(0, 255, 102, 0.03)
-    vec3 gridColor = vec3(0.0, 1.0, 0.4);
+    // Absolute minimal alpha of violet token rgba(139, 92, 246, 0.03)
+    vec3 gridColor = vec3(0.545, 0.361, 0.965);
     float gridIntensity = 0.03;
 
     vec3 finalColor = mix(bgColor, gridColor, gridAlpha * gridIntensity);

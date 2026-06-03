@@ -27,9 +27,9 @@ export default {
           dark: '#f1f5f9',
         },
         accent: {
-          light: 'var(--color-accent-light, #33ff85)',
-          DEFAULT: 'var(--color-accent, #00ff66)',
-          dark: 'var(--color-accent-dark, #00cc52)',
+          light: 'var(--color-accent-light, #a78bfa)',
+          DEFAULT: 'var(--color-accent, #8b5cf6)',
+          dark: 'var(--color-accent-dark, #7c3aed)',
         },
         success: '#10b981',
         warning: '#f59e0b',
