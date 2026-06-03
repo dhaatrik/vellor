@@ -25,6 +25,11 @@ vi.mock('../../../src/crypto', () => ({
   importKeyFromBase64: vi.fn(),
 }));
 
+// Mock useCybertext to immediately return the static text during tests
+vi.mock('../../../hooks/useCybertext', () => ({
+  useCybertext: vi.fn((text) => text),
+}));
+
 describe('SetupEncryption', () => {
   let mockSetMasterKey: any;
 
