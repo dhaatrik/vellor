@@ -99,7 +99,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ itemVariants }
           <Card className="content-visibility-auto contain-layout contain-paint h-full border border-white/5 bg-black flex flex-col">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-display font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <Icon iconName={activeChart === 'income' ? 'chart-bar' : 'users'} className={`w-5 h-5 ${activeChart === 'income' ? 'text-[#00ff66]' : 'text-white'}`} />
+                <Icon iconName={activeChart === 'income' ? 'chart-bar' : 'users'} className={`w-5 h-5 ${activeChart === 'income' ? 'text-[#8b5cf6]' : 'text-white'}`} />
                 {activeChart === 'income' ? 'Income Overview' : 'Student Growth'}
               </h3>
               <div className="flex bg-black border border-[#333333] rounded-sm p-[2px]" role="tablist" aria-label="Chart view options">
@@ -110,7 +110,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ itemVariants }
                   aria-controls="dashboard-chart-panel"
                   aria-label="View Income Overview"
                   onClick={() => setActiveChart('income')}
-                  className={`px-3 py-1 text-xs font-mono rounded-sm transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[#00ff66] focus-visible:ring-offset-1 focus-visible:ring-offset-black ${activeChart === 'income' ? 'bg-[#222222] text-[#00ff66] border border-[#00ff66]/30 shadow-sm' : 'text-gray-500 hover:text-gray-300 border border-transparent'}`}
+                  className={`px-3 py-1 text-xs font-mono rounded-sm transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[#8b5cf6] focus-visible:ring-offset-1 focus-visible:ring-offset-black ${activeChart === 'income' ? 'bg-[#222222] text-[#8b5cf6] border border-[#8b5cf6]/30 shadow-sm' : 'text-gray-500 hover:text-gray-300 border border-transparent'}`}
                 >
                   Income
                 </button>
@@ -132,7 +132,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ itemVariants }
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <pattern id="scanlines" patternUnits="userSpaceOnUse" width="4" height="4">
-                      <rect width="4" height="1" fill={activeChart === 'income' ? 'rgba(0, 255, 102, 0.15)' : 'rgba(255, 255, 255, 0.15)'} />
+                      <rect width="4" height="1" fill={activeChart === 'income' ? 'rgba(139, 92, 246, 0.15)' : 'rgba(255, 255, 255, 0.15)'} />
                     </pattern>
                   </defs>
                   <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="rgba(255,255,255,0.05)" />
@@ -152,14 +152,14 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ itemVariants }
                   />
                   <Tooltip
                     contentStyle={{ backgroundColor: '#000000', border: '1px solid #333333', borderRadius: '0', padding: '8px' }}
-                    itemStyle={{ color: activeChart === 'income' ? '#00ff66' : '#ffffff', fontFamily: 'monospace', fontSize: '14px' }}
+                    itemStyle={{ color: activeChart === 'income' ? '#8b5cf6' : '#ffffff', fontFamily: 'monospace', fontSize: '14px' }}
                     labelStyle={{ color: '#888888', fontFamily: 'monospace', fontSize: '12px', marginBottom: '4px' }}
                     formatter={(value: ValueType | undefined) => activeChart === 'income' ? [formatCurrency(Number(value), settings.currencySymbol), 'Income'] : [value, 'Students']}
                   />
                   <Area
                     type="monotone"
                     dataKey={activeChart}
-                    stroke={activeChart === 'income' ? '#00ff66' : '#ffffff'}
+                    stroke={activeChart === 'income' ? '#8b5cf6' : '#ffffff'}
                     strokeWidth={1.5}
                     fillOpacity={1}
                     fill="url(#scanlines)"
