@@ -11,6 +11,7 @@ import { QuickLogModal } from '../components/transactions/QuickLogModal';
 import { generateBulkInvoicePDF } from '../pdf';
 import { CSVImportWizard } from '../components/students/CSVImportWizard';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getLocalYYYYMMDD } from '../helpers';
 
 /**
  * Manages the display and manipulation of student data.
@@ -49,7 +50,7 @@ export const StudentsPage: React.FC = () => {
   const [selectedStudentIds, setSelectedStudentIds] = useState<Set<string>>(new Set());
   const [showBulkLogModal, setShowBulkLogModal] = useState(false);
   const [showImportWizard, setShowImportWizard] = useState(false);
-  const [bulkLogData, setBulkLogData] = useState(() => ({ date: new Date().toISOString().split('T')[0], duration: 60, fee: 50, notes: 'Bulk logged lesson' }));
+  const [bulkLogData, setBulkLogData] = useState(() => ({ date: getLocalYYYYMMDD(), duration: 60, fee: 50, notes: 'Bulk logged lesson' }));
 
   const [makeupPrompt, setMakeupPrompt] = useState<{isOpen: boolean, studentId: string}>({isOpen: false, studentId: ''});
   const [showMakeupModal, setShowMakeupModal] = useState<{isOpen: boolean, studentId: string}>({isOpen: false, studentId: ''});

@@ -13,6 +13,17 @@ export const generateId = () => crypto.randomUUID();
  * @param {string | undefined} str The string to sanitize.
  * @returns {string} The sanitized string.
  */
+/**
+ * Fast, allocation-friendly method to generate 'YYYY-MM-DD' strings in local time.
+ * Avoids the timezone regressions and object allocations associated with `new Date().toISOString().split('T')[0]`.
+ */
+export const getLocalYYYYMMDD = (d = new Date()): string => {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export const sanitizeString = (str: string | undefined): string => {
   if (str === undefined) return '';
   return DOMPurify.sanitize(str, { ALLOWED_TAGS: [] }); // Strip all HTML tags

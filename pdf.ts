@@ -2,6 +2,7 @@ import jsPDF from 'jspdf';
 import { DEFAULT_VELLOR_LOGO_BASE64 } from './src/defaultLogo';
 import autoTable from 'jspdf-autotable';
 import { Transaction, Student, AppSettings, PaymentStatus } from './types';
+import { getLocalYYYYMMDD } from './helpers';
 
 // ⚡ Bolt Performance: Cache Intl.DateTimeFormat to avoid massive repeated allocation overhead
 const dateFormatter = new Intl.DateTimeFormat(undefined);
@@ -106,7 +107,7 @@ export const generateProgressReportPDF = (
       doc.text("No progress records found.", 14, currentY);
   }
 
-  doc.save(`ProgressReport_${student.firstName}_${new Date().toISOString().split('T')[0]}.pdf`);
+  doc.save(`ProgressReport_${student.firstName}_${getLocalYYYYMMDD()}.pdf`);
 };
 
 export const generateBulkInvoicePDF = (
@@ -247,6 +248,6 @@ export const generateBulkInvoicePDF = (
     return false;
   }
 
-  doc.save(`Monthly_Invoices_${new Date().toISOString().split('T')[0]}.pdf`);
+  doc.save(`Monthly_Invoices_${getLocalYYYYMMDD()}.pdf`);
   return true;
 };

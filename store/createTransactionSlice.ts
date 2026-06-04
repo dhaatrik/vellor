@@ -2,7 +2,7 @@ import { StateCreator } from 'zustand';
 import localforage from 'localforage';
 import { AppState, TransactionSlice } from './types';
 import { Transaction, TransactionFormData, PaymentStatus } from '../types';
-import { generateId } from '../helpers';
+import { generateId, getLocalYYYYMMDD } from '../helpers';
 import { POINTS_ALLOCATION } from '../constants';
 import { sanitizeString, determinePaymentStatus, calculateTransactionDue } from '../helpers';
 
@@ -325,7 +325,7 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `vellor_transactions_${new Date().toISOString().split('T')[0]}.csv`;
+        a.download = `vellor_transactions_${getLocalYYYYMMDD()}.csv`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

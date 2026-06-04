@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Icon, Button, Input, Select } from '../ui';
 import { useStore } from '../../store';
 import { TransactionFormData, AttendanceStatus, PaymentStatus } from '../../types';
+import { getLocalYYYYMMDD } from '../../helpers';
 
 interface QuickLogModalProps {
   isOpen: boolean;
@@ -69,7 +70,7 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ isOpen, onClose, d
 
     const transactionData: TransactionFormData = {
       studentId,
-      date: new Date().toISOString().split('T')[0],
+      date: getLocalYYYYMMDD(),
       lessonDuration: Number(duration),
       lessonFee,
       amountPaid: paid,

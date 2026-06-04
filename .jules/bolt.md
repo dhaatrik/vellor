@@ -243,3 +243,7 @@
 ## 2026-06-01 - Replace O(N^2) Array Reductions with Cached Running Totals
 **Learning:** During bulk operations (like importing multiple transactions), iterating over the entire array inside a loop to calculate aggregates (like total due per student) results in an O(N*M) or O(N^2) time complexity.
 **Action:** Replace nested array reductions with cached O(1) properties on the parent entity. Use state updates or Maps locally to track running totals during bulk inserts before flushing the final result to the state.
+
+## 2026-06-04 - UTC Offset Bug via `new Date().toISOString().split('T')[0]`
+**Learning:** `new Date().toISOString().split('T')[0]` generates strings in UTC. If a user logs a transaction late at night in a local timezone behind UTC (like PST), the transaction date will jump forward to "tomorrow". Relying on `toISOString()` to generate "local" strings is a subtle bug, even though it reduces allocations compared to instantiating new local Date strings.
+**Action:** Always prefer formatting dates in the local timezone using `getFullYear()`, `getMonth()`, etc., over `toISOString()` when dealing with user-facing date fields.
