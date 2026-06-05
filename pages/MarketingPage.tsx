@@ -143,13 +143,13 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
          </nav>
 
          <div className="flex items-center gap-4">
-            <a href="https://github.com/dhaatrik/vellor" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-primary rounded-md">
+            <a href="https://github.com/dhaatrik/vellor" target="_blank" rel="noopener noreferrer" aria-label="Visit our GitHub" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-primary rounded-md">
                 <Github className="w-5 h-5" />
             </a>
-            <a href="https://x.com/dhaatrik" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-primary rounded-md">
+            <a href="https://x.com/dhaatrik" target="_blank" rel="noopener noreferrer" aria-label="Visit our X (Twitter)" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-primary rounded-md">
                 <XIcon className="w-5 h-5" />
             </a>
-            <a href="https://www.linkedin.com/in/dhaatrik" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-[#0A66C2] dark:text-gray-400 dark:hover:text-[#0A66C2] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-primary rounded-md">
+            <a href="https://www.linkedin.com/in/dhaatrik" target="_blank" rel="noopener noreferrer" aria-label="Visit our LinkedIn" className="text-gray-600 hover:text-[#0A66C2] dark:text-gray-400 dark:hover:text-[#0A66C2] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-primary rounded-md">
                 <Linkedin className="w-5 h-5" />
             </a>
             <div className="w-px h-6 bg-gray-200 dark:bg-white/10 ml-2 mr-1"></div>
@@ -753,9 +753,9 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
                           The powerful, offline-first operating system designed exclusively for independent tutors.
                       </p>
                       <div className="flex items-center gap-4">
-                          <a href="https://github.com/dhaatrik/vellor" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"><Github className="w-5 h-5" /></a>
-                          <a href="https://x.com/dhaatrik" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"><XIcon className="w-5 h-5" /></a>
-                          <a href="https://www.linkedin.com/in/dhaatrik" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#0A66C2] transition-colors"><Linkedin className="w-5 h-5" /></a>
+                          <a href="https://github.com/dhaatrik/vellor" target="_blank" rel="noopener noreferrer" aria-label="Visit our GitHub" className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"><Github className="w-5 h-5" /></a>
+                          <a href="https://x.com/dhaatrik" target="_blank" rel="noopener noreferrer" aria-label="Visit our X (Twitter)" className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"><XIcon className="w-5 h-5" /></a>
+                          <a href="https://www.linkedin.com/in/dhaatrik" target="_blank" rel="noopener noreferrer" aria-label="Visit our LinkedIn" className="text-gray-400 hover:text-[#0A66C2] transition-colors"><Linkedin className="w-5 h-5" /></a>
                       </div>
                   </div>
                   
