@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useStore } from '../../store';
 import { Transaction, Student, PaymentStatus, AttendanceStatus } from '../../types';
-import { generateId } from '../../helpers';
+import { generateId, getLocalYYYYMMDD } from '../../helpers';
 import { Button, Input, Select, Textarea, Icon } from '../ui';
 import { z } from 'zod';
 import { useForm, DefaultValues } from 'react-hook-form';
@@ -50,7 +50,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({ transaction, s
   // Resolve default values
   let defaultFormValues: DefaultValues<TransactionFormInput> = {
       studentId: defaultStudentId || (students.length > 0 ? students[0].id : ''),
-      date: new Date().toISOString().split('T')[0],
+      date: getLocalYYYYMMDD(),
       lessonDuration: 60,
       lessonFee: 0,
       amountPaid: 0,

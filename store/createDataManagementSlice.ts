@@ -4,6 +4,7 @@ import { Theme } from '../types';
 import { DEFAULT_CURRENCY_SYMBOL, INITIAL_GAMIFICATION_STATS, ACHIEVEMENTS_DEFINITIONS } from '../constants';
 import { backupSchema } from './validation';
 import { jsonReviver } from '../src/crypto';
+import { getLocalYYYYMMDD } from '../helpers';
 
 export const createDataManagementSlice: StateCreator<AppState, [], [], DataManagementSlice> = (set, get) => ({
   masterKey: null,
@@ -43,7 +44,7 @@ export const createDataManagementSlice: StateCreator<AppState, [], [], DataManag
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `vellor_backup_${new Date().toISOString().split('T')[0]}.json`;
+        a.download = `vellor_backup_${getLocalYYYYMMDD()}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
