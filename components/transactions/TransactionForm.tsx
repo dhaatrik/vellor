@@ -226,6 +226,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({ transaction, s
               step="0.01" 
               error={errors.lessonFee?.message}
               disabled={studentRateType === 'monthly' || studentRateType === 'per_lesson'} 
+              title={studentRateType === 'monthly' || studentRateType === 'per_lesson' ? "Fee is fixed by student's tuition settings" : undefined}
             />
             <Input 
               label={`Amount Paid (${currencySymbol})`} 
