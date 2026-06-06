@@ -119,3 +119,7 @@
 ## 2026-06-01 - 100% Branch Coverage for crypto.ts
 **Learning:** In order to achieve 100% branch coverage for `crypto.ts`, all logical execution paths inside `try/catch` block or conditionally checked parameters such as `schema ? schema.parse(...) : ...` must be explicitly verified.
 **Action:** When working on missing test coverage, use the coverage output tool (like Vitest's coverage-final.json) to precisely identify missing branch evaluations, and supply inputs to test files that hit edge cases.
+
+## 2026-06-06 - Modal Close Button Accessibility
+**Learning:** In the Vellor app, raw HTML `<button>` elements often lack built-in focus visibility for keyboard navigation compared to the custom `<Button>` component. When working with raw `<button>` elements, always explicitly include focus-visibility utility classes (e.g., `focus:outline-none focus-visible:ring-2 focus-visible:ring-accent`) to maintain accessibility.
+**Action:** When creating or modifying close buttons or icon buttons, ensure they have explicit `focus-visible` styling or use the custom `Button` component which provides these out-of-the-box.
