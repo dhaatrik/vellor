@@ -72,7 +72,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
                       <Dialog.Title className="sr-only">Modal Dialog</Dialog.Title>
                     )}
                     <Dialog.Close asChild>
-                      <Button variant="ghost" size="sm" aria-label="Close modal" title="Close modal" className="rounded-full w-10 h-10 p-0 flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400">
+                      <Button variant="ghost" size="sm" aria-label="Close modal" title="Close modal" className="rounded-full w-10 h-10 p-0 flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary-light">
                         <Icon iconName="x-mark" className="w-5 h-5" />
                       </Button>
                     </Dialog.Close>
