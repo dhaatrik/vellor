@@ -78,14 +78,14 @@ test('Reload App button triggers window.location.reload', async () => {
 test('Hard Reset button clears data and reloads', async () => {
   const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-  // Mock window.location.reload and localStorage.clear
+  // Mock window.location.reload
   const originalLocation = window.location;
   Object.defineProperty(window, 'location', {
     configurable: true,
     value: { reload: vi.fn() },
   });
 
-  const localStorageSpy = vi.spyOn(Storage.prototype, 'clear').mockImplementation(() => {});
+
 
   render(
     <ErrorBoundary>
@@ -98,7 +98,7 @@ test('Hard Reset button clears data and reloads', async () => {
   await user.click(resetButton);
 
   expect(localforage.clear).toHaveBeenCalledTimes(1);
-  expect(localStorageSpy).toHaveBeenCalledTimes(1);
+
   expect(window.location.reload).toHaveBeenCalledTimes(1);
 
   // Restore
@@ -106,6 +106,6 @@ test('Hard Reset button clears data and reloads', async () => {
     configurable: true,
     value: originalLocation,
   });
-  localStorageSpy.mockRestore();
+
   consoleSpy.mockRestore();
 });

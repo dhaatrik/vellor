@@ -5,6 +5,7 @@ import { Button, Card, StatDisplayCard, Icon, ConfirmationModal } from '../compo
 import { formatCurrency, formatDate, formatRelativeTime } from '../helpers';
 import { motion } from 'framer-motion';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import localforage from 'localforage';
 import { usePwaInstall } from '../usePwaInstall';
 import { DashboardCharts } from '../components/dashboard/DashboardCharts';
 import { DashboardGoal } from '../components/dashboard/DashboardGoal';
@@ -38,19 +39,24 @@ export const DashboardPage: React.FC = () => {
   const [isConfirmingClearAll, setIsConfirmingClearAll] = useState(false);
   const [confirmingDeleteActivityId, setConfirmingDeleteActivityId] = useState<string | null>(null);
   const { isInstallable, promptInstall } = usePwaInstall();
+  const [lastBackup, setLastBackup] = useState<string | null>(null);
 
   useEffect(() => {
-    const lastBackup = localStorage.getItem('lastBackupDate');
-    if (lastBackup) {
+    const fetchBackup = async () => {
+      const backup = await localforage.getItem<string>('lastBackupDate');
+      setLastBackup(backup);
+      if (backup) {
       // ⚡ Bolt Performance: Use Date.parse() instead of new Date().getTime()
-      const daysSinceBackup = (Date.now() - Date.parse(lastBackup)) / (1000 * 3600 * 24);
+      const daysSinceBackup = (Date.now() - Date.parse(backup)) / (1000 * 3600 * 24);
       if (daysSinceBackup > 7) {
         // Use a timeout to ensure toasts render after initial mount
         setTimeout(() => addToast("It's been over a week since your last backup! Go to Settings to export your data.", "info"), 1000);
       }
-    } else if (students.length > 0) {
-      setTimeout(() => addToast("Remember to regularly export your data from Settings to keep it safe.", "info"), 1000);
-    }
+      } else if (students.length > 0) {
+        setTimeout(() => addToast("Remember to regularly export your data from Settings to keep it safe.", "info"), 1000);
+      }
+    };
+    fetchBackup();
   }, []); // Run only once on mount
 
   const activityParentRef = React.useRef<HTMLDivElement>(null);
@@ -138,7 +144,6 @@ export const DashboardPage: React.FC = () => {
             <span className="text-accent animate-pulse">●</span>
             <span>BACKUP_ENTROPY: {
               (() => {
-                const lastBackup = localStorage.getItem('lastBackupDate');
                 if (!lastBackup) return 'UNKNOWN';
                 const daysSinceBackup = (Date.now() - Date.parse(lastBackup)) / (1000 * 3600 * 24);
                 return daysSinceBackup > 7 ? 'CRITICAL' : 'NOMINAL';

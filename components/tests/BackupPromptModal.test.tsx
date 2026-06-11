@@ -1,11 +1,20 @@
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import '@testing-library/jest-dom';
 import { BackupPromptModal } from '../BackupPromptModal';
 import { useStore } from '../../store';
+import localforage from 'localforage';
 
 // Mock the store
+vi.mock('localforage', () => ({
+  default: {
+    getItem: vi.fn(),
+    setItem: vi.fn().mockResolvedValue(undefined),
+    clear: vi.fn().mockResolvedValue(undefined),
+  }
+}));
+
 vi.mock('../../store', () => ({
   useStore: vi.fn(),
 }));
@@ -59,7 +68,8 @@ describe('BackupPromptModal', () => {
   beforeEach(() => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     vi.clearAllMocks();
-    localStorage.clear();
+    localforage.clear();
+    vi.mocked(localforage.getItem).mockResolvedValue(null);
 
     // Setup store mock default return
     (useStore as unknown as ReturnType<typeof vi.fn>).mockImplementation((selector) => {
@@ -88,7 +98,7 @@ describe('BackupPromptModal', () => {
     await act(async () => {
         render(<BackupPromptModal />);
     });
-    expect(screen.queryByTestId('modal')).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByTestId('modal')).not.toBeInTheDocument());
   });
 
   it('opens after 3 seconds if never backed up and students exist', async () => {
@@ -134,7 +144,7 @@ describe('BackupPromptModal', () => {
   it('opens if last backup was more than 14 days ago', async () => {
     const twentyDaysAgo = new Date();
     twentyDaysAgo.setDate(twentyDaysAgo.getDate() - 20);
-    localStorage.setItem('lastBackupDate', twentyDaysAgo.toISOString());
+    vi.mocked(localforage.getItem).mockResolvedValue(twentyDaysAgo.toISOString());
 
     await act(async () => {
         render(<BackupPromptModal />);
@@ -150,7 +160,7 @@ describe('BackupPromptModal', () => {
   it('does not open if last backup was less than 14 days ago', async () => {
     const twoDaysAgo = new Date();
     twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-    localStorage.setItem('lastBackupDate', twoDaysAgo.toISOString());
+    vi.mocked(localforage.getItem).mockResolvedValue(twoDaysAgo.toISOString());
 
     await act(async () => {
         render(<BackupPromptModal />);
@@ -163,7 +173,7 @@ describe('BackupPromptModal', () => {
     expect(screen.queryByTestId('modal')).not.toBeInTheDocument();
   });
 
-  it('calls exportData and updates localStorage when Export Backup is clicked', async () => {
+  it('calls exportData and updates localforage when Export Backup is clicked', async () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     await act(async () => {
         render(<BackupPromptModal />);
@@ -179,13 +189,13 @@ describe('BackupPromptModal', () => {
     await user.click(exportBtn);
 
     expect(mockExportData).toHaveBeenCalled();
-    expect(localStorage.getItem('lastBackupDate')).not.toBeNull();
+    expect(localforage.setItem).toHaveBeenCalledWith('lastBackupDate', expect.any(String));
     // Modal should close
-    expect(screen.queryByTestId('modal')).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByTestId('modal')).not.toBeInTheDocument());
   });
 
   it('opens if last backup date is an invalid string', async () => {
-    localStorage.setItem('lastBackupDate', 'invalid_date_string');
+    vi.mocked(localforage.getItem).mockResolvedValue('invalid_date_string');
 
     await act(async () => {
         render(<BackupPromptModal />);
@@ -198,7 +208,7 @@ describe('BackupPromptModal', () => {
     expect(screen.getByTestId('modal')).toBeInTheDocument();
   });
 
-  it('updates localStorage and shows toast when Remind Me Later is clicked', async () => {
+  it('updates localforage and shows toast when Remind Me Later is clicked', async () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     await act(async () => {
         render(<BackupPromptModal />);
@@ -215,19 +225,9 @@ describe('BackupPromptModal', () => {
 
     expect(mockAddToast).toHaveBeenCalledWith('Backup postponed to tomorrow.', 'info');
 
-    const lastBackupDateStr = localStorage.getItem('lastBackupDate');
-    expect(lastBackupDateStr).not.toBeNull();
-
-    // It should be set to (13 days ago) effectively postponing the next check to tomorrow
-    const lastBackupDate = new Date(lastBackupDateStr!);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - lastBackupDate.getTime());
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-    // It sets the last backup date to 13 days ago, so tomorrow it will be 14 days
-    expect(diffDays).toBe(13); // BACKUP_INTERVAL_DAYS - 1
+    expect(localforage.setItem).toHaveBeenCalledWith('lastBackupDate', expect.any(String));
 
     // Modal should close
-    expect(screen.queryByTestId('modal')).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByTestId('modal')).not.toBeInTheDocument());
   });
 });

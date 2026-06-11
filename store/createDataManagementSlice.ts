@@ -5,6 +5,7 @@ import { DEFAULT_CURRENCY_SYMBOL, INITIAL_GAMIFICATION_STATS, ACHIEVEMENTS_DEFIN
 import { backupSchema } from './validation';
 import { jsonReviver } from '../src/crypto';
 import { getLocalYYYYMMDD } from '../helpers';
+import localforage from 'localforage';
 
 export const createDataManagementSlice: StateCreator<AppState, [], [], DataManagementSlice> = (set, get) => ({
   masterKey: null,
@@ -50,7 +51,7 @@ export const createDataManagementSlice: StateCreator<AppState, [], [], DataManag
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
         
-        localStorage.setItem('lastBackupDate', new Date().toISOString());
+        await localforage.setItem('lastBackupDate', new Date().toISOString());
         
         get().addToast('Data exported successfully!', 'success');
     } catch (error) {
