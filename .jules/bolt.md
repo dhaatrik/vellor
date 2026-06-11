@@ -255,3 +255,7 @@
 ## 2026-06-11 - Eliminate array chaining map/sort in portal payload serialization
 **Learning:** Chaining array methods like `.map().sort()` inside serialization functions or payload generators creates intermediate arrays and increases garbage collection overhead, particularly with potentially large lists.
 **Action:** Replace `.map().sort()` pipelines with single-pass standard `for` loops that manually construct objects into a pre-allocated array (`new Array(len)` when mapping exactly 1-to-1) and then execute `.sort()` in-place before returning the array.
+
+## 2026-06-12 - Eliminate Linear Search in Bulk Data Processing
+**Learning:** Calling an O(N) array search operation (like `.forEach` or `.find`) inside a bulk data processing loop (e.g., iterating through `M` imported rows) results in O(N*M) time complexity, creating significant latency on large datasets.
+**Action:** When performing cross-entity lookups or conflict detection inside a loop, pre-compute an index `Map` (e.g., mapping normalized emails to entities) outside the loop. This reduces lookups to O(1) and optimizes the overall complexity to O(N + M).
