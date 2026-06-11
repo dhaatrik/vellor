@@ -142,6 +142,25 @@ export const generateWhatsAppLink = (phone: PhoneNumber | undefined, message: st
  * Generates a Base64 encoded URL for the read-only student/parent portal.
  */
 export const generatePortalLink = (student: Student, transactions: Transaction[], settings: AppSettings): string => {
+  // ⚡ Bolt Performance: Replace Array.prototype.map() with a pre-allocated array and a standard for loop
+  // to avoid intermediate allocations and callback execution overhead.
+  const mappedTransactions = new Array(transactions.length);
+  for (let i = 0, len = transactions.length; i < len; i++) {
+    const t = transactions[i];
+    mappedTransactions[i] = {
+      id: t.id,
+      date: t.date,
+      lessonFee: t.lessonFee,
+      amountPaid: t.amountPaid,
+      status: t.status,
+      grade: t.grade,
+      progressRemark: t.progressRemark,
+    };
+  }
+
+  // ⚡ Bolt Performance: Avoid Date.parse() overhead during O(N log N) sorting by using direct ISO string comparison
+  mappedTransactions.sort((a, b) => b.date < a.date ? -1 : (b.date > a.date ? 1 : 0));
+
   const payload = {
     tutorName: settings.userName,
     currencySymbol: settings.currencySymbol,
@@ -150,17 +169,7 @@ export const generatePortalLink = (student: Student, transactions: Transaction[]
       lastName: student.lastName,
       subjects: student.tuition.subjects,
     },
-    transactions: transactions.map(t => ({
-      id: t.id,
-      date: t.date,
-      lessonFee: t.lessonFee,
-      amountPaid: t.amountPaid,
-      status: t.status,
-      grade: t.grade,
-      progressRemark: t.progressRemark,
-    }))
-    // ⚡ Bolt Performance: Avoid Date.parse() overhead during O(N log N) sorting by using direct ISO string comparison
-    .sort((a, b) => b.date < a.date ? -1 : (b.date > a.date ? 1 : 0))
+    transactions: mappedTransactions
   };
   
   // 🛡️ SECURITY RATIONALE:
