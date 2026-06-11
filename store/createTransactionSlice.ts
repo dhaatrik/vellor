@@ -6,18 +6,22 @@ import { generateId, getLocalYYYYMMDD } from '../helpers';
 import { POINTS_ALLOCATION } from '../constants';
 import { sanitizeString, determinePaymentStatus, calculateTransactionDue } from '../helpers';
 
+
+const sanitizeTransactionData = <T extends Partial<TransactionFormData>>(transactionData: T): T => {
+  const sanitized: Partial<TransactionFormData> = { ...transactionData };
+  if (transactionData.paymentMethod !== undefined) sanitized.paymentMethod = sanitizeString(transactionData.paymentMethod);
+  if (transactionData.notes !== undefined) sanitized.notes = sanitizeString(transactionData.notes);
+  if (transactionData.grade !== undefined) sanitized.grade = sanitizeString(transactionData.grade);
+  if (transactionData.progressRemark !== undefined) sanitized.progressRemark = sanitizeString(transactionData.progressRemark);
+  return sanitized as T;
+};
+
 export const createTransactionSlice: StateCreator<AppState, [], [], TransactionSlice> = (set, get) => ({
   transactions: [],
 
 
   addTransaction: (transactionData) => {
-    const sanitizedTransactionData: TransactionFormData = {
-      ...transactionData,
-      paymentMethod: sanitizeString(transactionData.paymentMethod),
-      notes: sanitizeString(transactionData.notes),
-      grade: sanitizeString(transactionData.grade),
-      progressRemark: sanitizeString(transactionData.progressRemark),
-    };
+    const sanitizedTransactionData: TransactionFormData = sanitizeTransactionData(transactionData);
 
     const status = determinePaymentStatus(sanitizedTransactionData.amountPaid, sanitizedTransactionData.lessonFee, sanitizedTransactionData.status);
 
@@ -71,13 +75,7 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
     // ⚡ Bolt Performance: Process bulk additions inside a single loop to avoid N+1 state updates
     for (let j = 0; j < transactionsData.length; j++) {
       const transactionData = transactionsData[j];
-      const sanitizedTransactionData: TransactionFormData = {
-        ...transactionData,
-        paymentMethod: sanitizeString(transactionData.paymentMethod),
-        notes: sanitizeString(transactionData.notes),
-        grade: sanitizeString(transactionData.grade),
-        progressRemark: sanitizeString(transactionData.progressRemark),
-      };
+      const sanitizedTransactionData: TransactionFormData = sanitizeTransactionData(transactionData);
 
       const status = determinePaymentStatus(sanitizedTransactionData.amountPaid, sanitizedTransactionData.lessonFee, sanitizedTransactionData.status);
 
@@ -150,19 +148,7 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
   updateTransaction: (transactionId, transactionData) => {
      let updatedTransaction: Transaction | undefined;
 
-     const sanitizedTransactionData: Partial<TransactionFormData> = { ...transactionData };
-     if (transactionData.paymentMethod !== undefined) {
-        sanitizedTransactionData.paymentMethod = sanitizeString(transactionData.paymentMethod);
-     }
-     if (transactionData.notes !== undefined) {
-        sanitizedTransactionData.notes = sanitizeString(transactionData.notes);
-     }
-     if (transactionData.grade !== undefined) {
-        sanitizedTransactionData.grade = sanitizeString(transactionData.grade);
-     }
-     if (transactionData.progressRemark !== undefined) {
-        sanitizedTransactionData.progressRemark = sanitizeString(transactionData.progressRemark);
-     }
+     const sanitizedTransactionData = sanitizeTransactionData(transactionData);
 
      set(state => {
        // ⚡ Bolt Performance: Use an early-breaking for loop instead of .map() to avoid full array iterations when updating a single item

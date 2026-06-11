@@ -31,11 +31,15 @@ export interface GamificationSlice {
 
 export interface UISlice {
   toasts: ToastMessage[];
+  hoveredTransactionId: string | null;
+  hoveredStudentId: string | null;
   activityLog: Activity[];
   addToast: (message: string, type?: ToastMessage['type']) => void;
   logActivity: (message: string, icon: IconName) => void;
   deleteActivity: (id: string) => void;
   clearActivityLog: () => void;
+  setHoveredTransaction: (id: string | null) => void;
+  setHoveredStudent: (id: string | null) => void;
 }
 
 export interface SettingsSlice {
