@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { sanitizeString, formatCurrency, formatDate, formatPhoneNumber, getPaymentStatusColor, formatRelativeTime, generatePortalLink, generateWhatsAppLink, getLocalYYYYMMDD } from '../../helpers';
+import { describe, it, expect, vi } from 'vitest';
+import { generateId, sanitizeString, formatCurrency, formatDate, formatPhoneNumber, getPaymentStatusColor, formatRelativeTime, generatePortalLink, generateWhatsAppLink, getLocalYYYYMMDD } from '../../helpers';
 import { PaymentStatus, Student, Transaction, AppSettings, Theme } from '../../types';
 
 describe('Helpers', () => {
