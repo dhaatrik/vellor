@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Student } from '../../types';
 import { Button, Card, Icon } from '../ui';
 import { formatCurrency } from '../../helpers';
-import { setHoveredStudent } from '../../helpers/globalHover';
+import { useStore } from '../../store';
 
 /**
  * Props for the StudentListItem component.
@@ -46,6 +46,7 @@ const getGradient = (name: string) => {
  */
 export const StudentListItem: React.FC<StudentListItemProps> = React.memo(({ student, onSelect, onDelete, currencySymbol, outstandingBalance, isSelected, onToggleSelect }) => {
   const gradientClass = useMemo(() => getGradient(student.firstName + student.lastName), [student.firstName, student.lastName]);
+  const setHoveredStudent = useStore(s => s.setHoveredStudent);
 
   return (
     <Card
