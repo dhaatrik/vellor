@@ -256,6 +256,6 @@
 **Learning:** Chaining array methods like `.map().sort()` inside serialization functions or payload generators creates intermediate arrays and increases garbage collection overhead, particularly with potentially large lists.
 **Action:** Replace `.map().sort()` pipelines with single-pass standard `for` loops that manually construct objects into a pre-allocated array (`new Array(len)` when mapping exactly 1-to-1) and then execute `.sort()` in-place before returning the array.
 
-## 2024-05-18 - Bulk Update Students Optimization
+## 2026-06-11 - Bulk Update Students Optimization
 **Learning:** Adding multiple transactions processes due balances and creates an N+1 state update problem when we iteratively call `updateStudent` in a loop, resulting in huge performance bottlenecks and lag. O(N*M) behavior is mitigated by bulk updates.
 **Action:** Implemented `bulkUpdateStudents` inside the student slice state creator which uses a `Map` to perform multiple updates to distinct students and applies them efficiently within a single `set()` dispatch. Always favor batching updates into a single store action to avoid multiple re-renders and React state update delays.
