@@ -247,3 +247,6 @@
 ## 2026-06-04 - UTC Offset Bug via `new Date().toISOString().split('T')[0]`
 **Learning:** `new Date().toISOString().split('T')[0]` generates strings in UTC. If a user logs a transaction late at night in a local timezone behind UTC (like PST), the transaction date will jump forward to "tomorrow". Relying on `toISOString()` to generate "local" strings is a subtle bug, even though it reduces allocations compared to instantiating new local Date strings.
 **Action:** Always prefer formatting dates in the local timezone using `getFullYear()`, `getMonth()`, etc., over `toISOString()` when dealing with user-facing date fields.
+## 2024-05-19 - Hoist Date.toISOString() in Batch Updates
+**Learning:** To optimize performance during bulk creation operations (like array mapping or Zustand bulk actions), hoist invariant, expensive operations such as `new Date().toISOString()` outside of iterative loops. This saves CPU cycles, prevents redundant memory allocations, and ensures batch items logically share the same timestamp.
+**Action:** Always extract `new Date().toISOString()` or other expensive, unchanging computations to a variable before entering a loop or a `.map()` that processes multiple items.

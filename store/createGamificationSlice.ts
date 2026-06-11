@@ -151,6 +151,9 @@ export const createGamificationSlice: StateCreator<AppState, [], [], Gamificatio
       const hasSubjectMaster = uniqueSubjects.size >= 3;
       const hasRateDiversifier = hasHourly && hasPerLesson && hasMonthly;
 
+      // ⚡ Bolt Performance: Hoist new Date().toISOString() outside the loop
+      // to avoid redundant memory allocations and ensure all achievements awarded in this batch share the exact same timestamp.
+      const nowIso = new Date().toISOString();
       const updatedAchievements = new Array(state.achievements.length);
 
       for (let i = 0, len = state.achievements.length; i < len; i++) {
@@ -254,7 +257,7 @@ export const createGamificationSlice: StateCreator<AppState, [], [], Gamificatio
               get().logActivity(`Unlocked: ${ach.name}`, 'trophy');
             }, 0);
             changed = true;
-            updatedAchievements[i] = { ...ach, achieved: true, dateAchieved: new Date().toISOString() };
+            updatedAchievements[i] = { ...ach, achieved: true, dateAchieved: nowIso };
         } else {
             updatedAchievements[i] = ach;
         }
