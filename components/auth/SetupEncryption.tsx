@@ -32,7 +32,8 @@ export const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlock
       if (isFirstTime) {
         if (password.length < 12) { setError("Password must be at least 12 characters."); return; }
         const salt = generateSalt();
-        await localforage.setItem('vellor-salt', btoa(String.fromCharCode(...salt)));
+        localStorage.setItem('vellor-salt', btoa(String.fromCharCode(...salt)));
+        localStorage.setItem('vellor-pbkdf2-iters', '600000');
         const key = await deriveKey(password, salt);
         const exported = await exportKeyToBase64(key);
         useStore.getState().setMasterKey(key);
@@ -56,9 +57,20 @@ export const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlock
            for (let i = 0, len = saltStrDecoded.length; i < len; i++) {
              salt[i] = saltStrDecoded.charCodeAt(i);
            }
-           const key = await deriveKey(password, salt);
+           const iters = parseInt(localStorage.getItem('vellor-pbkdf2-iters') || '100000', 10);
+           const key = await deriveKey(password, salt, iters);
            useStore.getState().setMasterKey(key);
            await useStore.persist.rehydrate();
+
+           if (iters < 600000) {
+             const newSalt = generateSalt();
+             const newKey = await deriveKey(password, newSalt, 600000);
+             localStorage.setItem('vellor-salt', btoa(String.fromCharCode(...newSalt)));
+             localStorage.setItem('vellor-pbkdf2-iters', '600000');
+             useStore.getState().setMasterKey(newKey);
+             useStore.setState((s) => ({ settings: { ...s.settings } }));
+           }
+
            onUnlocked();
         }
       }
