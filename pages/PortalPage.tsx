@@ -220,59 +220,67 @@ export const PortalPage: React.FC = () => {
              
              {transactions.length > 0 ? (
                <div className="space-y-6 relative">
-                  {transactions.slice(0, 10).map((t, idx) => (
-                     <motion.div 
-                        key={t.id} 
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.3 + (idx * 0.05) }}
-                        className="p-5 bg-gray-50 dark:bg-slate-800/50 rounded-3xl border border-gray-100 dark:border-slate-800 hover:border-indigo-200 dark:hover:border-indigo-900/50 transition-colors"
-                      >
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                           <div>
-                              <p className="text-lg font-black text-gray-900 dark:text-white">{formatDate(t.date)}</p>
-                              <div className="text-sm font-bold text-gray-500 dark:text-gray-400 mt-1 flex gap-4">
-                                 <span className="flex items-center gap-1.5">
-                                   <div className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600" />
-                                   Fee: {formatCurrency(t.lessonFee, currencySymbol)}
-                                 </span>
-                                 <span className="flex items-center gap-1.5">
-                                   <div className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600" />
-                                   Paid: {formatCurrency(t.amountPaid, currencySymbol)}
-                                 </span>
-                              </div>
-                           </div>
-                           <div className="flex flex-wrap gap-2 self-start sm:self-center">
-                              {t.attendance && (
-                                <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider ${
-                                  t.attendance === 'Present' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400' :
-                                  t.attendance === 'Absent' ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400' :
-                                  'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'
-                                }`}>
-                                  {t.attendance}
-                                </span>
-                              )}
-                              <TransactionStatusBadge status={t.status} />
-                           </div>
-                        </div>
-                        {(t.grade || t.progressRemark) && (
-                           <div className="mt-4 pt-4 border-t border-gray-200 dark:border-slate-700">
-                              <div className="flex flex-wrap items-center gap-3">
-                                {t.grade && (
-                                  <span className="px-3 py-1 bg-indigo-600 text-white font-black text-xs rounded-full shadow-lg shadow-indigo-500/30">
-                                    Grade: {t.grade}
+                  {(() => {
+                    const limit = Math.min(transactions.length, 10);
+                    const items = [];
+                    for (let idx = 0; idx < limit; idx++) {
+                      const t = transactions[idx];
+                      items.push(
+                        <motion.div
+                          key={t.id}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.3 + (idx * 0.05) }}
+                          className="p-5 bg-gray-50 dark:bg-slate-800/50 rounded-3xl border border-gray-100 dark:border-slate-800 hover:border-indigo-200 dark:hover:border-indigo-900/50 transition-colors"
+                        >
+                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                             <div>
+                                <p className="text-lg font-black text-gray-900 dark:text-white">{formatDate(t.date)}</p>
+                                <div className="text-sm font-bold text-gray-500 dark:text-gray-400 mt-1 flex gap-4">
+                                   <span className="flex items-center gap-1.5">
+                                     <div className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600" />
+                                     Fee: {formatCurrency(t.lessonFee, currencySymbol)}
+                                   </span>
+                                   <span className="flex items-center gap-1.5">
+                                     <div className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600" />
+                                     Paid: {formatCurrency(t.amountPaid, currencySymbol)}
+                                   </span>
+                                </div>
+                             </div>
+                             <div className="flex flex-wrap gap-2 self-start sm:self-center">
+                                {t.attendance && (
+                                  <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider ${
+                                    t.attendance === 'Present' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400' :
+                                    t.attendance === 'Absent' ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400' :
+                                    'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'
+                                  }`}>
+                                    {t.attendance}
                                   </span>
                                 )}
-                                {t.progressRemark && (
-                                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-900/50 px-4 py-2 border border-gray-100 dark:border-slate-800 rounded-2xl flex-1">
-                                    {t.progressRemark}
-                                  </p>
-                                )}
-                              </div>
-                           </div>
-                        )}
-                     </motion.div>
-                  ))}
+                                <TransactionStatusBadge status={t.status} />
+                             </div>
+                          </div>
+                          {(t.grade || t.progressRemark) && (
+                             <div className="mt-4 pt-4 border-t border-gray-200 dark:border-slate-700">
+                                <div className="flex flex-wrap items-center gap-3">
+                                  {t.grade && (
+                                    <span className="px-3 py-1 bg-indigo-600 text-white font-black text-xs rounded-full shadow-lg shadow-indigo-500/30">
+                                      Grade: {t.grade}
+                                    </span>
+                                  )}
+                                  {t.progressRemark && (
+                                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-900/50 px-4 py-2 border border-gray-100 dark:border-slate-800 rounded-2xl flex-1">
+                                      {t.progressRemark}
+                                    </p>
+                                  )}
+                                </div>
+                             </div>
+                          )}
+                        </motion.div>
+                      );
+                    }
+                    return items;
+                  })()}
                   {transactions.length > 10 && (
                     <p className="text-center text-sm font-bold text-gray-400 dark:text-gray-500 pt-4 uppercase tracking-widest">
                       Showing latest 10 records

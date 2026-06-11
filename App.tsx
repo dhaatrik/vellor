@@ -12,6 +12,7 @@ import { ToastContainer } from './components/ui';
 import { MarketingPage } from './pages/MarketingPage';
 import { PortalPage } from './pages/PortalPage';
 import { Theme } from './types'; // Theme enum
+import localforage from 'localforage';
 
 // Extracted Components
 import { AppContent } from './components/layout/AppContent';
@@ -21,7 +22,11 @@ import { SetupEncryption } from './components/auth/SetupEncryption';
 const App: React.FC = () => {
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [isPortal, setIsPortal] = useState(window.location.hash.startsWith('#/portal'));
-  const [isFirstTime] = useState<boolean>(() => !localStorage.getItem('vellor-salt'));
+  const [isFirstTime, setIsFirstTime] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    localforage.getItem('vellor-salt').then(salt => setIsFirstTime(!salt));
+  }, []);
   const [showSetup, setShowSetup] = useState(false);
 
   useEffect(() => {

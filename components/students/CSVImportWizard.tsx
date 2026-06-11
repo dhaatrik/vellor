@@ -3,7 +3,7 @@ import { Button, Modal, Icon, Select } from '../ui';
 import { useStore } from '../../store';
 import { PaymentStatus, StudentFormData, TransactionFormData, IconName, Student } from '../../types';
 import { parseCSV, bulkMapCSVRows, ImportMapping, ImportResult } from '../../helpers/csvParser';
-import { findConflicts, resolveConflict, ConflictStrategy } from '../../helpers/conflictResolution';
+import { findConflicts, resolveConflict, ConflictStrategy, buildStudentEmailMap } from '../../helpers/conflictResolution';
 
 interface CSVImportWizardProps {
     isOpen: boolean;
@@ -200,9 +200,11 @@ export const CSVImportWizard: React.FC<CSVImportWizardProps> = ({ isOpen, onClos
         const newTransactionsData: TransactionFormData[] = [];
         const importedStudentMapping: Record<number, string> = {};
 
+        const existingStudentsMap = buildStudentEmailMap(students);
+
         for (let i = 0; i < result.entities.length; i++) {
             const entities = result.entities[i];
-            const conflicts = findConflicts(entities.student, students);
+            const conflicts = findConflicts(entities.student, existingStudentsMap);
             
             if (conflicts.length > 0) {
                 const resolved = resolveConflict(entities.student, conflicts[0].existing, ConflictStrategy.Overwrite);

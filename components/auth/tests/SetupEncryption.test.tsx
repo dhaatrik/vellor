@@ -4,6 +4,15 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { SetupEncryption } from '../SetupEncryption';
 import { useStore } from '../../../store';
 import * as crypto from '../../../src/crypto';
+import localforage from 'localforage';
+
+// Mock localforage
+vi.mock('localforage', () => ({
+  default: {
+    getItem: vi.fn(),
+    setItem: vi.fn(),
+  }
+}));
 
 // Mock store
 vi.mock('../../../store', () => ({
@@ -35,7 +44,7 @@ describe('SetupEncryption', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.clear();
+    // localforage mock is cleared below
     mockSetMasterKey = vi.fn();
     (useStore.getState as any).mockReturnValue({
       setMasterKey: mockSetMasterKey,
@@ -44,7 +53,7 @@ describe('SetupEncryption', () => {
 
   it('handles incorrect password or decryption failure', async () => {
     // Setup for "not first time"
-    localStorage.setItem('vellor-salt', btoa(String.fromCharCode(1, 2, 3)));
+    vi.mocked(localforage.getItem).mockResolvedValueOnce(btoa(String.fromCharCode(1, 2, 3)));
 
     // Mock deriveKey to throw an error
     (crypto.deriveKey as any).mockRejectedValue(new Error('Decryption failed'));
@@ -73,7 +82,7 @@ describe('SetupEncryption', () => {
 
   it('enforces 12-character minimum password length during first-time setup', async () => {
     // Setup for "first time"
-    localStorage.removeItem('vellor-salt');
+    vi.mocked(localforage.getItem).mockResolvedValueOnce(null);
 
     const mockOnUnlocked = vi.fn();
     render(<SetupEncryption onUnlocked={mockOnUnlocked} />);
@@ -109,7 +118,7 @@ describe('SetupEncryption', () => {
 
   it('handles crypto errors during first-time setup', async () => {
     // Setup for "first time"
-    localStorage.removeItem('vellor-salt');
+    vi.mocked(localforage.getItem).mockResolvedValueOnce(null);
 
     // Mock deriveKey to throw an error
     (crypto.deriveKey as any).mockRejectedValue(new Error('Crypto failed'));
