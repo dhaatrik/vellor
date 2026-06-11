@@ -263,3 +263,7 @@
 ## 2026-06-11 - Single-Pass Rendering for Lists
 **Learning:** Combining `.filter()` and `.map()` passes directly into a single `for` loop or `.reduce()` inside `useMemo` avoids iterating large arrays twice during React rendering cycles.
 **Action:** When filtering and rendering long lists, use a single pass (like `reduce`) inside `useMemo` to generate the JSX elements rather than mapping over a pre-filtered array within the return statement, yielding substantial improvements in React render time.
+
+## 2026-06-11 - Eliminate Linear Search in Bulk Data Processing
+**Learning:** Calling an O(N) array search operation (like `.forEach` or `.find`) inside a bulk data processing loop (e.g., iterating through `M` imported rows) results in O(N*M) time complexity, creating significant latency on large datasets.
+**Action:** When performing cross-entity lookups or conflict detection inside a loop, pre-compute an index `Map` (e.g., mapping normalized emails to entities) outside the loop. This reduces lookups to O(1) and optimizes the overall complexity to O(N + M).
