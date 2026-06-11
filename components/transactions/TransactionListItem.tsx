@@ -3,7 +3,7 @@ import { Transaction } from '../../types';
 import { Button, Card, Icon } from '../ui';
 import { formatCurrency, formatDate } from '../../helpers';
 import { TransactionStatusBadge } from './TransactionStatusBadge';
-import { setHoveredTransaction } from '../../helpers/globalHover';
+import { useStore } from '../../store';
 
 /**
  * Props for the TransactionListItem component.
@@ -26,6 +26,7 @@ interface TransactionListItemProps {
  * Displays a summary of a single transaction in a list.
  */
 export const TransactionListItem: React.FC<TransactionListItemProps> = React.memo(({ transaction, studentName, onEdit, onDelete, onShareWhatsApp, currencySymbol }) => {
+  const setHoveredTransaction = useStore(s => s.setHoveredTransaction);
   return (
     <Card
       className="hover:border-accent/50 transition-colors duration-300 group border border-white/20 dark:border-white/5 shadow-xl shadow-black/5 bg-white/60 dark:bg-primary-light/60 backdrop-blur-xl"
