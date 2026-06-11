@@ -3,6 +3,32 @@ import { sanitizeString, formatCurrency, formatDate, formatPhoneNumber, getPayme
 import { PaymentStatus, Student, Transaction, AppSettings, Theme } from '../../types';
 
 describe('Helpers', () => {
+
+    describe('generateId', () => {
+        it('should return a valid UUID string', () => {
+            const mockUUID = '12345678-1234-1234-1234-1234567890ab';
+            const originalCrypto = globalThis.crypto;
+
+            Object.defineProperty(globalThis, 'crypto', {
+                value: {
+                    ...originalCrypto,
+                    randomUUID: vi.fn().mockReturnValue(mockUUID)
+                },
+                configurable: true
+            });
+
+            const id = generateId();
+
+            expect(id).toBe(mockUUID);
+            expect(globalThis.crypto.randomUUID).toHaveBeenCalledTimes(1);
+
+            Object.defineProperty(globalThis, 'crypto', {
+                value: originalCrypto,
+                configurable: true
+            });
+        });
+    });
+
     describe('sanitizeString', () => {
         it('handles undefined input', () => {
             expect(sanitizeString(undefined)).toBe('');
