@@ -1,7 +1,0 @@
-🎯 **What:** Extracted `PrivacyPolicyModal`, `FriendlyTutorAdviceModal`, and `TermsOfServiceModal` from `MarketingPage.tsx` into separate component files in `pages/marketing-sections/`.
-
-💡 **Why:** To significantly reduce the massive monolithic size of `MarketingPage.tsx` (over 1000 lines), improving maintainability and readability by keeping the main page component focused on layout and composition.
-
-✅ **Verification:** Verified by running linters (`pnpm lint`), TypeScript build (`pnpm build`), tests (`pnpm test`), and manual review of the replaced JSX. All checks passed successfully.
-
-✨ **Result:** A more modular and easier to read `MarketingPage.tsx` with self-contained modal components.
