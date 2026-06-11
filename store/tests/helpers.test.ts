@@ -1,31 +1,68 @@
-import { describe, it, expect, vi } from 'vitest';
-import { generateId, sanitizeString, formatCurrency, formatDate, formatPhoneNumber, getPaymentStatusColor, formatRelativeTime, generatePortalLink, generateWhatsAppLink } from '../../helpers';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { sanitizeString, formatCurrency, formatDate, formatPhoneNumber, getPaymentStatusColor, formatRelativeTime, generatePortalLink, generateWhatsAppLink, getLocalYYYYMMDD, determinePaymentStatus, calculateTransactionDue } from '../../helpers';
 import { PaymentStatus, Student, Transaction, AppSettings, Theme } from '../../types';
 
 describe('Helpers', () => {
+    describe('getLocalYYYYMMDD', () => {
+        beforeEach(() => {
+            vi.useFakeTimers();
+        });
 
-    describe('generateId', () => {
-        it('should return a valid UUID string', () => {
-            const mockUUID = '12345678-1234-1234-1234-1234567890ab';
-            const originalCrypto = globalThis.crypto;
+        afterEach(() => {
+            vi.useRealTimers();
+        });
 
-            Object.defineProperty(globalThis, 'crypto', {
-                value: {
-                    ...originalCrypto,
-                    randomUUID: vi.fn().mockReturnValue(mockUUID)
-                },
-                configurable: true
-            });
+        it('formats current date correctly', () => {
+            const date = new Date('2023-05-09T10:00:00Z');
+            vi.setSystemTime(date);
+            expect(getLocalYYYYMMDD()).toBe('2023-05-09');
+        });
 
-            const id = generateId();
+        it('formats provided date correctly', () => {
+            const date = new Date('2023-11-25T15:30:00Z');
+            expect(getLocalYYYYMMDD(date)).toBe('2023-11-25');
+        });
 
-            expect(id).toBe(mockUUID);
-            expect(globalThis.crypto.randomUUID).toHaveBeenCalledTimes(1);
+        it('pads single-digit months and days', () => {
+            const date = new Date('2024-01-05T08:00:00Z');
+            expect(getLocalYYYYMMDD(date)).toBe('2024-01-05');
+        });
+    });
 
-            Object.defineProperty(globalThis, 'crypto', {
-                value: originalCrypto,
-                configurable: true
-            });
+    describe('determinePaymentStatus', () => {
+        it('returns current status if provided', () => {
+            expect(determinePaymentStatus(0, 100, PaymentStatus.Paid)).toBe(PaymentStatus.Paid);
+        });
+
+        it('returns Paid if amountPaid equals lessonFee', () => {
+            expect(determinePaymentStatus(100, 100)).toBe(PaymentStatus.Paid);
+        });
+
+        it('returns Overpaid if amountPaid is greater than lessonFee', () => {
+            expect(determinePaymentStatus(150, 100)).toBe(PaymentStatus.Overpaid);
+        });
+
+        it('returns PartiallyPaid if amountPaid is greater than 0 but less than lessonFee', () => {
+            expect(determinePaymentStatus(50, 100)).toBe(PaymentStatus.PartiallyPaid);
+        });
+
+        it('returns Due if amountPaid is 0', () => {
+            expect(determinePaymentStatus(0, 100)).toBe(PaymentStatus.Due);
+        });
+    });
+
+    describe('calculateTransactionDue', () => {
+        it('returns lessonFee if status is Due', () => {
+            expect(calculateTransactionDue(PaymentStatus.Due, 100, 0)).toBe(100);
+        });
+
+        it('returns lessonFee - amountPaid if status is PartiallyPaid', () => {
+            expect(calculateTransactionDue(PaymentStatus.PartiallyPaid, 100, 40)).toBe(60);
+        });
+
+        it('returns 0 if status is Paid or Overpaid', () => {
+            expect(calculateTransactionDue(PaymentStatus.Paid, 100, 100)).toBe(0);
+            expect(calculateTransactionDue(PaymentStatus.Overpaid, 100, 150)).toBe(0);
         });
     });
 
