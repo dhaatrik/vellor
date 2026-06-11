@@ -4,7 +4,6 @@ import { generateSalt, deriveKey, exportKeyToBase64, importKeyFromBase64 } from 
 import { Icon, Button } from '../ui';
 import localforage from 'localforage';
 import { useCybertext } from '../../hooks/useCybertext';
-import localforage from 'localforage';
 
 export const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlocked }) => {
   const [isFirstTime, setIsFirstTime] = useState<boolean | null>(null);
@@ -59,20 +58,9 @@ export const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlock
            for (let i = 0, len = saltStrDecoded.length; i < len; i++) {
              salt[i] = saltStrDecoded.charCodeAt(i);
            }
-           const iters = parseInt(localStorage.getItem('vellor-pbkdf2-iters') || '100000', 10);
-           const key = await deriveKey(password, salt, iters);
+           const key = await deriveKey(password, salt);
            useStore.getState().setMasterKey(key);
            await useStore.persist.rehydrate();
-
-           if (iters < 600000) {
-             const newSalt = generateSalt();
-             const newKey = await deriveKey(password, newSalt, 600000);
-             localStorage.setItem('vellor-salt', btoa(String.fromCharCode(...newSalt)));
-             localStorage.setItem('vellor-pbkdf2-iters', '600000');
-             useStore.getState().setMasterKey(newKey);
-             useStore.setState((s) => ({ settings: { ...s.settings } }));
-           }
-
            onUnlocked();
         }
       }

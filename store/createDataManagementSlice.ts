@@ -36,7 +36,6 @@ export const createDataManagementSlice: StateCreator<AppState, [], [], DataManag
             exportPayload = {
                 __vellor_encrypted: true,
                 salt: Array.from(salt),
-                iterations: 600000,
                 data: encryptedData
             };
         }
@@ -78,8 +77,7 @@ export const createDataManagementSlice: StateCreator<AppState, [], [], DataManag
 
             const { deriveKey, decryptObject } = await import('../src/crypto');
             const salt = new Uint8Array(rawData.salt);
-            const iters = rawData.iterations || 100000;
-            const key = await deriveKey(password, salt, iters);
+            const key = await deriveKey(password, salt);
             let decrypted;
             try {
                 decrypted = await decryptObject(rawData.data, key);

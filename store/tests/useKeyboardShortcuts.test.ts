@@ -1,6 +1,7 @@
 import { renderHook } from "@testing-library/react";
 import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts";
 import { useStore } from "../../store";
+import * as globalHover from "../../helpers/globalHover";
 import { PaymentStatus, Transaction } from "../../types";
 import { vi, describe, it, expect, beforeEach, afterEach, Mock } from "vitest";
 
@@ -10,6 +11,14 @@ vi.mock("../../store", () => ({
 }));
 
 // We must mock the properties directly on the module object
+vi.mock("../../helpers/globalHover", () => ({
+  get currentHoveredTransactionId() {
+    return null;
+  },
+  get currentHoveredStudentId() {
+    return null;
+  },
+}));
 
 describe("useKeyboardShortcuts", () => {
   let onOpenSearch: Mock;
@@ -57,6 +66,13 @@ describe("useKeyboardShortcuts", () => {
       value: originalPlatform,
       configurable: true,
     });
+    // Reset mocked getters manually if possible, or just re-stub
+    vi.spyOn(globalHover, "currentHoveredTransactionId", "get").mockReturnValue(
+      null,
+    );
+    vi.spyOn(globalHover, "currentHoveredStudentId", "get").mockReturnValue(
+      null,
+    );
   });
 
   const fireKeyDown = (key: string, options: Partial<KeyboardEvent> = {}) => {
@@ -242,7 +258,6 @@ describe("useKeyboardShortcuts", () => {
     };
 
     (useStore as unknown as Mock).mockReturnValue({
-        hoveredTransactionId: "tx-1",
       transactions: [mockTx],
       updateTransaction: mockUpdateTransaction,
       getTransactionById: vi.fn((id) =>
@@ -252,7 +267,9 @@ describe("useKeyboardShortcuts", () => {
       ),
       addToast: mockAddToast,
     });
-
+    vi.spyOn(globalHover, "currentHoveredTransactionId", "get").mockReturnValue(
+      "tx-1",
+    );
 
     renderHook(() =>
       useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
@@ -312,7 +329,6 @@ describe("useKeyboardShortcuts", () => {
       };
 
       (useStore as unknown as Mock).mockReturnValue({
-        hoveredTransactionId: "tx-1",
         transactions: [mockTx],
         updateTransaction: mockUpdateTransaction,
         getTransactionById: vi.fn((id) =>
@@ -323,7 +339,11 @@ describe("useKeyboardShortcuts", () => {
         addToast: mockAddToast,
       });
 
-
+      vi.spyOn(
+        globalHover,
+        "currentHoveredTransactionId",
+        "get",
+      ).mockReturnValue("tx-1");
 
       renderHook(() =>
         useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
@@ -354,7 +374,6 @@ describe("useKeyboardShortcuts", () => {
       };
 
       (useStore as unknown as Mock).mockReturnValue({
-        hoveredTransactionId: "tx-1",
         transactions: [mockTx],
         updateTransaction: mockUpdateTransaction,
         getTransactionById: vi.fn((id) =>
@@ -365,7 +384,11 @@ describe("useKeyboardShortcuts", () => {
         addToast: mockAddToast,
       });
 
-
+      vi.spyOn(
+        globalHover,
+        "currentHoveredTransactionId",
+        "get",
+      ).mockReturnValue("tx-1");
 
       renderHook(() =>
         useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
@@ -390,7 +413,6 @@ describe("useKeyboardShortcuts", () => {
       };
 
       (useStore as unknown as Mock).mockReturnValue({
-        hoveredTransactionId: "tx-1",
         transactions: [mockTx],
         updateTransaction: mockUpdateTransaction,
         getTransactionById: vi.fn((id) =>
@@ -401,7 +423,11 @@ describe("useKeyboardShortcuts", () => {
         addToast: mockAddToast,
       });
 
-
+      vi.spyOn(
+        globalHover,
+        "currentHoveredTransactionId",
+        "get",
+      ).mockReturnValue("tx-1");
 
       renderHook(() =>
         useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
@@ -432,7 +458,6 @@ describe("useKeyboardShortcuts", () => {
       };
 
       (useStore as unknown as Mock).mockReturnValue({
-        hoveredTransactionId: "tx-1",
         transactions: [mockTx],
         updateTransaction: mockUpdateTransaction,
         getTransactionById: vi.fn((id) =>
@@ -443,7 +468,11 @@ describe("useKeyboardShortcuts", () => {
         addToast: mockAddToast,
       });
 
-
+      vi.spyOn(
+        globalHover,
+        "currentHoveredTransactionId",
+        "get",
+      ).mockReturnValue("tx-1");
 
       renderHook(() =>
         useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
@@ -470,7 +499,6 @@ describe("useKeyboardShortcuts", () => {
       };
 
       (useStore as unknown as Mock).mockReturnValue({
-        hoveredTransactionId: "tx-1",
         transactions: [mockTx],
         updateTransaction: mockUpdateTransaction,
         getTransactionById: vi.fn((id) =>
@@ -481,7 +509,11 @@ describe("useKeyboardShortcuts", () => {
         addToast: mockAddToast,
       });
 
-
+      vi.spyOn(
+        globalHover,
+        "currentHoveredTransactionId",
+        "get",
+      ).mockReturnValue("tx-1");
 
       renderHook(() =>
         useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
@@ -495,7 +527,6 @@ describe("useKeyboardShortcuts", () => {
 
     it("does nothing if neither transaction nor student is hovered (Shift+P)", () => {
       (useStore as unknown as Mock).mockReturnValue({
-        hoveredStudentId: null,
         transactions: [],
         updateTransaction: mockUpdateTransaction,
         getTransactionById: vi.fn((id) =>
@@ -506,8 +537,14 @@ describe("useKeyboardShortcuts", () => {
         addToast: mockAddToast,
       });
 
-
-
+      vi.spyOn(
+        globalHover,
+        "currentHoveredTransactionId",
+        "get",
+      ).mockReturnValue(null);
+      vi.spyOn(globalHover, "currentHoveredStudentId", "get").mockReturnValue(
+        null,
+      );
 
       renderHook(() =>
         useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
@@ -521,7 +558,6 @@ describe("useKeyboardShortcuts", () => {
 
     it("does nothing if hovered transaction is not found (Shift+P)", () => {
       (useStore as unknown as Mock).mockReturnValue({
-        hoveredTransactionId: "tx-1",
         transactions: [],
         updateTransaction: mockUpdateTransaction,
         getTransactionById: vi.fn((id) =>
@@ -532,7 +568,11 @@ describe("useKeyboardShortcuts", () => {
         addToast: mockAddToast,
       });
 
-
+      vi.spyOn(
+        globalHover,
+        "currentHoveredTransactionId",
+        "get",
+      ).mockReturnValue("tx-1");
 
       renderHook(() =>
         useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
@@ -577,7 +617,6 @@ describe("useKeyboardShortcuts", () => {
       };
 
       (useStore as unknown as Mock).mockReturnValue({
-        hoveredStudentId: "st-1",
         transactions: [mockTx1, mockTx2, mockTx3],
         updateTransaction: mockUpdateTransaction,
         getTransactionById: vi.fn((id) =>
@@ -588,7 +627,9 @@ describe("useKeyboardShortcuts", () => {
         addToast: mockAddToast,
       });
 
-
+      vi.spyOn(globalHover, "currentHoveredStudentId", "get").mockReturnValue(
+        "st-1",
+      );
 
       renderHook(() =>
         useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),
@@ -625,7 +666,6 @@ describe("useKeyboardShortcuts", () => {
       };
 
       (useStore as unknown as Mock).mockReturnValue({
-        hoveredStudentId: "st-1",
         transactions: [mockTx],
         updateTransaction: mockUpdateTransaction,
         getTransactionById: vi.fn((id) =>
@@ -636,7 +676,9 @@ describe("useKeyboardShortcuts", () => {
         addToast: mockAddToast,
       });
 
-
+      vi.spyOn(globalHover, "currentHoveredStudentId", "get").mockReturnValue(
+        "st-1",
+      );
 
       renderHook(() =>
         useKeyboardShortcuts(onOpenSearch, onOpenQuickLog, onOpenHelp),

@@ -5,15 +5,6 @@ import { SetupEncryption } from '../SetupEncryption';
 import { useStore } from '../../../store';
 import localforage from 'localforage';
 import * as crypto from '../../../src/crypto';
-import localforage from 'localforage';
-
-// Mock localforage
-vi.mock('localforage', () => ({
-  default: {
-    getItem: vi.fn(),
-    setItem: vi.fn(),
-  }
-}));
 
 // Mock store
 vi.mock('../../../store', () => ({

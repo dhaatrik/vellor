@@ -13,7 +13,6 @@ import { ToastContainer } from './components/ui';
 import { MarketingPage } from './pages/MarketingPage';
 import { PortalPage } from './pages/PortalPage';
 import { Theme } from './types'; // Theme enum
-import localforage from 'localforage';
 
 // Extracted Components
 import { AppContent } from './components/layout/AppContent';
