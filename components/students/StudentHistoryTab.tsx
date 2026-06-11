@@ -23,66 +23,15 @@ export const StudentHistoryTab: React.FC<StudentHistoryTabProps> = ({
 }) => {
   const [filter, setFilter] = useState<'all' | 'paid' | 'due' | 'partially-paid'>('all');
 
-  const renderedTransactions = useMemo(() => {
-    return studentTransactions.reduce<React.ReactNode[]>((acc, t) => {
-      let keep = false;
-      if (filter === 'all') keep = true;
-      else if (filter === 'paid') keep = t.status === PaymentStatus.Paid;
-      else if (filter === 'due') keep = t.status === PaymentStatus.Due;
-      else if (filter === 'partially-paid') keep = t.status === PaymentStatus.PartiallyPaid;
-
-      if (keep) {
-        acc.push(
-          <div
-            key={t.id}
-            className="p-4 bg-gray-50 dark:bg-primary/30 rounded-2xl border border-gray-100 dark:border-white/5 hover:border-gray-200 dark:hover:border-white/10 transition-colors"
-          >
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white dark:bg-primary-light flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5">
-                  <Icon iconName="calendar" className="w-5 h-5 text-gray-400" />
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900 dark:text-white">
-                    {formatDate(t.date)}
-                  </p>
-                  <div className="flex items-center gap-3 mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    <span className="flex items-center gap-1">
-                      <Icon iconName="banknotes" className="w-3.5 h-3.5" /> Fee:{' '}
-                      {formatCurrency(t.lessonFee, currencySymbol)}
-                    </span>
-                    <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-                    <span>
-                      Paid:{' '}
-                      <span
-                        className={
-                          t.amountPaid > 0 ? 'text-success font-medium' : ''
-                        }
-                      >
-                        {formatCurrency(t.amountPaid, currencySymbol)}
-                      </span>
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="self-start sm:self-center">
-                <TransactionStatusBadge status={t.status} />
-              </div>
-            </div>
-            {t.notes && (
-              <div className="mt-3 ml-13 p-2.5 bg-white dark:bg-primary-light rounded-xl text-sm text-gray-600 dark:text-gray-400 border border-gray-100 dark:border-white/5">
-                <span className="font-medium text-gray-700 dark:text-gray-300">
-                  Note:
-                </span>{' '}
-                {t.notes}
-              </div>
-            )}
-          </div>
-        );
-      }
-      return acc;
-    }, []);
-  }, [studentTransactions, filter, currencySymbol]);
+  const filteredTransactions = useMemo(() => {
+    return studentTransactions.filter(t => {
+      if (filter === 'all') return true;
+      if (filter === 'paid') return t.status === PaymentStatus.Paid;
+      if (filter === 'due') return t.status === PaymentStatus.Due;
+      if (filter === 'partially-paid') return t.status === PaymentStatus.PartiallyPaid;
+      return true;
+    });
+  }, [studentTransactions, filter]);
 
   return (
     <Card className="border-gray-100 dark:border-white/5">
@@ -134,9 +83,55 @@ export const StudentHistoryTab: React.FC<StudentHistoryTabProps> = ({
         </div>
       </div>
 
-      {renderedTransactions.length > 0 ? (
+      {filteredTransactions.length > 0 ? (
         <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-          {renderedTransactions}
+          {filteredTransactions.map((t) => (
+            <div
+              key={t.id}
+              className="p-4 bg-gray-50 dark:bg-primary/30 rounded-2xl border border-gray-100 dark:border-white/5 hover:border-gray-200 dark:hover:border-white/10 transition-colors"
+            >
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-primary-light flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5">
+                    <Icon iconName="calendar" className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {formatDate(t.date)}
+                    </p>
+                    <div className="flex items-center gap-3 mt-1 text-sm text-gray-500 dark:text-gray-400">
+                      <span className="flex items-center gap-1">
+                        <Icon iconName="banknotes" className="w-3.5 h-3.5" /> Fee:{' '}
+                        {formatCurrency(t.lessonFee, currencySymbol)}
+                      </span>
+                      <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+                      <span>
+                        Paid:{' '}
+                        <span
+                          className={
+                            t.amountPaid > 0 ? 'text-success font-medium' : ''
+                          }
+                        >
+                          {formatCurrency(t.amountPaid, currencySymbol)}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="self-start sm:self-center">
+                  <TransactionStatusBadge status={t.status} />
+                </div>
+              </div>
+              {t.notes && (
+                <div className="mt-3 ml-13 p-2.5 bg-white dark:bg-primary-light rounded-xl text-sm text-gray-600 dark:text-gray-400 border border-gray-100 dark:border-white/5">
+                  <span className="font-medium text-gray-700 dark:text-gray-300">
+                    Note:
+                  </span>{' '}
+                  {t.notes}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       ) : (
         <div className="h-[400px] flex flex-col items-center justify-center text-center bg-gray-50 dark:bg-primary/30 rounded-2xl border border-dashed border-gray-200 dark:border-white/10 border-telemetry">

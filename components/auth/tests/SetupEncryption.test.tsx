@@ -3,16 +3,8 @@ import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { SetupEncryption } from '../SetupEncryption';
 import { useStore } from '../../../store';
-import * as crypto from '../../../src/crypto';
 import localforage from 'localforage';
-
-// Mock localforage
-vi.mock('localforage', () => ({
-  default: {
-    getItem: vi.fn(),
-    setItem: vi.fn(),
-  }
-}));
+import * as crypto from '../../../src/crypto';
 
 // Mock store
 vi.mock('../../../store', () => ({
@@ -27,6 +19,15 @@ vi.mock('../../../store', () => ({
 }));
 
 // Mock crypto
+vi.mock('localforage', () => ({
+  default: {
+    getItem: vi.fn(),
+    setItem: vi.fn().mockResolvedValue(undefined),
+    removeItem: vi.fn().mockResolvedValue(undefined),
+    clear: vi.fn().mockResolvedValue(undefined),
+  }
+}));
+
 vi.mock('../../../src/crypto', () => ({
   generateSalt: vi.fn(() => new Uint8Array([1, 2, 3])),
   deriveKey: vi.fn(),
@@ -44,7 +45,7 @@ describe('SetupEncryption', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // localforage mock is cleared below
+    localforage.clear();
     mockSetMasterKey = vi.fn();
     (useStore.getState as any).mockReturnValue({
       setMasterKey: mockSetMasterKey,
@@ -53,7 +54,7 @@ describe('SetupEncryption', () => {
 
   it('handles incorrect password or decryption failure', async () => {
     // Setup for "not first time"
-    vi.mocked(localforage.getItem).mockResolvedValueOnce(btoa(String.fromCharCode(1, 2, 3)));
+    vi.mocked(localforage.getItem).mockResolvedValue(btoa(String.fromCharCode(1, 2, 3)));
 
     // Mock deriveKey to throw an error
     (crypto.deriveKey as any).mockRejectedValue(new Error('Decryption failed'));
@@ -82,7 +83,7 @@ describe('SetupEncryption', () => {
 
   it('enforces 12-character minimum password length during first-time setup', async () => {
     // Setup for "first time"
-    vi.mocked(localforage.getItem).mockResolvedValueOnce(null);
+    vi.mocked(localforage.getItem).mockResolvedValue(null);
 
     const mockOnUnlocked = vi.fn();
     render(<SetupEncryption onUnlocked={mockOnUnlocked} />);
@@ -118,7 +119,7 @@ describe('SetupEncryption', () => {
 
   it('handles crypto errors during first-time setup', async () => {
     // Setup for "first time"
-    vi.mocked(localforage.getItem).mockResolvedValueOnce(null);
+    vi.mocked(localforage.getItem).mockResolvedValue(null);
 
     // Mock deriveKey to throw an error
     (crypto.deriveKey as any).mockRejectedValue(new Error('Crypto failed'));

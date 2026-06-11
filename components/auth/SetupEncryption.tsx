@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useStore } from '../../store';
 import { generateSalt, deriveKey, exportKeyToBase64, importKeyFromBase64 } from '../../src/crypto';
 import { Icon, Button } from '../ui';
-import { useCybertext } from '../../hooks/useCybertext';
 import localforage from 'localforage';
+import { useCybertext } from '../../hooks/useCybertext';
 
 export const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlocked }) => {
   const [isFirstTime, setIsFirstTime] = useState<boolean | null>(null);
@@ -21,9 +21,10 @@ export const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlock
   const scrambledRecoveryHeading = useCybertext('Recovery Key');
 
   useEffect(() => {
-    localforage.getItem('vellor-salt').then(saltString => {
+    (async () => {
+      const saltString = await localforage.getItem('vellor-salt');
       setIsFirstTime(!saltString);
-    });
+    })();
   }, []);
 
   const handleUnlock = async () => {
@@ -32,8 +33,7 @@ export const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlock
       if (isFirstTime) {
         if (password.length < 12) { setError("Password must be at least 12 characters."); return; }
         const salt = generateSalt();
-        localStorage.setItem('vellor-salt', btoa(String.fromCharCode(...salt)));
-        localStorage.setItem('vellor-pbkdf2-iters', '600000');
+        await localforage.setItem('vellor-salt', btoa(String.fromCharCode(...salt)));
         const key = await deriveKey(password, salt);
         const exported = await exportKeyToBase64(key);
         useStore.getState().setMasterKey(key);
@@ -46,7 +46,8 @@ export const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlock
            await useStore.persist.rehydrate();
            onUnlocked();
         } else {
-           const saltString = await localforage.getItem<string>('vellor-salt') || '';
+           const saltString = await localforage.getItem<string>('vellor-salt');
+           if (!saltString) throw new Error("Salt missing.");
            if (!/^[A-Za-z0-9+/]*={0,2}$/.test(saltString)) {
              throw new Error("Invalid salt format.");
            }
@@ -57,20 +58,9 @@ export const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlock
            for (let i = 0, len = saltStrDecoded.length; i < len; i++) {
              salt[i] = saltStrDecoded.charCodeAt(i);
            }
-           const iters = parseInt(localStorage.getItem('vellor-pbkdf2-iters') || '100000', 10);
-           const key = await deriveKey(password, salt, iters);
+           const key = await deriveKey(password, salt);
            useStore.getState().setMasterKey(key);
            await useStore.persist.rehydrate();
-
-           if (iters < 600000) {
-             const newSalt = generateSalt();
-             const newKey = await deriveKey(password, newSalt, 600000);
-             localStorage.setItem('vellor-salt', btoa(String.fromCharCode(...newSalt)));
-             localStorage.setItem('vellor-pbkdf2-iters', '600000');
-             useStore.getState().setMasterKey(newKey);
-             useStore.setState((s) => ({ settings: { ...s.settings } }));
-           }
-
            onUnlocked();
         }
       }

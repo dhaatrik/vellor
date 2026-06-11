@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Button, Icon } from './ui';
 import { useStore } from '../store';
+import localforage from 'localforage';
 
 const BACKUP_INTERVAL_DAYS = 14;
 
@@ -10,8 +11,8 @@ export const BackupPromptModal: React.FC = () => {
   const addToast = useStore(s => s.addToast);
 
   useEffect(() => {
-    const checkBackupStatus = () => {
-      const lastBackupDateStr = localStorage.getItem('lastBackupDate');
+    const checkBackupStatus = async () => {
+      const lastBackupDateStr = await localforage.getItem<string>('lastBackupDate');
       const now = new Date();
       const lastBackupDate = lastBackupDateStr ? new Date(lastBackupDateStr) : null;
 
@@ -36,16 +37,16 @@ export const BackupPromptModal: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleBackup = () => {
+  const handleBackup = async () => {
     exportData();
-    localStorage.setItem('lastBackupDate', new Date().toISOString());
+    await localforage.setItem('lastBackupDate', new Date().toISOString());
     setIsOpen(false);
   };
 
-  const handleDismiss = () => {
+  const handleDismiss = async () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() - (BACKUP_INTERVAL_DAYS - 1));
-    localStorage.setItem('lastBackupDate', tomorrow.toISOString());
+    await localforage.setItem('lastBackupDate', tomorrow.toISOString());
     addToast('Backup postponed to tomorrow.', 'info');
     setIsOpen(false);
   };

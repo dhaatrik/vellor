@@ -4,7 +4,6 @@ export interface StudentSlice {
   students: Student[];
   addStudent: (studentData: StudentFormData) => Student;
   addStudents: (studentsData: StudentFormData[]) => Student[];
-  bulkUpdateStudents: (updates: { id: string, data: Partial<StudentFormData> }[]) => void;
   updateStudent: (studentId: string, studentData: Partial<StudentFormData>) => Student | undefined;
   deleteStudent: (studentId: string) => void;
   getStudentById: (studentId: string) => Student | undefined;
@@ -31,15 +30,11 @@ export interface GamificationSlice {
 
 export interface UISlice {
   toasts: ToastMessage[];
-  hoveredTransactionId: string | null;
-  hoveredStudentId: string | null;
   activityLog: Activity[];
   addToast: (message: string, type?: ToastMessage['type']) => void;
   logActivity: (message: string, icon: IconName) => void;
   deleteActivity: (id: string) => void;
   clearActivityLog: () => void;
-  setHoveredTransaction: (id: string | null) => void;
-  setHoveredStudent: (id: string | null) => void;
 }
 
 export interface SettingsSlice {

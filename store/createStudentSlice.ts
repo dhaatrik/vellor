@@ -5,31 +5,6 @@ import { generateId } from '../helpers';
 import { POINTS_ALLOCATION } from '../constants';
 import { sanitizeString } from '../helpers';
 
-
-const sanitizeStudentData = (studentData: StudentFormData): StudentFormData => ({
-  ...studentData,
-  firstName: sanitizeString(studentData.firstName),
-  lastName: sanitizeString(studentData.lastName),
-  country: sanitizeString(studentData.country),
-  parent: {
-    ...studentData.parent,
-    name: sanitizeString(studentData.parent?.name),
-    relationship: studentData.parent?.relationship ?? 'Parent',
-  },
-  contact: {
-    ...studentData.contact,
-    email: sanitizeString(studentData.contact?.email),
-    studentPhone: studentData.contact?.studentPhone ? { ...studentData.contact.studentPhone, number: sanitizeString(studentData.contact.studentPhone.number) } : undefined,
-    parentPhone1: studentData.contact?.parentPhone1 ? { ...studentData.contact.parentPhone1, number: sanitizeString(studentData.contact.parentPhone1.number) } : undefined,
-    parentPhone2: studentData.contact?.parentPhone2 ? { ...studentData.contact.parentPhone2, number: sanitizeString(studentData.contact.parentPhone2.number) } : undefined,
-  },
-  notes: sanitizeString(studentData.notes),
-  tuition: {
-    ...studentData.tuition,
-    subjects: studentData.tuition.subjects.map(subject => sanitizeString(subject)),
-  }
-});
-
 export const createStudentSlice: StateCreator<AppState, [], [], StudentSlice> = (set, get) => ({
   students: [],
 
@@ -40,7 +15,29 @@ export const createStudentSlice: StateCreator<AppState, [], [], StudentSlice> = 
     // ⚡ Bolt Performance: Process bulk additions inside a single loop to avoid N+1 state updates
     for (let i = 0; i < studentsData.length; i++) {
         const studentData = studentsData[i];
-        const sanitizedStudentData = sanitizeStudentData(studentData);
+        const sanitizedStudentData: StudentFormData = {
+          ...studentData,
+          firstName: sanitizeString(studentData.firstName),
+          lastName: sanitizeString(studentData.lastName),
+          country: sanitizeString(studentData.country),
+          parent: {
+            ...studentData.parent,
+            name: sanitizeString(studentData.parent?.name),
+            relationship: studentData.parent?.relationship ?? 'Parent',
+          },
+          contact: {
+            ...studentData.contact,
+            email: sanitizeString(studentData.contact?.email),
+            studentPhone: studentData.contact?.studentPhone ? { ...studentData.contact.studentPhone, number: sanitizeString(studentData.contact.studentPhone.number) } : undefined,
+            parentPhone1: studentData.contact?.parentPhone1 ? { ...studentData.contact.parentPhone1, number: sanitizeString(studentData.contact.parentPhone1.number) } : undefined,
+            parentPhone2: studentData.contact?.parentPhone2 ? { ...studentData.contact.parentPhone2, number: sanitizeString(studentData.contact.parentPhone2.number) } : undefined,
+          },
+          notes: sanitizeString(studentData.notes),
+          tuition: {
+            ...studentData.tuition,
+            subjects: studentData.tuition.subjects.map(subject => sanitizeString(subject)),
+          }
+        };
         newStudents.push({
           ...sanitizedStudentData,
           searchName: `${sanitizedStudentData.firstName} ${sanitizedStudentData.lastName}`.toLowerCase(),
@@ -63,7 +60,29 @@ export const createStudentSlice: StateCreator<AppState, [], [], StudentSlice> = 
   },
 
   addStudent: (studentData) => {
-    const sanitizedStudentData = sanitizeStudentData(studentData);
+    const sanitizedStudentData: StudentFormData = {
+      ...studentData,
+      firstName: sanitizeString(studentData.firstName),
+      lastName: sanitizeString(studentData.lastName),
+      country: sanitizeString(studentData.country),
+      parent: {
+        ...studentData.parent,
+        name: sanitizeString(studentData.parent?.name),
+        relationship: studentData.parent?.relationship ?? 'Parent',
+      },
+      contact: {
+        ...studentData.contact,
+        email: sanitizeString(studentData.contact?.email),
+        studentPhone: studentData.contact?.studentPhone ? { ...studentData.contact.studentPhone, number: sanitizeString(studentData.contact.studentPhone.number) } : undefined,
+        parentPhone1: studentData.contact?.parentPhone1 ? { ...studentData.contact.parentPhone1, number: sanitizeString(studentData.contact.parentPhone1.number) } : undefined,
+        parentPhone2: studentData.contact?.parentPhone2 ? { ...studentData.contact.parentPhone2, number: sanitizeString(studentData.contact.parentPhone2.number) } : undefined,
+      },
+      notes: sanitizeString(studentData.notes),
+      tuition: {
+        ...studentData.tuition,
+        subjects: studentData.tuition.subjects.map(subject => sanitizeString(subject)),
+      }
+    };
     const newStudent: Student = {
       ...sanitizedStudentData,
       searchName: `${sanitizedStudentData.firstName} ${sanitizedStudentData.lastName}`.toLowerCase(),
@@ -78,76 +97,6 @@ export const createStudentSlice: StateCreator<AppState, [], [], StudentSlice> = 
     get().logActivity(`Added student: ${newStudent.firstName} ${newStudent.lastName}`, 'user');
     get().checkAndAwardAchievements();
     return newStudent;
-  },
-
-  bulkUpdateStudents: (updates) => {
-    set(state => {
-      const newStudents = [...state.students];
-      let hasChanges = false;
-      const updateMap = new Map();
-      for (let i = 0; i < updates.length; i++) {
-        updateMap.set(updates[i].id, updates[i].data);
-      }
-
-      for (let i = 0, len = newStudents.length; i < len; i++) {
-        const student = newStudents[i];
-        if (updateMap.has(student.id)) {
-          hasChanges = true;
-          const studentData = updateMap.get(student.id);
-          const studentToUpdate = { ...student };
-
-          if (studentData.firstName !== undefined) studentToUpdate.firstName = sanitizeString(studentData.firstName);
-          if (studentData.lastName !== undefined) studentToUpdate.lastName = sanitizeString(studentData.lastName);
-          if (studentData.firstName !== undefined || studentData.lastName !== undefined) {
-             studentToUpdate.searchName = `${studentToUpdate.firstName} ${studentToUpdate.lastName}`.toLowerCase();
-          }
-
-          if (studentData.notes !== undefined) studentToUpdate.notes = sanitizeString(studentData.notes);
-          if (studentData.country !== undefined) studentToUpdate.country = sanitizeString(studentData.country);
-
-          if (studentData.parent) {
-            const existingParent = studentToUpdate.parent || { name: '', relationship: '' };
-            const updatedParentData = { ...existingParent, ...studentData.parent };
-            if (studentData.parent.name !== undefined) {
-              updatedParentData.name = sanitizeString(studentData.parent.name);
-            }
-            studentToUpdate.parent = updatedParentData;
-          }
-
-          if (studentData.contact) {
-            const updatedContactData = { ...studentToUpdate.contact, ...studentData.contact };
-            if (studentData.contact.email !== undefined) updatedContactData.email = sanitizeString(studentData.contact.email);
-
-            if (studentData.contact.studentPhone && updatedContactData.studentPhone) {
-                updatedContactData.studentPhone.number = sanitizeString(updatedContactData.studentPhone.number);
-            }
-            if (studentData.contact.parentPhone1 && updatedContactData.parentPhone1) {
-                updatedContactData.parentPhone1.number = sanitizeString(updatedContactData.parentPhone1.number);
-            }
-            if (studentData.contact.parentPhone2 && updatedContactData.parentPhone2) {
-                updatedContactData.parentPhone2.number = sanitizeString(updatedContactData.parentPhone2.number);
-            }
-
-            studentToUpdate.contact = updatedContactData;
-          }
-
-          if (studentData.tuition) {
-             const updatedTuitionData = { ...studentToUpdate.tuition, ...studentData.tuition };
-             if (studentData.tuition.subjects !== undefined) {
-                updatedTuitionData.subjects = studentData.tuition.subjects.map((subject: string) => sanitizeString(subject));
-             }
-             studentToUpdate.tuition = updatedTuitionData;
-          }
-
-          if (studentData.balance !== undefined) {
-             studentToUpdate.balance = studentData.balance;
-          }
-
-          newStudents[i] = studentToUpdate;
-        }
-      }
-      return hasChanges ? { students: newStudents } : state;
-    });
   },
 
   updateStudent: (studentId, studentData) => {

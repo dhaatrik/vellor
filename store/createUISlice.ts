@@ -5,8 +5,6 @@ import { generateId } from '../helpers';
 
 export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set) => ({
   toasts: [],
-  hoveredTransactionId: null,
-  hoveredStudentId: null,
   activityLog: [],
 
   addToast: (message, type = 'info') => {
@@ -49,6 +47,4 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set) => (
   },
 
   clearActivityLog: () => set({ activityLog: [] }),
-  setHoveredTransaction: (id) => set({ hoveredTransactionId: id }),
-  setHoveredStudent: (id) => set({ hoveredStudentId: id }),
 });

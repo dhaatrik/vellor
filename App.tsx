@@ -6,13 +6,13 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import localforage from 'localforage';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import { useStore } from './store'; // Zustand hook
 import { ToastContainer } from './components/ui';
 import { MarketingPage } from './pages/MarketingPage';
 import { PortalPage } from './pages/PortalPage';
 import { Theme } from './types'; // Theme enum
-import localforage from 'localforage';
 
 // Extracted Components
 import { AppContent } from './components/layout/AppContent';
@@ -23,11 +23,29 @@ const App: React.FC = () => {
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [isPortal, setIsPortal] = useState(window.location.hash.startsWith('#/portal'));
   const [isFirstTime, setIsFirstTime] = useState<boolean | null>(null);
+  const [showSetup, setShowSetup] = useState(false);
 
   useEffect(() => {
-    localforage.getItem('vellor-salt').then(salt => setIsFirstTime(!salt));
+    const init = async () => {
+      // Migrate vellor-salt
+      const legacySalt = localStorage.getItem('vellor-salt');
+      if (legacySalt) {
+        await localforage.setItem('vellor-salt', legacySalt);
+        localStorage.removeItem('vellor-salt');
+      }
+
+      // Migrate lastBackupDate
+      const legacyBackupDate = localStorage.getItem('lastBackupDate');
+      if (legacyBackupDate) {
+        await localforage.setItem('lastBackupDate', legacyBackupDate);
+        localStorage.removeItem('lastBackupDate');
+      }
+
+      const salt = await localforage.getItem('vellor-salt');
+      setIsFirstTime(!salt);
+    };
+    init();
   }, []);
-  const [showSetup, setShowSetup] = useState(false);
 
   useEffect(() => {
     const handleHashChange = () => setIsPortal(window.location.hash.startsWith('#/portal'));

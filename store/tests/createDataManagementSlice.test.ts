@@ -3,6 +3,8 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { useStore } from '../../store';
 import { Theme } from '../../types';
 import * as crypto from '../../src/crypto';
+import localforage from 'localforage';
+vi.mock('localforage', () => ({ default: { setItem: vi.fn().mockResolvedValue(undefined) } }));
 
 describe('createDataManagementSlice', () => {
   let createObjectURLMock: any;
@@ -31,8 +33,8 @@ describe('createDataManagementSlice', () => {
       addToast: vi.fn(),
     });
 
-    // Mock localStorage
-    vi.spyOn(Storage.prototype, 'setItem');
+    // Mock localforage
+    vi.spyOn(localforage, 'setItem').mockResolvedValue(undefined);
 
     // Mock URL methods
     createObjectURLMock = vi.fn().mockReturnValue('blob:mock-url');
@@ -59,10 +61,10 @@ describe('createDataManagementSlice', () => {
   });
 
   describe('exportData', () => {
-    it('successfully creates an export Blob and interacts with DOM', () => {
+    it('successfully creates an export Blob and interacts with DOM', async () => {
       const addToastMock = useStore.getState().addToast;
 
-      useStore.getState().exportData();
+      await useStore.getState().exportData();
 
       // Verify Blob and URL creation
       expect(createObjectURLMock).toHaveBeenCalled();
@@ -84,7 +86,7 @@ describe('createDataManagementSlice', () => {
       expect(revokeObjectURLMock).toHaveBeenCalledWith('blob:mock-url');
 
       // Verify localStorage
-      expect(localStorage.setItem).toHaveBeenCalledWith('lastBackupDate', expect.any(String));
+      expect(localforage.setItem).toHaveBeenCalledWith('lastBackupDate', expect.any(String));
 
       // Verify toast
       expect(addToastMock).toHaveBeenCalledWith('Data exported successfully!', 'success');

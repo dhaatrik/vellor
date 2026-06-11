@@ -12,49 +12,21 @@ export interface Conflict {
 }
 
 /**
- * Builds an index of existing students mapped by their normalized email addresses.
- * Useful for fast O(1) lookups during conflict resolution.
- */
-export const buildStudentEmailMap = (students: Student[]): Map<string, Student[]> => {
-    const map = new Map<string, Student[]>();
-    for (const student of students) {
-        const email = student.contact?.email?.toLowerCase().trim();
-        if (email) {
-            if (!map.has(email)) {
-                map.set(email, []);
-            }
-            map.get(email)!.push(student);
-        }
-    }
-    return map;
-};
-
-/**
  * Identifies potential conflicts between an imported student and existing records.
  * Currently uses email matching as the primary conflict detection strategy.
- * Accepts either an array of students or a precomputed email map for better performance.
  */
-export const findConflicts = (imported: Partial<Student>, existingStudents: Student[] | Map<string, Student[]>): Conflict[] => {
+export const findConflicts = (imported: Partial<Student>, existingStudents: Student[]): Conflict[] => {
     const conflicts: Conflict[] = [];
     const importedEmail = imported.contact?.email?.toLowerCase().trim();
 
     if (!importedEmail) return [];
 
-    if (existingStudents instanceof Map) {
-        const matches = existingStudents.get(importedEmail);
-        if (matches) {
-            for (const existing of matches) {
-                conflicts.push({ imported, existing });
-            }
+    existingStudents.forEach(existing => {
+        const existingEmail = existing.contact?.email?.toLowerCase().trim();
+        if (existingEmail && existingEmail === importedEmail) {
+            conflicts.push({ imported, existing });
         }
-    } else {
-        existingStudents.forEach(existing => {
-            const existingEmail = existing.contact?.email?.toLowerCase().trim();
-            if (existingEmail && existingEmail === importedEmail) {
-                conflicts.push({ imported, existing });
-            }
-        });
-    }
+    });
 
     return conflicts;
 };
