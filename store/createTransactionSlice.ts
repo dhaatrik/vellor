@@ -131,9 +131,11 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
         }
 
         // Apply balance updates
-        studentBalances.forEach((newBalance, studentId) => {
-           get().updateStudent(studentId, { balance: newBalance });
-        });
+        const balanceUpdates = Array.from(studentBalances.entries()).map(([id, balance]) => ({
+          id,
+          data: { balance }
+        }));
+        get().bulkUpdateStudents(balanceUpdates);
 
         if (studentsOverdueCleared > 0) {
           get().addPoints(POINTS_ALLOCATION.CLEAR_OVERDUE * studentsOverdueCleared, `Cleared overdue payments for ${studentsOverdueCleared} students`);

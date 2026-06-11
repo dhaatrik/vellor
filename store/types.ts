@@ -4,6 +4,7 @@ export interface StudentSlice {
   students: Student[];
   addStudent: (studentData: StudentFormData) => Student;
   addStudents: (studentsData: StudentFormData[]) => Student[];
+  bulkUpdateStudents: (updates: { id: string, data: Partial<StudentFormData> }[]) => void;
   updateStudent: (studentId: string, studentData: Partial<StudentFormData>) => Student | undefined;
   deleteStudent: (studentId: string) => void;
   getStudentById: (studentId: string) => Student | undefined;
