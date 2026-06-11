@@ -123,3 +123,6 @@
 ## 2026-06-06 - Modal Close Button Accessibility
 **Learning:** In the Vellor app, raw HTML `<button>` elements often lack built-in focus visibility for keyboard navigation compared to the custom `<Button>` component. When working with raw `<button>` elements, always explicitly include focus-visibility utility classes (e.g., `focus:outline-none focus-visible:ring-2 focus-visible:ring-accent`) to maintain accessibility.
 **Action:** When creating or modifying close buttons or icon buttons, ensure they have explicit `focus-visible` styling or use the custom `Button` component which provides these out-of-the-box.
+## 2026-06-10 - Button Loading State Accessibility
+**Learning:** When implementing loading states on custom button components (e.g., `<Button isLoading>`), failing to explicitly mark the element as busy can leave screen reader users unaware that an async operation has started. Furthermore, purely visual loading indicators (like a spinning SVG) may confuse assistive technologies if not explicitly hidden.
+**Action:** When implementing loading states on custom button components, always ensure accessibility by applying `aria-busy={isLoading}` to the root `<button>` element, and apply `aria-hidden="true"` to any purely visual loading spinner SVGs to prevent screen readers from parsing them.

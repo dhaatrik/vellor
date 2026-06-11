@@ -248,6 +248,10 @@
 **Learning:** `new Date().toISOString().split('T')[0]` generates strings in UTC. If a user logs a transaction late at night in a local timezone behind UTC (like PST), the transaction date will jump forward to "tomorrow". Relying on `toISOString()` to generate "local" strings is a subtle bug, even though it reduces allocations compared to instantiating new local Date strings.
 **Action:** Always prefer formatting dates in the local timezone using `getFullYear()`, `getMonth()`, etc., over `toISOString()` when dealing with user-facing date fields.
 
+## 2026-06-10 - Hoist Date.toISOString() in Batch Updates
+**Learning:** To optimize performance during bulk creation operations (like array mapping or Zustand bulk actions), hoist invariant, expensive operations such as `new Date().toISOString()` outside of iterative loops. This saves CPU cycles, prevents redundant memory allocations, and ensures batch items logically share the same timestamp.
+**Action:** Always extract `new Date().toISOString()` or other expensive, unchanging computations to a variable before entering a loop or a `.map()` that processes multiple items.
+
 ## 2026-06-11 - Eliminate array chaining map/sort in portal payload serialization
 **Learning:** Chaining array methods like `.map().sort()` inside serialization functions or payload generators creates intermediate arrays and increases garbage collection overhead, particularly with potentially large lists.
 **Action:** Replace `.map().sort()` pipelines with single-pass standard `for` loops that manually construct objects into a pre-allocated array (`new Array(len)` when mapping exactly 1-to-1) and then execute `.sort()` in-place before returning the array.
