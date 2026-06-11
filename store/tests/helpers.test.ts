@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { sanitizeString, formatCurrency, formatDate, formatPhoneNumber, getPaymentStatusColor, formatRelativeTime, generatePortalLink, generateWhatsAppLink } from '../../helpers';
+import { sanitizeString, formatCurrency, formatDate, formatPhoneNumber, getPaymentStatusColor, formatRelativeTime, generatePortalLink, generateWhatsAppLink, getLocalYYYYMMDD } from '../../helpers';
 import { PaymentStatus, Student, Transaction, AppSettings, Theme } from '../../types';
 
 describe('Helpers', () => {
@@ -214,5 +214,38 @@ describe('generatePortalLink', () => {
 
         expect(payload.transactions).toHaveLength(0);
         expect(payload.transactions).toEqual([]);
+    });
+});
+
+describe('getLocalYYYYMMDD', () => {
+    it('formats a specific date correctly with zero padding', () => {
+        // Date months are 0-indexed, so 0 is January
+        const testDate = new Date(2023, 0, 5, 12, 0, 0); // Jan 5, 2023, 12:00:00 local time
+        expect(getLocalYYYYMMDD(testDate)).toBe('2023-01-05');
+    });
+
+    it('formats a late year date correctly', () => {
+        const testDate = new Date(2024, 11, 25, 12, 0, 0); // Dec 25, 2024
+        expect(getLocalYYYYMMDD(testDate)).toBe('2024-12-25');
+    });
+
+    it('uses the local timezone rather than UTC', () => {
+        // We create a date that is clearly on different days in UTC and local if constructed specifically
+        // But the easiest way to test is just to ensure it uses the Date object's local getters.
+        // We can mock a Date object.
+        const mockDate = {
+            getFullYear: () => 2022,
+            getMonth: () => 9, // October (0-indexed)
+            getDate: () => 31
+        } as Date;
+
+        expect(getLocalYYYYMMDD(mockDate)).toBe('2022-10-31');
+    });
+
+    it('uses the current date when no argument is passed', () => {
+        // To test without arguments without making it flaky, we can compare to the current date's local values
+        const now = new Date();
+        const expected = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        expect(getLocalYYYYMMDD()).toBe(expected);
     });
 });
