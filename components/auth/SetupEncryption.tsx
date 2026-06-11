@@ -3,6 +3,7 @@ import { useStore } from '../../store';
 import { generateSalt, deriveKey, exportKeyToBase64, importKeyFromBase64 } from '../../src/crypto';
 import { Icon, Button } from '../ui';
 import { useCybertext } from '../../hooks/useCybertext';
+import localforage from 'localforage';
 
 export const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlocked }) => {
   const [isFirstTime, setIsFirstTime] = useState<boolean | null>(null);
@@ -20,8 +21,9 @@ export const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlock
   const scrambledRecoveryHeading = useCybertext('Recovery Key');
 
   useEffect(() => {
-    const saltString = localStorage.getItem('vellor-salt');
-    setIsFirstTime(!saltString);
+    localforage.getItem('vellor-salt').then(saltString => {
+      setIsFirstTime(!saltString);
+    });
   }, []);
 
   const handleUnlock = async () => {
@@ -44,7 +46,7 @@ export const SetupEncryption: React.FC<{ onUnlocked: () => void }> = ({ onUnlock
            await useStore.persist.rehydrate();
            onUnlocked();
         } else {
-           const saltString = localStorage.getItem('vellor-salt')!;
+           const saltString = await localforage.getItem<string>('vellor-salt') || '';
            if (!/^[A-Za-z0-9+/]*={0,2}$/.test(saltString)) {
              throw new Error("Invalid salt format.");
            }

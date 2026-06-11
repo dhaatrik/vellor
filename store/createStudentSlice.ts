@@ -5,6 +5,31 @@ import { generateId } from '../helpers';
 import { POINTS_ALLOCATION } from '../constants';
 import { sanitizeString } from '../helpers';
 
+
+const sanitizeStudentData = (studentData: StudentFormData): StudentFormData => ({
+  ...studentData,
+  firstName: sanitizeString(studentData.firstName),
+  lastName: sanitizeString(studentData.lastName),
+  country: sanitizeString(studentData.country),
+  parent: {
+    ...studentData.parent,
+    name: sanitizeString(studentData.parent?.name),
+    relationship: studentData.parent?.relationship ?? 'Parent',
+  },
+  contact: {
+    ...studentData.contact,
+    email: sanitizeString(studentData.contact?.email),
+    studentPhone: studentData.contact?.studentPhone ? { ...studentData.contact.studentPhone, number: sanitizeString(studentData.contact.studentPhone.number) } : undefined,
+    parentPhone1: studentData.contact?.parentPhone1 ? { ...studentData.contact.parentPhone1, number: sanitizeString(studentData.contact.parentPhone1.number) } : undefined,
+    parentPhone2: studentData.contact?.parentPhone2 ? { ...studentData.contact.parentPhone2, number: sanitizeString(studentData.contact.parentPhone2.number) } : undefined,
+  },
+  notes: sanitizeString(studentData.notes),
+  tuition: {
+    ...studentData.tuition,
+    subjects: studentData.tuition.subjects.map(subject => sanitizeString(subject)),
+  }
+});
+
 export const createStudentSlice: StateCreator<AppState, [], [], StudentSlice> = (set, get) => ({
   students: [],
 
@@ -15,29 +40,7 @@ export const createStudentSlice: StateCreator<AppState, [], [], StudentSlice> = 
     // ⚡ Bolt Performance: Process bulk additions inside a single loop to avoid N+1 state updates
     for (let i = 0; i < studentsData.length; i++) {
         const studentData = studentsData[i];
-        const sanitizedStudentData: StudentFormData = {
-          ...studentData,
-          firstName: sanitizeString(studentData.firstName),
-          lastName: sanitizeString(studentData.lastName),
-          country: sanitizeString(studentData.country),
-          parent: {
-            ...studentData.parent,
-            name: sanitizeString(studentData.parent?.name),
-            relationship: studentData.parent?.relationship ?? 'Parent',
-          },
-          contact: {
-            ...studentData.contact,
-            email: sanitizeString(studentData.contact?.email),
-            studentPhone: studentData.contact?.studentPhone ? { ...studentData.contact.studentPhone, number: sanitizeString(studentData.contact.studentPhone.number) } : undefined,
-            parentPhone1: studentData.contact?.parentPhone1 ? { ...studentData.contact.parentPhone1, number: sanitizeString(studentData.contact.parentPhone1.number) } : undefined,
-            parentPhone2: studentData.contact?.parentPhone2 ? { ...studentData.contact.parentPhone2, number: sanitizeString(studentData.contact.parentPhone2.number) } : undefined,
-          },
-          notes: sanitizeString(studentData.notes),
-          tuition: {
-            ...studentData.tuition,
-            subjects: studentData.tuition.subjects.map(subject => sanitizeString(subject)),
-          }
-        };
+        const sanitizedStudentData = sanitizeStudentData(studentData);
         newStudents.push({
           ...sanitizedStudentData,
           searchName: `${sanitizedStudentData.firstName} ${sanitizedStudentData.lastName}`.toLowerCase(),
@@ -60,29 +63,7 @@ export const createStudentSlice: StateCreator<AppState, [], [], StudentSlice> = 
   },
 
   addStudent: (studentData) => {
-    const sanitizedStudentData: StudentFormData = {
-      ...studentData,
-      firstName: sanitizeString(studentData.firstName),
-      lastName: sanitizeString(studentData.lastName),
-      country: sanitizeString(studentData.country),
-      parent: {
-        ...studentData.parent,
-        name: sanitizeString(studentData.parent?.name),
-        relationship: studentData.parent?.relationship ?? 'Parent',
-      },
-      contact: {
-        ...studentData.contact,
-        email: sanitizeString(studentData.contact?.email),
-        studentPhone: studentData.contact?.studentPhone ? { ...studentData.contact.studentPhone, number: sanitizeString(studentData.contact.studentPhone.number) } : undefined,
-        parentPhone1: studentData.contact?.parentPhone1 ? { ...studentData.contact.parentPhone1, number: sanitizeString(studentData.contact.parentPhone1.number) } : undefined,
-        parentPhone2: studentData.contact?.parentPhone2 ? { ...studentData.contact.parentPhone2, number: sanitizeString(studentData.contact.parentPhone2.number) } : undefined,
-      },
-      notes: sanitizeString(studentData.notes),
-      tuition: {
-        ...studentData.tuition,
-        subjects: studentData.tuition.subjects.map(subject => sanitizeString(subject)),
-      }
-    };
+    const sanitizedStudentData = sanitizeStudentData(studentData);
     const newStudent: Student = {
       ...sanitizedStudentData,
       searchName: `${sanitizedStudentData.firstName} ${sanitizedStudentData.lastName}`.toLowerCase(),
