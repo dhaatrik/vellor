@@ -256,6 +256,6 @@
 **Learning:** Chaining array methods like `.map().sort()` inside serialization functions or payload generators creates intermediate arrays and increases garbage collection overhead, particularly with potentially large lists.
 **Action:** Replace `.map().sort()` pipelines with single-pass standard `for` loops that manually construct objects into a pre-allocated array (`new Array(len)` when mapping exactly 1-to-1) and then execute `.sort()` in-place before returning the array.
 
-## 2026-06-12 - Single-Pass Rendering for Lists
+## 2026-06-11 - Single-Pass Rendering for Lists
 **Learning:** Combining `.filter()` and `.map()` passes directly into a single `for` loop or `.reduce()` inside `useMemo` avoids iterating large arrays twice during React rendering cycles.
 **Action:** When filtering and rendering long lists, use a single pass (like `reduce`) inside `useMemo` to generate the JSX elements rather than mapping over a pre-filtered array within the return statement, yielding substantial improvements in React render time.
