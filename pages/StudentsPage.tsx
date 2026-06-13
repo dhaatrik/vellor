@@ -477,22 +477,22 @@ export const StudentsPage: React.FC = () => {
       <Modal isOpen={showBulkLogModal} onClose={() => setShowBulkLogModal(false)} title={`Bulk Log Lesson (${selectedStudentIds.size} Students)`}>
          <div className="space-y-4 p-2">
             <div>
-               <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Date</label>
-               <Input type="date" value={bulkLogData.date} onChange={e => setBulkLogData({...bulkLogData, date: e.target.value})} />
+               <label htmlFor="bulk-log-date" className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Date</label>
+               <Input id="bulk-log-date" type="date" value={bulkLogData.date} onChange={e => setBulkLogData({...bulkLogData, date: e.target.value})} />
             </div>
             <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Duration (mins)</label>
-                  <Input type="number" value={bulkLogData.duration} onChange={e => setBulkLogData({...bulkLogData, duration: Number(e.target.value)})} />
+                  <label htmlFor="bulk-log-duration" className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Duration (mins)</label>
+                  <Input id="bulk-log-duration" type="number" value={bulkLogData.duration} onChange={e => setBulkLogData({...bulkLogData, duration: Number(e.target.value)})} />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Fee ({settings.currencySymbol})</label>
-                  <Input type="number" value={bulkLogData.fee} onChange={e => setBulkLogData({...bulkLogData, fee: Number(e.target.value)})} />
+                  <label htmlFor="bulk-log-fee" className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Fee ({settings.currencySymbol})</label>
+                  <Input id="bulk-log-fee" type="number" value={bulkLogData.fee} onChange={e => setBulkLogData({...bulkLogData, fee: Number(e.target.value)})} />
                 </div>
             </div>
             <div>
-               <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Notes</label>
-               <Input value={bulkLogData.notes} onChange={e => setBulkLogData({...bulkLogData, notes: e.target.value})} placeholder="Optional notes for all" />
+               <label htmlFor="bulk-log-notes" className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Notes</label>
+               <Input id="bulk-log-notes" value={bulkLogData.notes} onChange={e => setBulkLogData({...bulkLogData, notes: e.target.value})} placeholder="Optional notes for all" />
             </div>
             <Button className="w-full mt-4" variant="primary" onClick={submitBulkLog}>Log Lesson for All</Button>
          </div>
