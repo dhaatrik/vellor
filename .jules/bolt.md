@@ -255,3 +255,7 @@
 ## 2026-06-11 - Eliminate array chaining map/sort in portal payload serialization
 **Learning:** Chaining array methods like `.map().sort()` inside serialization functions or payload generators creates intermediate arrays and increases garbage collection overhead, particularly with potentially large lists.
 **Action:** Replace `.map().sort()` pipelines with single-pass standard `for` loops that manually construct objects into a pre-allocated array (`new Array(len)` when mapping exactly 1-to-1) and then execute `.sort()` in-place before returning the array.
+
+## 2026-06-13 - Early returns for 'all' filters
+**Learning:** Returning a newly created array from a `.filter(t => true)` or manual loop when no actual filtering is needed (e.g. `filter === 'all'`) needlessly breaks referential equality in React `useMemo` hooks, causing child components to re-render.
+**Action:** Always implement an early return (e.g., `if (filter === 'all') return items;`) to preserve referential equality and avoid unnecessary O(N) traversals. Use the standard declarative `.filter()` method for actual filtering rather than an imperative `for` loop unless proven strictly necessary.

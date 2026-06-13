@@ -24,8 +24,11 @@ export const StudentHistoryTab: React.FC<StudentHistoryTabProps> = ({
   const [filter, setFilter] = useState<'all' | 'paid' | 'due' | 'partially-paid'>('all');
 
   const filteredTransactions = useMemo(() => {
+    // ⚡ Bolt Performance: Early return for 'all' filter to avoid O(N) array traversal,
+    // prevent intermediate allocations, and preserve referential equality to avoid downstream re-renders.
+    if (filter === 'all') return studentTransactions;
+
     return studentTransactions.filter(t => {
-      if (filter === 'all') return true;
       if (filter === 'paid') return t.status === PaymentStatus.Paid;
       if (filter === 'due') return t.status === PaymentStatus.Due;
       if (filter === 'partially-paid') return t.status === PaymentStatus.PartiallyPaid;
