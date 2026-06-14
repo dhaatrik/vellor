@@ -113,9 +113,11 @@
 ## 2026-05-30 - Playwright Frontend Verification for Secured Routes
 **Learning:** Writing Playwright scripts to visually verify frontend changes on secured routes can be incredibly brittle if they rely on UI clicks to navigate complex onboarding flows, password setups, and dashboard navigations just to reach a deep view. These scripts often time out due to unexpected animations, missing locators, or changed DOM structures in the auth layer.
 **Action:** When writing Playwright scripts to visually verify frontend changes on internal routes, avoid relying on brittle UI clicks to bypass the onboarding flow. Instead, directly inject the required state by evaluating JavaScript on the page: `page.evaluate("localStorage.setItem('vellor-store', JSON.stringify({ state: { settings: { hasCompletedOnboarding: true, userName: 'Test User', theme: 'light', currencySymbol: '$' } } }))")`. Then, use direct URL navigation (e.g., `page.goto("http://localhost:5173/#/students")` if using hash routing) to immediately land on the relevant view, drastically reducing test execution time and flakiness.
+
 ## 2026-06-01 - Accessible Tab Navigation
 **Learning:** When adding ARIA attributes or custom HTML props to Framer Motion components (e.g., `motion.div`) in the Vellor project, be aware that existing `framer-motion` mocks in Vitest (like in `StudentDetailView.test.tsx`) may drop these attributes by only forwarding `className`, `onClick`, and `children`. You must update the mock to spread `...props` if your tests rely on querying these elements by their ARIA roles.
 **Action:** When working on accessibility for animated elements, check the component's test file to ensure the `framer-motion` mock properly spreads rest parameters (`...props`) so that ARIA roles and labels are passed to the DOM in test environments.
+
 ## 2026-06-01 - 100% Branch Coverage for crypto.ts
 **Learning:** In order to achieve 100% branch coverage for `crypto.ts`, all logical execution paths inside `try/catch` block or conditionally checked parameters such as `schema ? schema.parse(...) : ...` must be explicitly verified.
 **Action:** When working on missing test coverage, use the coverage output tool (like Vitest's coverage-final.json) to precisely identify missing branch evaluations, and supply inputs to test files that hit edge cases.
@@ -123,9 +125,11 @@
 ## 2026-06-06 - Modal Close Button Accessibility
 **Learning:** In the Vellor app, raw HTML `<button>` elements often lack built-in focus visibility for keyboard navigation compared to the custom `<Button>` component. When working with raw `<button>` elements, always explicitly include focus-visibility utility classes (e.g., `focus:outline-none focus-visible:ring-2 focus-visible:ring-accent`) to maintain accessibility.
 **Action:** When creating or modifying close buttons or icon buttons, ensure they have explicit `focus-visible` styling or use the custom `Button` component which provides these out-of-the-box.
+
 ## 2026-06-10 - Button Loading State Accessibility
 **Learning:** When implementing loading states on custom button components (e.g., `<Button isLoading>`), failing to explicitly mark the element as busy can leave screen reader users unaware that an async operation has started. Furthermore, purely visual loading indicators (like a spinning SVG) may confuse assistive technologies if not explicitly hidden.
 **Action:** When implementing loading states on custom button components, always ensure accessibility by applying `aria-busy={isLoading}` to the root `<button>` element, and apply `aria-hidden="true"` to any purely visual loading spinner SVGs to prevent screen readers from parsing them.
-## 2026-06-15 - ARIA Expanded for Accordions
+
+## 2026-06-14 - ARIA Expanded for Accordions
 **Learning:** Found an accordion-like collapsible section ("Read the full story" / "Show less" toggle) that visually expanded/collapsed content but lacked the necessary ARIA attributes. Screen readers rely on `aria-expanded` and `aria-controls` to understand that a button controls the visibility of another section and to announce its current state.
 **Action:** When implementing accordion-like UI elements or "Read more/less" toggles, always ensure the toggle button includes `aria-expanded` reflecting the current state, and `aria-controls` pointing to the ID of the collapsible content container.
