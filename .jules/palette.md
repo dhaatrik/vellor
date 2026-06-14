@@ -126,3 +126,6 @@
 ## 2026-06-10 - Button Loading State Accessibility
 **Learning:** When implementing loading states on custom button components (e.g., `<Button isLoading>`), failing to explicitly mark the element as busy can leave screen reader users unaware that an async operation has started. Furthermore, purely visual loading indicators (like a spinning SVG) may confuse assistive technologies if not explicitly hidden.
 **Action:** When implementing loading states on custom button components, always ensure accessibility by applying `aria-busy={isLoading}` to the root `<button>` element, and apply `aria-hidden="true"` to any purely visual loading spinner SVGs to prevent screen readers from parsing them.
+## 2026-06-15 - ARIA Expanded for Accordions
+**Learning:** Found an accordion-like collapsible section ("Read the full story" / "Show less" toggle) that visually expanded/collapsed content but lacked the necessary ARIA attributes. Screen readers rely on `aria-expanded` and `aria-controls` to understand that a button controls the visibility of another section and to announce its current state.
+**Action:** When implementing accordion-like UI elements or "Read more/less" toggles, always ensure the toggle button includes `aria-expanded` reflecting the current state, and `aria-controls` pointing to the ID of the collapsible content container.

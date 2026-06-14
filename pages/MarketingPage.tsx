@@ -567,6 +567,7 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
                 <AnimatePresence initial={false}>
                   {isManifestoExpanded && (
                     <motion.div
+                      id="manifesto-content"
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
@@ -593,6 +594,8 @@ export const MarketingPage: React.FC<MarketingPageProps> = ({ onGetStarted }) =>
 
               <button
                 onClick={() => setIsManifestoExpanded(!isManifestoExpanded)}
+                aria-expanded={isManifestoExpanded}
+                aria-controls="manifesto-content"
                 className="inline-flex items-center gap-2 text-accent font-semibold text-base hover:underline underline-offset-4 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-gray-50 dark:focus-visible:ring-offset-primary rounded-md mt-2"
               >
                 {isManifestoExpanded ? 'Show less' : 'Read the full story'}
