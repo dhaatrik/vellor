@@ -1,8 +1,9 @@
 import React, { useRef, useEffect } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { Button } from '../../components/ui';
+import { IconName } from '../../types';
 
-export const MagneticButton: React.FC<{ children: React.ReactNode; onClick: () => void; className?: string; rightIcon?: string }> = ({ children, onClick, className, rightIcon }) => {
+export const MagneticButton: React.FC<{ children: React.ReactNode; onClick: () => void; className?: string; rightIcon?: IconName }> = ({ children, onClick, className, rightIcon }) => {
   const ref = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -62,7 +63,7 @@ export const MagneticButton: React.FC<{ children: React.ReactNode; onClick: () =
       <Button
         onClick={onClick}
         className={className}
-        rightIcon={rightIcon as any}
+        rightIcon={rightIcon}
       >
         {children}
       </Button>
