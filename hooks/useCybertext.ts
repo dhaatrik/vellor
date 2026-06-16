@@ -31,7 +31,9 @@ export const useCybertext = (text: string): string => {
         } else if (text[i] === ' ') {
           newText += ' ';
         } else {
-          newText += TOKENS[Math.floor(Math.random() * TOKENS.length)];
+          const array = new Uint32Array(1);
+          crypto.getRandomValues(array);
+          newText += TOKENS[array[0] % TOKENS.length];
         }
       }
 
