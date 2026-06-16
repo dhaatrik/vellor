@@ -81,9 +81,6 @@ export const SearchModal: React.FC<{ isOpen: boolean; onClose: () => void }> = (
               if (student) {
                   const shareText = `Student Portal for ${student.firstName} ${student.lastName}`;
                   navigator.clipboard.writeText(shareText).then(() => {
-                    // Need visual feedback per memory
-                    // Since we can't add new CSS/components per instructions ("Do not add any new visual inputs or adjust CSS styling markers in this subphase"),
-                    // we will just console.log or use existing toast if available.
                     addToast('Portal link copied to clipboard!', 'success');
                   });
                   setQuery('');
