@@ -13,6 +13,8 @@ interface StudentHistoryTabProps {
   onLogPayment: (studentId: string) => void;
 }
 
+type FilterOption = 'all' | 'paid' | 'due' | 'partially-paid';
+
 export const StudentHistoryTab: React.FC<StudentHistoryTabProps> = ({
   studentTransactions,
   totalOwed,
@@ -21,7 +23,7 @@ export const StudentHistoryTab: React.FC<StudentHistoryTabProps> = ({
   studentId,
   onLogPayment,
 }) => {
-  const [filter, setFilter] = useState<'all' | 'paid' | 'due' | 'partially-paid'>('all');
+  const [filter, setFilter] = useState<FilterOption>('all');
 
   const filteredTransactions = useMemo(() => {
     // ⚡ Bolt Performance: Early return for 'all' filter to avoid O(N) array traversal,
@@ -50,7 +52,7 @@ export const StudentHistoryTab: React.FC<StudentHistoryTabProps> = ({
               <select
                 aria-label="Filter transactions"
                 value={filter}
-                onChange={(e) => setFilter(e.target.value as any)}
+                onChange={(e) => setFilter(e.target.value as FilterOption)}
                 className="text-sm bg-white dark:bg-primary-light border border-gray-200 dark:border-white/10 rounded-lg px-2 py-1.5 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-accent/50"
               >
                 <option value="all">All</option>
