@@ -133,3 +133,6 @@
 ## 2026-06-14 - ARIA Expanded for Accordions
 **Learning:** Found an accordion-like collapsible section ("Read the full story" / "Show less" toggle) that visually expanded/collapsed content but lacked the necessary ARIA attributes. Screen readers rely on `aria-expanded` and `aria-controls` to understand that a button controls the visibility of another section and to announce its current state.
 **Action:** When implementing accordion-like UI elements or "Read more/less" toggles, always ensure the toggle button includes `aria-expanded` reflecting the current state, and `aria-controls` pointing to the ID of the collapsible content container.
+## 2026-06-15 - ARIA Roles for Custom Switches
+**Learning:** In React applications, custom toggles or switches implemented using an `<input type="checkbox">` and visually styled with CSS (e.g. Tailwind) must have `role="switch"` and `aria-checked` attributes to properly convey their functionality to screen reader users as a toggle rather than a simple checkbox.
+**Action:** Always include `role="switch"` and `aria-checked={isChecked}` on checkbox inputs that function visually and logically as a toggle switch.
