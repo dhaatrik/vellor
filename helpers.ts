@@ -119,7 +119,7 @@ export const generateWhatsAppLink = (phone: PhoneNumber | undefined, message: st
     // Ignore malformed URI components and proceed with the raw input
   }
 
-  if (/(javascript|data|vbscript)[\s\u0000-\u001F\u007F-\u009F]*:/i.test(rawInput)) {
+  if (/[a-zA-Z]/.test(rawInput)) {
     return '#';
   }
 
