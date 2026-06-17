@@ -67,7 +67,6 @@ describe('useCybertext', () => {
   });
 
   it('should not throw error if text is undefined', () => {
-    // @ts-ignore
     const { result } = renderHook(() => useCybertext(undefined));
     expect(result.current).toBe(undefined);
   });

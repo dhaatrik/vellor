@@ -2,7 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 
 const TOKENS = '!@#$%01XF';
 
-export const useCybertext = (text: string): string => {
+export function useCybertext(text: string): string;
+export function useCybertext(text: undefined): undefined;
+export function useCybertext(text: string | undefined): string | undefined;
+export function useCybertext(text: string | undefined): string | undefined {
   const [displayText, setDisplayText] = useState(text);
   const iterationRef = useRef<number>(0);
 
@@ -48,4 +51,4 @@ export const useCybertext = (text: string): string => {
   }, [text]);
 
   return displayText;
-};
+}
