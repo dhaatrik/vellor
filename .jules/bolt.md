@@ -260,6 +260,10 @@
 **Learning:** Returning a newly created array from a `.filter(t => true)` or manual loop when no actual filtering is needed (e.g. `filter === 'all'`) needlessly breaks referential equality in React `useMemo` hooks, causing child components to re-render.
 **Action:** Always implement an early return (e.g., `if (filter === 'all') return items;`) to preserve referential equality and avoid unnecessary O(N) traversals. Use the standard declarative `.filter()` method for actual filtering rather than an imperative `for` loop unless proven strictly necessary.
 
+## 2026-06-14 - Testing Event Propagation and Mocks
+**Learning:** Testing component event propagation like `e.stopPropagation()` in Vitest/React Testing Library requires creating custom `MouseEvent` objects and explicitly mocking the propagation methods before firing the event on the DOM node.
+**Action:** Always construct standard DOM event objects and assign `vi.fn()` to control methods (`stopPropagation`, `preventDefault`) when validating event cancellation logic in component tests.
+
 ## 2026-06-15 - Derived State Over Redundant O(N) Computations
 **Learning:** Computing totals by iterating over an entire transactions array inside a component's `useMemo` introduces an O(N) performance penalty on every update. When the required data (like `outstandingBalance`) is already computed and stored in the global store as derived state on related entities (like the student object), using the global state is significantly faster.
 **Action:** Before writing O(N) loops to calculate aggregates in UI components, check if the data already exists as derived state in the global store. Replacing O(N) iterations with O(1) property access drastically improves render performance for large datasets.
