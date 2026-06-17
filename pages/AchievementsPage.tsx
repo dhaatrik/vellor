@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useStore } from '../store';
 import { Card, Icon } from '../components/ui';
 import { formatDate, formatCurrency } from '../helpers';
-import { AchievementId, PaymentStatus } from '../types';
+import { AchievementId, PaymentStatus, Achievement } from '../types';
 import { motion } from 'framer-motion';
 
 /**
@@ -18,7 +18,7 @@ export const AchievementsPage: React.FC = () => {
   
   const achievedList = useMemo(() => {
     // ⚡ Bolt Performance: Replace .filter() with a standard for loop to avoid intermediate array allocations and callback overhead
-    const list = [];
+    const list: Achievement[] = [];
     for (let i = 0, len = achievements.length; i < len; i++) {
       if (achievements[i].achieved) {
         list.push(achievements[i]);
@@ -31,7 +31,7 @@ export const AchievementsPage: React.FC = () => {
         name: 'Personal Goal',
         description: settings.customAchievement,
         achieved: true,
-        icon: 'star' as any,
+        icon: 'star',
         dateAchieved: new Date().toISOString() // Assuming earned today for sorting purposes if not stored
       });
     }
@@ -46,7 +46,7 @@ export const AchievementsPage: React.FC = () => {
 
   const pendingList = useMemo(() => {
     // ⚡ Bolt Performance: Replace .filter() with a standard for loop to avoid intermediate array allocations and callback overhead
-    const list = [];
+    const list: Achievement[] = [];
     for (let i = 0, len = achievements.length; i < len; i++) {
       if (!achievements[i].achieved) {
         list.push(achievements[i]);
@@ -59,7 +59,7 @@ export const AchievementsPage: React.FC = () => {
         name: 'Personal Goal',
         description: settings.customAchievement,
         achieved: false,
-        icon: 'star' as any
+        icon: 'star'
       });
     }
     return list;

@@ -5,20 +5,13 @@ import { formatCurrency } from '../../helpers';
 import { motion, Variants } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import type { ValueType } from 'recharts/types/component/DefaultTooltipContent';
-import { PaymentStatus } from '../../types';
+import { PaymentStatus, Student, Transaction } from '../../types';
 
 interface DashboardChartsProps {
   itemVariants: Variants;
 }
 
-export const DashboardCharts: React.FC<DashboardChartsProps> = ({ itemVariants }) => {
-  const settings = useStore(s => s.settings);
-  const students = useStore(s => s.students);
-  const transactions = useStore(s => s.transactions);
-
-  const [activeChart, setActiveChart] = React.useState<'income' | 'students'>('income');
-
-  const chartData = useMemo(() => {
+export const generateChartData = (transactions: Transaction[], students: Student[]) => {
     const data = [];
     const today = new Date();
 
@@ -92,6 +85,17 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ itemVariants }
       });
     }
     return data;
+};
+
+export const DashboardCharts: React.FC<DashboardChartsProps> = ({ itemVariants }) => {
+  const settings = useStore(s => s.settings);
+  const students = useStore(s => s.students);
+  const transactions = useStore(s => s.transactions);
+
+  const [activeChart, setActiveChart] = React.useState<'income' | 'students'>('income');
+
+  const chartData = useMemo(() => {
+    return generateChartData(transactions, students);
   }, [transactions, students]);
 
   return (
