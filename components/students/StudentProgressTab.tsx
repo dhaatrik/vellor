@@ -31,7 +31,6 @@ export const StudentProgressTab: React.FC<StudentProgressTabProps> = ({
 
   const handleAddProgressLog = () => {
     // In a real implementation this would save to the store
-    console.log("Logged progress:", { confidence: sessionConfidence, notes: sessionNotes });
     setSessionNotes('');
     setSessionConfidence(50);
   };

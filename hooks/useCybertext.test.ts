@@ -28,12 +28,27 @@ describe('useCybertext', () => {
     expect(result.current).toBe('');
   });
 
-  it('should animate to final text', () => {
+  it('should animate text by resolving characters across frames', () => {
     const text = 'hello';
     const { result } = renderHook(() => useCybertext(text));
 
+    // Initially, it might have random tokens
     expect(result.current.length).toBe(text.length);
 
+    // Frame 1-2: 0 chars resolved -> random string of same length
+    act(() => {
+      vi.advanceTimersByTime(16 * 1);
+    });
+    expect(result.current).not.toBe(text);
+
+    // Frame 3-4: 1 char resolved -> 'h' + random
+    act(() => {
+      vi.advanceTimersByTime(16 * 2);
+    });
+    expect(result.current.startsWith('h')).toBe(true);
+    expect(result.current).not.toBe(text);
+
+    // Skip to end (needs text.length * 2 frames)
     act(() => {
       vi.advanceTimersByTime(16 * 15);
     });
@@ -41,7 +56,7 @@ describe('useCybertext', () => {
     expect(result.current).toBe(text);
   });
 
-  it('should handle spaces properly', () => {
+  it('should preserve spaces during animation', () => {
     const { result } = renderHook(() => useCybertext('a b'));
 
     act(() => {
@@ -52,7 +67,6 @@ describe('useCybertext', () => {
   });
 
   it('should not throw error if text is undefined', () => {
-    // @ts-ignore
     const { result } = renderHook(() => useCybertext(undefined));
     expect(result.current).toBe(undefined);
   });
@@ -78,5 +92,14 @@ describe('useCybertext', () => {
       vi.advanceTimersByTime(16 * 10);
     });
     expect(result.current).toBe('two');
+  });
+
+  it('should cancel animation frame on unmount', () => {
+    const { unmount } = renderHook(() => useCybertext('hello'));
+    const cancelSpy = vi.spyOn(window, 'cancelAnimationFrame');
+
+    unmount();
+
+    expect(cancelSpy).toHaveBeenCalled();
   });
 });

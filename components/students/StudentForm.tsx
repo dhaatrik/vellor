@@ -4,7 +4,7 @@ import { generateId } from '../../helpers';
 import { Button, Input, Select, Textarea, PhoneInput, Icon } from '../ui';
 import { COUNTRY_CODE_MAP, COUNTRY_OPTIONS } from '../../constants';
 import { z } from 'zod';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, FormProvider, useFormContext } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 /**
@@ -54,7 +54,7 @@ interface StudentFormProps {
  * validated with react-hook-form and zod.
  */
 export const StudentForm: React.FC<StudentFormProps> = ({ student, onSave, onClose }) => {
-  const { register, handleSubmit, control, setValue, getValues, formState: { errors } } = useForm<StudentFormInput, unknown, StudentFormValues>({
+  const methods = useForm<StudentFormInput, unknown, StudentFormValues>({
     resolver: zodResolver(studentSchema),
     defaultValues: student ? {
       firstName: student.firstName,
@@ -108,13 +108,35 @@ export const StudentForm: React.FC<StudentFormProps> = ({ student, onSave, onClo
     onSave(studentToSave);
   };
 
-  const [subjectsInput, setSubjectsInput] = React.useState((student?.tuition.subjects || []).join(', '));
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-      <div className="space-y-6">
+    <FormProvider {...methods}>
+      <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-8">
+        <div className="space-y-6">
+          <BasicInfoSection />
+          <ParentDetailsSection />
+          <ContactInfoSection />
+          <TuitionDetailsSection />
+          <AdditionalNotesSection />
+        </div>
+      <div className="flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-white/10">
+        <Button type="button" variant="ghost" onClick={onClose} className="rounded-full px-6">Cancel</Button>
+        <Button type="submit" variant="primary" className="rounded-full px-8 shadow-lg shadow-accent/20">
+          {student ? 'Save Changes' : 'Add Student'}
+        </Button>
+      </div>
+      </form>
+    </FormProvider>
+  );
+};
+
+const BasicInfoSection = () => {
+  const { register, getValues, setValue, formState: { errors } } = useFormContext<StudentFormValues>();
+
+  return (
+    <>
         {/* Basic Info */}
-        <div className="bg-gray-50 dark:bg-primary/50 p-6 rounded-3xl border border-gray-100 dark:border-white/5 space-y-4">
+      <div className="bg-gray-50 dark:bg-primary/50 p-6 rounded-3xl border border-gray-100 dark:border-white/5 space-y-4">
           <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
             <Icon iconName="identification" className="w-4 h-4" />
             Basic Info
@@ -152,8 +174,17 @@ export const StudentForm: React.FC<StudentFormProps> = ({ student, onSave, onClo
           />
         </div>
 
+    </>
+  );
+};
+
+const ParentDetailsSection = () => {
+  const { register, formState: { errors } } = useFormContext<StudentFormValues>();
+
+  return (
+    <>
         {/* Parent Details */}
-        <div className="bg-gray-50 dark:bg-primary/50 p-6 rounded-3xl border border-gray-100 dark:border-white/5 space-y-4">
+      <div className="bg-gray-50 dark:bg-primary/50 p-6 rounded-3xl border border-gray-100 dark:border-white/5 space-y-4">
           <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
             <Icon iconName="users" className="w-4 h-4" />
             Parent/Guardian Details
@@ -178,8 +209,17 @@ export const StudentForm: React.FC<StudentFormProps> = ({ student, onSave, onClo
           </div>
         </div>
 
+    </>
+  );
+};
+
+const ContactInfoSection = () => {
+  const { register, control, formState: { errors } } = useFormContext<StudentFormValues>();
+
+  return (
+    <>
         {/* Contact Info */}
-        <div className="bg-gray-50 dark:bg-primary/50 p-6 rounded-3xl border border-gray-100 dark:border-white/5 space-y-4">
+      <div className="bg-gray-50 dark:bg-primary/50 p-6 rounded-3xl border border-gray-100 dark:border-white/5 space-y-4">
           <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
             <Icon iconName="phone" className="w-4 h-4" />
             Contact Information
@@ -232,8 +272,18 @@ export const StudentForm: React.FC<StudentFormProps> = ({ student, onSave, onClo
           </div>
         </div>
 
+    </>
+  );
+};
+
+const TuitionDetailsSection = () => {
+  const { register, getValues, setValue, formState: { errors } } = useFormContext<StudentFormValues>();
+  const [subjectsInput, setSubjectsInput] = React.useState((getValues('tuition.subjects') || []).join(', '));
+
+  return (
+    <>
         {/* Tuition Details */}
-        <div className="bg-gray-50 dark:bg-primary/50 p-6 rounded-3xl border border-gray-100 dark:border-white/5 space-y-4">
+      <div className="bg-gray-50 dark:bg-primary/50 p-6 rounded-3xl border border-gray-100 dark:border-white/5 space-y-4">
           <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
             <Icon iconName="academic-cap" className="w-4 h-4" />
             Tuition Details
@@ -299,28 +349,29 @@ export const StudentForm: React.FC<StudentFormProps> = ({ student, onSave, onClo
             />
           </div>
         </div>
-        
-        {/* Additional Notes */}
-        <div className="bg-gray-50 dark:bg-primary/50 p-6 rounded-3xl border border-gray-100 dark:border-white/5">
-          <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-            <Icon iconName="document-text" className="w-4 h-4" />
-            Additional Notes
-          </h4>
-          <Textarea 
-            label="Notes" 
-            {...register('notes')} 
-            error={errors.notes?.message}
-            placeholder="Add any additional notes about the student here..."
-          />
-        </div>
-      </div>
 
-      <div className="flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-white/10">
-        <Button type="button" variant="ghost" onClick={onClose} className="rounded-full px-6">Cancel</Button>
-        <Button type="submit" variant="primary" className="rounded-full px-8 shadow-lg shadow-accent/20">
-          {student ? 'Save Changes' : 'Add Student'}
-        </Button>
+    </>
+  );
+};
+
+const AdditionalNotesSection = () => {
+  const { register, formState: { errors } } = useFormContext<StudentFormValues>();
+
+  return (
+    <>
+      {/* Additional Notes */}
+      <div className="bg-gray-50 dark:bg-primary/50 p-6 rounded-3xl border border-gray-100 dark:border-white/5">
+        <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+          <Icon iconName="document-text" className="w-4 h-4" />
+          Additional Notes
+        </h4>
+        <Textarea
+          label="Notes"
+          {...register('notes')}
+          error={errors.notes?.message}
+          placeholder="Add any additional notes about the student here..."
+        />
       </div>
-    </form>
+    </>
   );
 };
