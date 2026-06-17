@@ -260,6 +260,10 @@
 **Learning:** Returning a newly created array from a `.filter(t => true)` or manual loop when no actual filtering is needed (e.g. `filter === 'all'`) needlessly breaks referential equality in React `useMemo` hooks, causing child components to re-render.
 **Action:** Always implement an early return (e.g., `if (filter === 'all') return items;`) to preserve referential equality and avoid unnecessary O(N) traversals. Use the standard declarative `.filter()` method for actual filtering rather than an imperative `for` loop unless proven strictly necessary.
 
+## 2026-06-13 - O(N) Loop optimizations in Virtualizers
+**Learning:** Virtualizers mapping render functions often access state in O(N) patterns inside the loop which compounds poorly since Zustand map functions aren't purely O(1) free and re-evaluate global slices.
+**Action:** Next time when modifying map iterators, hoist dictionary maps or derived data structures using `useMemo` outside of the render loops.
+
 ## 2026-06-14 - Integration Testing Confirmation Modals
 **Learning:** For components relying on `AnimatePresence` and Modal structures (like `ConfirmationModal`), interactions can be tested directly using standard React Testing Library commands (`screen.getByRole`) to ensure click handlers like `onConfirm` and `onClose` are properly bound.
 **Action:** When creating tests for generic UI wrappers, ensure the test explicitly asserts the existence of the expected text/content, simulates user interactions, and verifies that the provided callbacks are triggered.

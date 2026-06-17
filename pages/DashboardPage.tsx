@@ -59,6 +59,17 @@ export const DashboardPage: React.FC = () => {
     fetchBackup();
   }, []); // Run only once on mount
 
+  const overdueStudentMap = useMemo(() => {
+    const map = new Map();
+    for (let i = 0; i < overduePayments.length; i++) {
+      const studentId = overduePayments[i].studentId;
+      if (!map.has(studentId)) {
+        map.set(studentId, getStudentById(studentId));
+      }
+    }
+    return map;
+  }, [overduePayments, students]);
+
   const activityParentRef = React.useRef<HTMLDivElement>(null);
   const rowVirtualizerActivity = useVirtualizer({
     count: activityLog.length,
@@ -330,7 +341,7 @@ export const DashboardPage: React.FC = () => {
                 <div style={{ height: `${rowVirtualizerOverdue.getTotalSize()}px`, width: '100%', position: 'relative' }}>
                   {rowVirtualizerOverdue.getVirtualItems().map(virtualRow => {
                     const t = overduePayments[virtualRow.index];
-                    const student = getStudentById(t.studentId);
+                    const student = overdueStudentMap.get(t.studentId);
                     return (
                       <div 
                         key={t.id}
