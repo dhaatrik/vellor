@@ -44,62 +44,82 @@ interface TransactionFormProps {
 /**
  * A form for logging a new lesson/payment or editing an existing transaction.
  */
+
+/**
+ * Calculates the default duration and fee for a given student based on their tuition settings.
+ * @param student The student object containing tuition details.
+ * @param overrideDuration Optional duration to use for calculating hourly fees instead of the typical duration.
+ * @returns An object containing the calculated duration and fee.
+ */
+function calculateTuitionDefaults(student: Student, overrideDuration?: number): { duration: number; fee: number } {
+    let duration = overrideDuration !== undefined ? overrideDuration : student.tuition.typicalLessonDuration;
+    let fee = 0;
+
+    if (student.tuition.rateType === 'hourly') {
+        fee = student.tuition.defaultRate * (duration / 60);
+    } else if (student.tuition.rateType === 'per_lesson' || student.tuition.rateType === 'monthly') {
+        fee = student.tuition.defaultRate;
+        if (student.tuition.rateType === 'monthly') duration = 1;
+    }
+
+    return { duration, fee };
+}
+
+/**
+ * Resolves the default form values based on the initial transaction, default student, or available students.
+ */
+function resolveDefaultFormValues(
+    transaction: Transaction | undefined,
+    defaultStudentId: string | undefined,
+    students: Student[],
+    getStudentById: (id: string) => Student | undefined
+): DefaultValues<TransactionFormInput> {
+    let defaultFormValues: DefaultValues<TransactionFormInput> = {
+        studentId: defaultStudentId || (students.length > 0 ? students[0].id : ''),
+        date: getLocalYYYYMMDD(),
+        lessonDuration: 60,
+        lessonFee: 0,
+        amountPaid: 0,
+        paymentMethod: '',
+        notes: '',
+        grade: '',
+        progressRemark: '',
+        attendance: AttendanceStatus.Present,
+    };
+
+    if (transaction) {
+        defaultFormValues = {
+            studentId: transaction.studentId,
+            date: transaction.date.split('T')[0],
+            lessonDuration: transaction.lessonDuration,
+            lessonFee: transaction.lessonFee,
+            amountPaid: transaction.amountPaid,
+            paymentMethod: transaction.paymentMethod || '',
+            notes: transaction.notes || '',
+            grade: transaction.grade || '',
+            progressRemark: transaction.progressRemark || '',
+            attendance: transaction.attendance || AttendanceStatus.Present,
+        };
+    } else {
+        const studentIdToUse = defaultStudentId || (students.length > 0 ? students[0].id : null);
+        if (studentIdToUse) {
+            const student = getStudentById(studentIdToUse);
+            if (student) {
+                const { duration, fee } = calculateTuitionDefaults(student);
+                defaultFormValues.lessonDuration = duration;
+                defaultFormValues.lessonFee = fee;
+                defaultFormValues.amountPaid = fee;
+            }
+        }
+    }
+
+    return defaultFormValues;
+}
+
 export const TransactionForm: React.FC<TransactionFormProps> = ({ transaction, students, defaultStudentId, onSave, onClose, currencySymbol }) => {
   const getStudentById = useStore(s => s.getStudentById);
   
-  // Resolve default values
-  let defaultFormValues: DefaultValues<TransactionFormInput> = {
-      studentId: defaultStudentId || (students.length > 0 ? students[0].id : ''),
-      date: getLocalYYYYMMDD(),
-      lessonDuration: 60,
-      lessonFee: 0,
-      amountPaid: 0,
-      paymentMethod: '',
-      notes: '',
-      grade: '',
-      progressRemark: '',
-      attendance: AttendanceStatus.Present,
-  };
-
-  if (transaction) {
-      defaultFormValues = {
-          studentId: transaction.studentId,
-          date: transaction.date.split('T')[0],
-          lessonDuration: transaction.lessonDuration,
-          lessonFee: transaction.lessonFee,
-          amountPaid: transaction.amountPaid,
-          paymentMethod: transaction.paymentMethod || '',
-          notes: transaction.notes || '',
-          grade: transaction.grade || '',
-          progressRemark: transaction.progressRemark || '',
-          attendance: transaction.attendance || AttendanceStatus.Present,
-      };
-  } else if (defaultStudentId) {
-      const student = getStudentById(defaultStudentId);
-      if (student) {
-          defaultFormValues.lessonDuration = student.tuition.typicalLessonDuration;
-          if (student.tuition.rateType === 'per_lesson' || student.tuition.rateType === 'monthly') {
-              defaultFormValues.lessonFee = student.tuition.defaultRate;
-              if (student.tuition.rateType === 'monthly') defaultFormValues.lessonDuration = 1;
-          } else {
-              defaultFormValues.lessonFee = student.tuition.defaultRate * (Number(defaultFormValues.lessonDuration) / 60);
-          }
-          defaultFormValues.amountPaid = defaultFormValues.lessonFee;
-      }
-  } else if (!defaultStudentId && students.length > 0) {
-      // Initialize with the first student if no default is provided
-      const student = getStudentById(students[0].id);
-      if (student) {
-          defaultFormValues.lessonDuration = student.tuition.typicalLessonDuration;
-          if (student.tuition.rateType === 'per_lesson' || student.tuition.rateType === 'monthly') {
-              defaultFormValues.lessonFee = student.tuition.defaultRate;
-              if (student.tuition.rateType === 'monthly') defaultFormValues.lessonDuration = 1;
-          } else {
-              defaultFormValues.lessonFee = student.tuition.defaultRate * (Number(defaultFormValues.lessonDuration) / 60);
-          }
-          defaultFormValues.amountPaid = defaultFormValues.lessonFee;
-      }
-  }
+  const defaultFormValues = resolveDefaultFormValues(transaction, defaultStudentId, students, getStudentById);
 
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<TransactionFormInput, unknown, TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
@@ -117,14 +137,7 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({ transaction, s
       if (newStudentId && !transaction) { // Only do this automatically if we're not editing an existing transaction
           const student = getStudentById(newStudentId);
           if (student) {
-              let duration = student.tuition.typicalLessonDuration;
-              let fee = 0;
-              if (student.tuition.rateType === 'hourly') {
-                  fee = student.tuition.defaultRate * (duration / 60);
-              } else if (student.tuition.rateType === 'per_lesson' || student.tuition.rateType === 'monthly') {
-                  fee = student.tuition.defaultRate;
-                  if (student.tuition.rateType === 'monthly') duration = 1;
-              }
+              const { duration, fee } = calculateTuitionDefaults(student);
               setValue('lessonDuration', duration);
               setValue('lessonFee', fee);
               setValue('amountPaid', fee);
@@ -139,11 +152,8 @@ export const TransactionForm: React.FC<TransactionFormProps> = ({ transaction, s
       if (currentStudentId) {
           const student = getStudentById(currentStudentId);
           if (student) {
-              if (student.tuition.rateType === 'hourly') {
-                  setValue('lessonFee', student.tuition.defaultRate * (duration / 60));
-              } else if (student.tuition.rateType === 'per_lesson' || student.tuition.rateType === 'monthly') {
-                  setValue('lessonFee', student.tuition.defaultRate);
-              }
+              const { fee } = calculateTuitionDefaults(student, duration);
+              setValue('lessonFee', fee);
           }
       }
   };

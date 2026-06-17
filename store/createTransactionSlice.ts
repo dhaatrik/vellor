@@ -6,6 +6,45 @@ import { generateId, getLocalYYYYMMDD } from '../helpers';
 import { POINTS_ALLOCATION } from '../constants';
 import { sanitizeString, determinePaymentStatus, calculateTransactionDue } from '../helpers';
 
+
+const sanitizePartialTransactionData = (data: Partial<TransactionFormData>): Partial<TransactionFormData> => {
+  const sanitized = { ...data };
+  if (sanitized.paymentMethod !== undefined) sanitized.paymentMethod = sanitizeString(sanitized.paymentMethod);
+  if (sanitized.notes !== undefined) sanitized.notes = sanitizeString(sanitized.notes);
+  if (sanitized.grade !== undefined) sanitized.grade = sanitizeString(sanitized.grade);
+  if (sanitized.progressRemark !== undefined) sanitized.progressRemark = sanitizeString(sanitized.progressRemark);
+  return sanitized;
+};
+
+const handleTransactionUpdateSideEffects = (
+  get: () => AppState,
+  originalTransaction: Transaction,
+  updatedTransaction: Transaction
+) => {
+  const originalStatus = originalTransaction.status;
+  const newStatus = updatedTransaction.status;
+
+  if (originalStatus !== PaymentStatus.Paid && originalStatus !== PaymentStatus.Overpaid &&
+     (newStatus === PaymentStatus.Paid || newStatus === PaymentStatus.Overpaid)) {
+    get().addPoints(POINTS_ALLOCATION.LOG_PAYMENT_ON_TIME, `Updated transaction to Paid: ${updatedTransaction.id}`);
+  }
+
+  const student = get().getStudentById(updatedTransaction.studentId);
+  if (student && (originalStatus === PaymentStatus.Due || originalStatus === PaymentStatus.PartiallyPaid) &&
+     (newStatus === PaymentStatus.Paid || newStatus === PaymentStatus.Overpaid)) {
+    get().addPoints(POINTS_ALLOCATION.CLEAR_OVERDUE, `Cleared overdue status for transaction ${updatedTransaction.id}`);
+  }
+
+  if (student) {
+    const oldDue = calculateTransactionDue(originalTransaction.status, originalTransaction.lessonFee, originalTransaction.amountPaid);
+    const newDue = calculateTransactionDue(updatedTransaction.status, updatedTransaction.lessonFee, updatedTransaction.amountPaid);
+    const balanceDiff = newDue - oldDue;
+    if (balanceDiff !== 0) {
+      get().updateStudent(student.id, { balance: (student.balance || 0) + balanceDiff });
+    }
+  }
+};
+
 export const createTransactionSlice: StateCreator<AppState, [], [], TransactionSlice> = (set, get) => ({
   transactions: [],
 
@@ -146,69 +185,44 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
   },
 
   updateTransaction: (transactionId, transactionData) => {
-     let updatedTransaction: Transaction | undefined;
+    const originalTransaction = get().getTransactionById(transactionId);
+    if (!originalTransaction) return undefined;
 
-     const sanitizedTransactionData: Partial<TransactionFormData> = { ...transactionData };
-     if (transactionData.paymentMethod !== undefined) {
-        sanitizedTransactionData.paymentMethod = sanitizeString(transactionData.paymentMethod);
-     }
-     if (transactionData.notes !== undefined) {
-        sanitizedTransactionData.notes = sanitizeString(transactionData.notes);
-     }
-     if (transactionData.grade !== undefined) {
-        sanitizedTransactionData.grade = sanitizeString(transactionData.grade);
-     }
-     if (transactionData.progressRemark !== undefined) {
-        sanitizedTransactionData.progressRemark = sanitizeString(transactionData.progressRemark);
-     }
+    const sanitizedTransactionData = sanitizePartialTransactionData(transactionData);
 
-     set(state => {
-       // ⚡ Bolt Performance: Use an early-breaking for loop instead of .map() to avoid full array iterations when updating a single item
-       // Only copy the array if a match is actually found to save allocation overhead
-       for (let i = 0, len = state.transactions.length; i < len; i++) {
-        const t = state.transactions[i];
-        if (t.id === transactionId) {
-            const newTransactions = [...state.transactions];
-            const originalStatus = t.status;
-            const potentiallyUpdated = { ...t, ...sanitizedTransactionData };
-            let newStatus = t.status;
-            if (sanitizedTransactionData.amountPaid !== undefined || sanitizedTransactionData.lessonFee !== undefined) {
-                const fee = sanitizedTransactionData.lessonFee !== undefined ? sanitizedTransactionData.lessonFee : t.lessonFee;
-                const paid = sanitizedTransactionData.amountPaid !== undefined ? sanitizedTransactionData.amountPaid : t.amountPaid;
-                newStatus = determinePaymentStatus(paid, fee);
-            }
-            updatedTransaction = { ...potentiallyUpdated, status: newStatus };
-            
-            if (originalStatus !== PaymentStatus.Paid && originalStatus !== PaymentStatus.Overpaid && (newStatus === PaymentStatus.Paid || newStatus === PaymentStatus.Overpaid)) {
-                 setTimeout(() => get().addPoints(POINTS_ALLOCATION.LOG_PAYMENT_ON_TIME, `Updated transaction to Paid: ${updatedTransaction?.id}`), 0);
-            }
-            const student = get().getStudentById(updatedTransaction.studentId);
-            if(student && (originalStatus === PaymentStatus.Due || originalStatus === PaymentStatus.PartiallyPaid) && (newStatus === PaymentStatus.Paid || newStatus === PaymentStatus.Overpaid)){
-                 setTimeout(() => get().addPoints(POINTS_ALLOCATION.CLEAR_OVERDUE, `Cleared overdue status for transaction ${updatedTransaction?.id}`), 0);
-            }
+    let newStatus = originalTransaction.status;
+    if (sanitizedTransactionData.amountPaid !== undefined || sanitizedTransactionData.lessonFee !== undefined) {
+      const fee = sanitizedTransactionData.lessonFee !== undefined ? sanitizedTransactionData.lessonFee : originalTransaction.lessonFee;
+      const paid = sanitizedTransactionData.amountPaid !== undefined ? sanitizedTransactionData.amountPaid : originalTransaction.amountPaid;
+      newStatus = determinePaymentStatus(paid, fee);
+    }
 
-            if (student) {
-                const oldDue = calculateTransactionDue(t.status, t.lessonFee, t.amountPaid);
-                const newDue = calculateTransactionDue(updatedTransaction.status, updatedTransaction.lessonFee, updatedTransaction.amountPaid);
-                const balanceDiff = newDue - oldDue;
-                if (balanceDiff !== 0) {
-                    setTimeout(() => get().updateStudent(student.id, { balance: (student.balance || 0) + balanceDiff }), 0);
-                }
-            }
+    const updatedTransaction = {
+      ...originalTransaction,
+      ...sanitizedTransactionData,
+      status: newStatus
+    };
 
-            newTransactions[i] = updatedTransaction;
-            return { transactions: newTransactions };
+    set(state => {
+      // ⚡ Bolt Performance: Use an early-breaking for loop instead of .map() to avoid full array iterations when updating a single item
+      for (let i = 0, len = state.transactions.length; i < len; i++) {
+        if (state.transactions[i].id === transactionId) {
+          const newTransactions = [...state.transactions];
+          newTransactions[i] = updatedTransaction;
+          return { transactions: newTransactions };
         }
-       }
-       return state;
-     });
+      }
+      return state;
+    });
 
-     if (updatedTransaction) {
-        get().addToast(`Transaction updated successfully.`, 'success');
-        get().checkAndAwardAchievements();
-     }
-     return updatedTransaction;
+    handleTransactionUpdateSideEffects(get, originalTransaction, updatedTransaction);
+
+    get().addToast('Transaction updated successfully.', 'success');
+    get().checkAndAwardAchievements();
+
+    return updatedTransaction;
   },
+
 
   deleteTransaction: (transactionId) => {
     const transactionToDelete = get().getTransactionById(transactionId);
