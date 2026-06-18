@@ -136,3 +136,7 @@
 ## 2026-06-15 - ARIA Roles for Custom Switches
 **Learning:** In React applications, custom toggles or switches implemented using an `<input type="checkbox">` and visually styled with CSS (e.g. Tailwind) must have `role="switch"` and `aria-checked` attributes to properly convey their functionality to screen reader users as a toggle rather than a simple checkbox.
 **Action:** Always include `role="switch"` and `aria-checked={isChecked}` on checkbox inputs that function visually and logically as a toggle switch.
+
+## 2024-06-17 - Add focus rings to modal close buttons
+**Learning:** Native `<button>` elements in Vellor's marketing pages lacked focus-visible states, making keyboard navigation of modals difficult for screen reader or keyboard-only users. Custom button abstractions usually handle this, but ad-hoc HTML buttons need explicit utility classes.
+**Action:** When adding or modifying raw `<button>` elements that act as generic UI toggles or close buttons, explicitly append `focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary` to ensure keyboard accessibility matches the design system.
