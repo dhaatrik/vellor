@@ -279,3 +279,7 @@
 ## 2026-06-16 - Extract complex inner block logic from React components
 **Learning:** Extracting complex block logic (e.g. within `useMemo`) into standalone pure functions enhances testability, readability, and isolates business logic from React's component rendering lifecycle.
 **Action:** Extract deep or computationally complex logic out of React component bodies and export them as standalone helper functions, accepting dependencies as parameters.
+
+## 2026-06-18 - Hoist fallback date outside of loops in bulk data mapping
+**Learning:** Calling `new Date().toISOString()` inside a loop to generate a fallback date during bulk data parsing (such as processing hundreds or thousands of rows from a CSV) causes redundant object instantiation and parsing overhead for every iteration.
+**Action:** Always hoist variables that rely on the current timestamp (like `const fallbackDate = new Date().toISOString();`) outside the loop, and pass it down as an argument to row parsers or entity mappers to reduce memory allocations and improve performance.

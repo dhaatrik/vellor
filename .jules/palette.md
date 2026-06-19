@@ -133,9 +133,19 @@
 ## 2026-06-14 - ARIA Expanded for Accordions
 **Learning:** Found an accordion-like collapsible section ("Read the full story" / "Show less" toggle) that visually expanded/collapsed content but lacked the necessary ARIA attributes. Screen readers rely on `aria-expanded` and `aria-controls` to understand that a button controls the visibility of another section and to announce its current state.
 **Action:** When implementing accordion-like UI elements or "Read more/less" toggles, always ensure the toggle button includes `aria-expanded` reflecting the current state, and `aria-controls` pointing to the ID of the collapsible content container.
+
 ## 2026-06-15 - ARIA Roles for Custom Switches
 **Learning:** In React applications, custom toggles or switches implemented using an `<input type="checkbox">` and visually styled with CSS (e.g. Tailwind) must have `role="switch"` and `aria-checked` attributes to properly convey their functionality to screen reader users as a toggle rather than a simple checkbox.
 **Action:** Always include `role="switch"` and `aria-checked={isChecked}` on checkbox inputs that function visually and logically as a toggle switch.
-## 2024-05-18 - Missing ID/Label mapping on Transactions Page Filters
+
+## 2026-06-18 - Missing ID/Label mapping on Transactions Page Filters
 **Learning:** Found an accessibility issue where inputs only had `aria-label` without a formal `<label>` or `id`. For inputs visually styled without text labels (like search bars with icons), an explicit `<label className="sr-only">` mapping to an `id` ensures robust screen reader support across all AT (Assistive Technology) compared to relying solely on `aria-label`.
 **Action:** When auditing forms and filter controls, ensure every input has a corresponding `<label>` (visually hidden if necessary) bound via `htmlFor` and `id`, rather than just using `aria-label`.
+
+## 2026-06-18 - Custom Switch Checkbox Role Accessibility
+**Learning:** React standard `<input type="checkbox">` toggles disguised as switches need explicitly defined `role="switch"` and `aria-checked` bindings for screen reader support, as native styling obscures their default checkbox function.
+**Action:** When implementing toggles via checkboxes in Gamification or Settings UI, explicitly bind `role="switch"` and assign `aria-checked` to the backing state value instead of simply binding `checked`.
+
+## 2026-06-19 - Add focus rings to modal close buttons
+**Learning:** Native `<button>` elements in Vellor's marketing pages lacked focus-visible states, making keyboard navigation of modals difficult for screen reader or keyboard-only users. Custom button abstractions usually handle this, but ad-hoc HTML buttons need explicit utility classes.
+**Action:** When adding or modifying raw `<button>` elements that act as generic UI toggles or close buttons, explicitly append `focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary` to ensure keyboard accessibility matches the design system.
