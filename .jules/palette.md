@@ -137,6 +137,7 @@
 **Learning:** In React applications, custom toggles or switches implemented using an `<input type="checkbox">` and visually styled with CSS (e.g. Tailwind) must have `role="switch"` and `aria-checked` attributes to properly convey their functionality to screen reader users as a toggle rather than a simple checkbox.
 **Action:** Always include `role="switch"` and `aria-checked={isChecked}` on checkbox inputs that function visually and logically as a toggle switch.
 
-## 2024-06-19 - Custom Switch Checkbox Role Accessibility
+
+## 2025-02-18 - Custom Switch Checkbox Role Accessibility
 **Learning:** React standard `<input type="checkbox">` toggles disguised as switches need explicitly defined `role="switch"` and `aria-checked` bindings for screen reader support, as native styling obscures their default checkbox function.
 **Action:** When implementing toggles via checkboxes in Gamification or Settings UI, explicitly bind `role="switch"` and assign `aria-checked` to the backing state value instead of simply binding `checked`.
