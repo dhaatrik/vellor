@@ -136,3 +136,6 @@
 ## 2026-06-15 - ARIA Roles for Custom Switches
 **Learning:** In React applications, custom toggles or switches implemented using an `<input type="checkbox">` and visually styled with CSS (e.g. Tailwind) must have `role="switch"` and `aria-checked` attributes to properly convey their functionality to screen reader users as a toggle rather than a simple checkbox.
 **Action:** Always include `role="switch"` and `aria-checked={isChecked}` on checkbox inputs that function visually and logically as a toggle switch.
+## 2024-05-18 - Missing ID/Label mapping on Transactions Page Filters
+**Learning:** Found an accessibility issue where inputs only had `aria-label` without a formal `<label>` or `id`. For inputs visually styled without text labels (like search bars with icons), an explicit `<label className="sr-only">` mapping to an `id` ensures robust screen reader support across all AT (Assistive Technology) compared to relying solely on `aria-label`.
+**Action:** When auditing forms and filter controls, ensure every input has a corresponding `<label>` (visually hidden if necessary) bound via `htmlFor` and `id`, rather than just using `aria-label`.
