@@ -101,7 +101,7 @@ const parseNumeric = (val: string): number => {
 /**
  * Maps a single CSV row to student and related entities based on provided mapping.
  */
-export const mapCSVRowToEntities = (row: Record<string, string>, mapping: ImportMapping): ImportedEntities => {
+export const mapCSVRowToEntities = (row: Record<string, string>, mapping: ImportMapping, fallbackDate?: string): ImportedEntities => {
     const firstName = row[mapping.firstName] || '';
     const lastName = mapping.lastName ? row[mapping.lastName] || '' : '';
     
@@ -137,7 +137,7 @@ export const mapCSVRowToEntities = (row: Record<string, string>, mapping: Import
         if (amount !== 0) {
             entities.payment = {
                 amount,
-                date: mapping.paymentDate ? row[mapping.paymentDate] || new Date().toISOString() : new Date().toISOString()
+                date: mapping.paymentDate ? row[mapping.paymentDate] || (fallbackDate || new Date().toISOString()) : (fallbackDate || new Date().toISOString())
             };
         }
     }
@@ -170,13 +170,14 @@ export const bulkMapCSVRows = (rows: Record<string, string>[], mapping: ImportMa
         entities: []
     };
 
+    const fallbackDate = new Date().toISOString(); // ⚡ Bolt Performance: Hoist fallback date outside the mapping loop to avoid massive object allocation overhead during bulk imports
     for (let index = 0, len = rows.length; index < len; index++) {
         const row = rows[index];
         try {
             if (!row[mapping.firstName]) {
                 throw new Error('Missing first name');
             }
-            const entities = mapCSVRowToEntities(row, mapping);
+            const entities = mapCSVRowToEntities(row, mapping, fallbackDate);
             result.entities.push(entities);
             result.successCount++;
         } catch (err) {
