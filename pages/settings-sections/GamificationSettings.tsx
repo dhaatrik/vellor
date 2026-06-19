@@ -23,6 +23,8 @@ const CustomAchievementSettings: React.FC<{
       <label className="flex items-center gap-2 mb-2 cursor-pointer">
         <input
           type="checkbox"
+          role="switch"
+          aria-checked={formData.customAchievementEarned || false}
           name="customAchievementEarned"
           checked={formData.customAchievementEarned || false}
           onChange={(e) => setFormData(prev => ({...prev, customAchievementEarned: e.target.checked}))}
