@@ -255,7 +255,9 @@ export const TransactionsPage: React.FC = () => {
       <div className="flex flex-col md:flex-row gap-4 mb-8">
         <div className="flex-1 relative">
            <Icon iconName="search" className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+           <label htmlFor="transaction-search" className="sr-only">Search by student name</label>
            <input 
+              id="transaction-search"
               type="text" 
               aria-label="Search by student name"
               title="Search by student name"
@@ -280,7 +282,9 @@ export const TransactionsPage: React.FC = () => {
            )}
         </div>
         <div className="flex items-center gap-2">
+           <label htmlFor="start-date" className="sr-only">Start date</label>
            <input 
+              id="start-date"
               type="date"
               aria-label="Start date"
               title="Start date"
@@ -289,7 +293,9 @@ export const TransactionsPage: React.FC = () => {
               className="w-full px-4 py-2 border border-gray-200 dark:border-white/10 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent sm:text-sm bg-white dark:bg-primary-light transition-all duration-200 appearance-none"
            />
            <span className="text-gray-500 font-medium">to</span>
+           <label htmlFor="end-date" className="sr-only">End date</label>
            <input 
+              id="end-date"
               type="date"
               aria-label="End date"
               title="End date"
