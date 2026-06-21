@@ -3,7 +3,7 @@ import { useStore } from '../store';
 import { AppSettings, PhoneNumber } from '../types';
 import { Button, Input, Card, PhoneInput, Modal, Icon, Select } from '../components/ui';
 import { formatPhoneNumber } from '../helpers';
-import { FORMATTED_CURRENCY_OPTIONS, COUNTRIES, COUNTRY_CODE_MAP } from '../constants';
+import { FORMATTED_CURRENCY_OPTIONS, COUNTRY_CODE_MAP, COUNTRY_OPTIONS } from '../constants';
 import { motion } from 'framer-motion';
 
 /**
@@ -76,8 +76,6 @@ export const ProfilePage: React.FC = () => {
   
 
 
-  const countryOptions = COUNTRIES.map(c => ({ value: c.name, label: c.name }));
-
   return (
     <motion.div 
       className="space-y-6 max-w-3xl mx-auto"
@@ -102,7 +100,7 @@ export const ProfilePage: React.FC = () => {
               name="country"
               value={formData.country || 'United States'}
               onChange={handleCountryChange}
-              options={countryOptions}
+              options={COUNTRY_OPTIONS}
             />
             <PhoneInput
               label="Phone Number"
