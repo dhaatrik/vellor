@@ -283,3 +283,7 @@
 ## 2026-06-18 - Hoist fallback date outside of loops in bulk data mapping
 **Learning:** Calling `new Date().toISOString()` inside a loop to generate a fallback date during bulk data parsing (such as processing hundreds or thousands of rows from a CSV) causes redundant object instantiation and parsing overhead for every iteration.
 **Action:** Always hoist variables that rely on the current timestamp (like `const fallbackDate = new Date().toISOString();`) outside the loop, and pass it down as an argument to row parsers or entity mappers to reduce memory allocations and improve performance.
+
+## 2026-06-21 - Verify missing exports
+**Learning:** Extracting an inline array mapping to an exported constant in another file via code modifications requires modifying that other file. Not exporting the new constant correctly will pass type-checking if not run correctly or result in a broken build and runtime.
+**Action:** When extracting a constant to another file, double check the export statement in that file using `cat` or `grep` to ensure it is correctly defined before running build checks.

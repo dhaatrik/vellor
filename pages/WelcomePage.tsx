@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
 import { AppSettings, PhoneNumber } from '../types';
-import { FORMATTED_CURRENCY_OPTIONS, COUNTRIES, COUNTRY_CODE_MAP } from '../constants';
+import { FORMATTED_CURRENCY_OPTIONS, COUNTRY_CODE_MAP, COUNTRY_OPTIONS } from '../constants';
 import { Button, Input, Select, Card, PhoneInput } from '../components/ui';
 import { motion } from 'framer-motion';
 
@@ -55,8 +55,6 @@ export const WelcomePage: React.FC = () => {
         updateSettings(formData);
         navigate('/dashboard');
     };
-
-    const countryOptions = COUNTRIES.map(c => ({ value: c.name, label: c.name }));
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-primary p-4 relative overflow-hidden">
@@ -115,7 +113,7 @@ export const WelcomePage: React.FC = () => {
                                     name="country"
                                     value={formData.country || 'United States'}
                                     onChange={handleCountryChange}
-                                    options={countryOptions}
+                                    options={COUNTRY_OPTIONS}
                                 />
                              </motion.div>
                         </div>
