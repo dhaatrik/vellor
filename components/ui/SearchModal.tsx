@@ -204,8 +204,21 @@ export const SearchModal: React.FC<{ isOpen: boolean; onClose: () => void }> = (
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Search or enter command..."
-            className="w-full bg-transparent text-white font-mono focus:outline-none placeholder-gray-500 sm:text-sm"
+            className="w-full bg-transparent text-white font-mono focus:outline-none placeholder-gray-500 sm:text-sm pr-10"
           />
+          {query && (
+            <button
+              onClick={() => {
+                setQuery('');
+                inputRef.current?.focus();
+              }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black rounded-full p-1"
+              aria-label="Clear search"
+              title="Clear search"
+            >
+              <Icon iconName="x-mark" className="w-4 h-4" />
+            </button>
+          )}
         </div>
         {query && filteredStudents.length > 0 && (
           <div className="space-y-2 mt-4">
