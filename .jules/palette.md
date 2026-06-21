@@ -149,3 +149,6 @@
 ## 2026-06-19 - Add focus rings to modal close buttons
 **Learning:** Native `<button>` elements in Vellor's marketing pages lacked focus-visible states, making keyboard navigation of modals difficult for screen reader or keyboard-only users. Custom button abstractions usually handle this, but ad-hoc HTML buttons need explicit utility classes.
 **Action:** When adding or modifying raw `<button>` elements that act as generic UI toggles or close buttons, explicitly append `focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 dark:focus-visible:ring-offset-primary` to ensure keyboard accessibility matches the design system.
+## 2024-06-20 - Ensure Inputs Have Padding for Floating Icons
+**Learning:** When adding floating elements inside input containers (like a clear search button inside the Command Palette), the underlying `<input>` must have sufficient padding (e.g. `pr-10`) so user text doesn't flow underneath the icon.
+**Action:** Always add `pr-10` or similar padding when adding absolutely positioned icons inside input wrappers.
