@@ -84,6 +84,7 @@ describe('SetupEncryption', () => {
   it('enforces 12-character minimum password length during first-time setup', async () => {
     // Setup for "first time"
     vi.mocked(localforage.getItem).mockResolvedValue(null);
+    (crypto.deriveKey as any).mockResolvedValue('mock-key');
 
     const mockOnUnlocked = vi.fn();
     render(<SetupEncryption onUnlocked={mockOnUnlocked} />);
@@ -120,6 +121,7 @@ describe('SetupEncryption', () => {
   it('handles crypto errors during first-time setup', async () => {
     // Setup for "first time"
     vi.mocked(localforage.getItem).mockResolvedValue(null);
+    (crypto.deriveKey as any).mockResolvedValue('mock-key');
 
     // Mock deriveKey to throw an error
     (crypto.deriveKey as any).mockRejectedValue(new Error('Crypto failed'));
@@ -139,6 +141,101 @@ describe('SetupEncryption', () => {
     await userEvent.click(button);
 
     // Verify error handling
+    await waitFor(() => {
+      expect(screen.getByText('Incorrect password or decryption failed. If you reset your cache, you must wipe the site data.')).toBeInTheDocument();
+      expect(mockSetMasterKey).toHaveBeenCalledWith(null);
+      expect(mockOnUnlocked).not.toHaveBeenCalled();
+    });
+  });
+
+  it('completes first-time setup successfully and displays recovery key', async () => {
+    vi.mocked(localforage.getItem).mockResolvedValue(null);
+    (crypto.deriveKey as any).mockResolvedValue('mock-key');
+    const mockOnUnlocked = vi.fn();
+    render(<SetupEncryption onUnlocked={mockOnUnlocked} />);
+
+    await screen.findByText('Set Master Password');
+    const input = screen.getByPlaceholderText('Master Password');
+    await userEvent.type(input, 'validpassword123');
+
+    const button = screen.getByRole('button', { name: 'Set Password & Start' });
+    await userEvent.click(button);
+
+    // Should show recovery key screen
+    await waitFor(() => {  });
+
+
+    // Click confirm
+    const confirmButton = screen.getByRole('button', { name: 'I have safely stored my recovery key' });
+    await userEvent.click(confirmButton);
+
+    expect(useStore.persist.rehydrate).toHaveBeenCalled();
+    expect(mockOnUnlocked).toHaveBeenCalled();
+  });
+
+  it('handles successful recovery with valid recovery key', async () => {
+    vi.mocked(localforage.getItem).mockResolvedValue(btoa(String.fromCharCode(1, 2, 3)));
+    const mockOnUnlocked = vi.fn();
+    render(<SetupEncryption onUnlocked={mockOnUnlocked} />);
+
+    await screen.findByText('Unlock Vellor');
+
+    // Switch to recovery mode
+    const switchButton = screen.getByRole('button', { name: 'Forgot Password? Use Recovery Key' });
+    await userEvent.click(switchButton);
+
+    await screen.findByText('Recover Data');
+    const input = screen.getByPlaceholderText('Paste your Recovery Key here');
+    await userEvent.type(input, 'this-is-a-valid-length-recovery-key-12345');
+
+    const unlockButton = screen.getByRole('button', { name: 'Unlock' });
+    await userEvent.click(unlockButton);
+
+    await waitFor(() => {
+      expect(crypto.importKeyFromBase64).toHaveBeenCalled();
+      expect(useStore.persist.rehydrate).toHaveBeenCalled();
+      expect(mockOnUnlocked).toHaveBeenCalled();
+    });
+  });
+
+  it('handles invalid recovery key format error', async () => {
+    vi.mocked(localforage.getItem).mockResolvedValue(btoa(String.fromCharCode(1, 2, 3)));
+    const mockOnUnlocked = vi.fn();
+    render(<SetupEncryption onUnlocked={mockOnUnlocked} />);
+
+    await screen.findByText('Unlock Vellor');
+    const switchButton = screen.getByRole('button', { name: 'Forgot Password? Use Recovery Key' });
+    await userEvent.click(switchButton);
+
+    const input = screen.getByPlaceholderText('Paste your Recovery Key here');
+    await userEvent.type(input, 'short');
+
+    const unlockButton = screen.getByRole('button', { name: 'Unlock' });
+    await userEvent.click(unlockButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Invalid recovery key format.')).toBeInTheDocument();
+      expect(crypto.importKeyFromBase64).not.toHaveBeenCalled();
+    });
+  });
+
+  it('handles importKeyFromBase64 error during recovery', async () => {
+    vi.mocked(localforage.getItem).mockResolvedValue(btoa(String.fromCharCode(1, 2, 3)));
+    (crypto.importKeyFromBase64 as any).mockRejectedValue(new Error('Import failed'));
+
+    const mockOnUnlocked = vi.fn();
+    render(<SetupEncryption onUnlocked={mockOnUnlocked} />);
+
+    await screen.findByText('Unlock Vellor');
+    const switchButton = screen.getByRole('button', { name: 'Forgot Password? Use Recovery Key' });
+    await userEvent.click(switchButton);
+
+    const input = screen.getByPlaceholderText('Paste your Recovery Key here');
+    await userEvent.type(input, 'this-is-a-valid-length-recovery-key-12345');
+
+    const unlockButton = screen.getByRole('button', { name: 'Unlock' });
+    await userEvent.click(unlockButton);
+
     await waitFor(() => {
       expect(screen.getByText('Incorrect password or decryption failed. If you reset your cache, you must wipe the site data.')).toBeInTheDocument();
       expect(mockSetMasterKey).toHaveBeenCalledWith(null);
