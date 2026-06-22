@@ -97,35 +97,24 @@ describe('StudentHistoryTab', () => {
     expect(screen.queryByText('Formatted 2023-10-28T10:00:00.000Z')).not.toBeInTheDocument(); // Due
   });
 
-  it('filters transactions when selecting "Due"', () => {
+  it('filters transactions when selecting "Unpaid"', () => {
     render(<StudentHistoryTab {...defaultProps} />);
 
     const select = screen.getByLabelText('Filter transactions');
-    fireEvent.change(select, { target: { value: 'due' } });
-
-    expect(screen.queryByText('Formatted 2023-10-26T10:00:00.000Z')).not.toBeInTheDocument(); // Paid
-    expect(screen.queryByText('Formatted 2023-10-27T10:00:00.000Z')).not.toBeInTheDocument(); // Partially Paid
-    expect(screen.getByText('Formatted 2023-10-28T10:00:00.000Z')).toBeInTheDocument(); // Due
-  });
-
-  it('filters transactions when selecting "Partially Paid"', () => {
-    render(<StudentHistoryTab {...defaultProps} />);
-
-    const select = screen.getByLabelText('Filter transactions');
-    fireEvent.change(select, { target: { value: 'partially-paid' } });
+    fireEvent.change(select, { target: { value: 'unpaid' } });
 
     expect(screen.queryByText('Formatted 2023-10-26T10:00:00.000Z')).not.toBeInTheDocument(); // Paid
     expect(screen.getByText('Formatted 2023-10-27T10:00:00.000Z')).toBeInTheDocument(); // Partially Paid
-    expect(screen.queryByText('Formatted 2023-10-28T10:00:00.000Z')).not.toBeInTheDocument(); // Due
+    expect(screen.getByText('Formatted 2023-10-28T10:00:00.000Z')).toBeInTheDocument(); // Due
   });
 
   it('renders correct empty state when filter yields no results', () => {
     // Only pass Paid transactions
     render(<StudentHistoryTab {...defaultProps} studentTransactions={[mockTransactions[0]]} />);
 
-    // Switch to "Due"
+    // Switch to "Unpaid"
     const select = screen.getByLabelText('Filter transactions');
-    fireEvent.change(select, { target: { value: 'due' } });
+    fireEvent.change(select, { target: { value: 'unpaid' } });
 
     expect(screen.getByText('No transactions found for this filter.')).toBeInTheDocument();
     // The "Log their first lesson" button shouldn't show if it's just a filter empty state

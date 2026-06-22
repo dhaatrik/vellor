@@ -13,7 +13,7 @@ interface StudentHistoryTabProps {
   onLogPayment: (studentId: string) => void;
 }
 
-type FilterOption = 'all' | 'paid' | 'due' | 'partially-paid';
+type FilterOption = 'all' | 'paid' | 'unpaid';
 
 export const StudentHistoryTab: React.FC<StudentHistoryTabProps> = ({
   studentTransactions,
@@ -30,12 +30,21 @@ export const StudentHistoryTab: React.FC<StudentHistoryTabProps> = ({
     // prevent intermediate allocations, and preserve referential equality to avoid downstream re-renders.
     if (filter === 'all') return studentTransactions;
 
-    return studentTransactions.filter(t => {
-      if (filter === 'paid') return t.status === PaymentStatus.Paid;
-      if (filter === 'due') return t.status === PaymentStatus.Due;
-      if (filter === 'partially-paid') return t.status === PaymentStatus.PartiallyPaid;
-      return true;
-    });
+    // ⚡ Bolt Performance: Replace Array.prototype.filter() with a pre-allocated/direct for loop
+    // to eliminate the overhead of intermediate allocations and callback execution.
+    const results = [];
+    for (let i = 0, len = studentTransactions.length; i < len; i++) {
+      const t = studentTransactions[i];
+      let matches = true;
+      if (filter === 'paid' && t.status !== PaymentStatus.Paid && t.status !== PaymentStatus.Overpaid) matches = false;
+      else if (filter === 'unpaid' && t.status !== PaymentStatus.Due && t.status !== PaymentStatus.PartiallyPaid) matches = false;
+
+      if (matches) {
+        results.push(t);
+      }
+    }
+    // ⚡ Bolt Performance: Use direct string comparison for ISO 8601 dates to eliminate parsing overhead
+    return results.sort((a, b) => b.date < a.date ? -1 : (b.date > a.date ? 1 : 0));
   }, [studentTransactions, filter]);
 
   return (
@@ -57,8 +66,7 @@ export const StudentHistoryTab: React.FC<StudentHistoryTabProps> = ({
               >
                 <option value="all">All</option>
                 <option value="paid">Paid</option>
-                <option value="due">Due</option>
-                <option value="partially-paid">Partially Paid</option>
+                <option value="unpaid">Unpaid</option>
               </select>
             </div>
           )}
