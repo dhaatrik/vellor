@@ -119,11 +119,18 @@ describe('pdf.ts utilities', () => {
     });
 
     it('should ignore logo injection failure in progress report', () => {
-      // Mock addImage to throw an error
+      // Mock addImage to throw an error when invalid base64 is provided
       mockJsPDFInstance.addImage.mockImplementationOnce(() => {
-        throw new Error('Logo injection failed');
+        throw new Error('Logo injection failed due to invalid image data');
       });
-      generateProgressReportPDF(mockStudent, [mockTransaction], mockSettings, 'Notes');
+      const settingsWithInvalidLogo = { ...mockSettings, invoiceLogoBase64: 'invalid-base64-data' };
+
+      // Verify it doesn't throw and continues generating
+      expect(() => {
+        generateProgressReportPDF(mockStudent, [mockTransaction], settingsWithInvalidLogo, 'Notes');
+      }).not.toThrow();
+
+      expect(mockJsPDFInstance.addImage).toHaveBeenCalledWith('invalid-base64-data', 'JPEG', 14, 10, 30, 30, undefined, 'FAST');
       expect(mockJsPDFInstance.save).toHaveBeenCalled();
     });
 
@@ -244,12 +251,19 @@ describe('pdf.ts utilities', () => {
     });
 
     it('should ignore logo injection failure in bulk invoice', () => {
-      // Mock addImage to throw an error
+      // Mock addImage to throw an error when invalid base64 is provided
       mockJsPDFInstance.addImage.mockImplementationOnce(() => {
-        throw new Error('Logo injection failed');
+        throw new Error('Logo injection failed due to invalid image data');
       });
       const unpaidTransaction = { ...mockTransaction, amountPaid: 0, status: PaymentStatus.Due };
-      generateBulkInvoicePDF([mockStudent], [unpaidTransaction], mockSettings);
+      const settingsWithInvalidLogo = { ...mockSettings, invoiceLogoBase64: 'invalid-base64-data' };
+
+      // Verify it doesn't throw and continues generating
+      expect(() => {
+        generateBulkInvoicePDF([mockStudent], [unpaidTransaction], settingsWithInvalidLogo);
+      }).not.toThrow();
+
+      expect(mockJsPDFInstance.addImage).toHaveBeenCalledWith('invalid-base64-data', 'JPEG', 14, 10, 30, 30, undefined, 'FAST');
       expect(mockJsPDFInstance.save).toHaveBeenCalled();
     });
 
