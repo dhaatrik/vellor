@@ -113,8 +113,8 @@ export const TransactionsPage: React.FC = () => {
          const message = `Hello ${student.firstName}, your invoice for ${settings.currencySymbol}${transaction.lessonFee} is ready.`;
          window.open(generateWhatsAppLink(phoneToUse, message), '_blank');
       }
-    } catch {
-      // user likely cancelled sharing
+    } catch (error) {
+      addToast('Failed to generate WhatsApp link.', 'error');
     }
   };
 
