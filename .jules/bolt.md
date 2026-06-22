@@ -287,3 +287,7 @@
 ## 2026-06-21 - Verify missing exports
 **Learning:** Extracting an inline array mapping to an exported constant in another file via code modifications requires modifying that other file. Not exporting the new constant correctly will pass type-checking if not run correctly or result in a broken build and runtime.
 **Action:** When extracting a constant to another file, double check the export statement in that file using `cat` or `grep` to ensure it is correctly defined before running build checks.
+
+## 2026-06-21 - Optimize Date Sorting
+**Learning:** Avoid `Date.parse()` or `new Date()` inside sorting comparator loops as they cause severe garbage collection and parsing overhead. ISO 8601 strings can be safely sorted lexicographically using string comparison.
+**Action:** Use direct string comparisons like `b.date < a.date ? -1 : (b.date > a.date ? 1 : 0)` when sorting ISO 8601 strings.
