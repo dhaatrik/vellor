@@ -84,10 +84,8 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
         let totalDueForStudent = student.balance || 0;
         let wasOverdue = totalDueForStudent > 0;
 
-        if(wasOverdue){
-            if (totalDueForStudent - newTransaction.amountPaid <= 0) {
-                get().addPoints(POINTS_ALLOCATION.CLEAR_OVERDUE, `Cleared overdue payment for ${student.firstName}`);
-            }
+        if (wasOverdue && totalDueForStudent - newTransaction.amountPaid <= 0) {
+            get().addPoints(POINTS_ALLOCATION.CLEAR_OVERDUE, `Cleared overdue payment for ${student.firstName}`);
         }
     }
     
