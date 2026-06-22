@@ -149,6 +149,7 @@ export const storageEngine = {
         );
         return JSON.stringify(obj);
       } catch (error) {
+        console.error('Decryption failed for key:', name, error);
         throw error;
       }
     }
