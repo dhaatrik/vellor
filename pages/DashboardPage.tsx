@@ -42,21 +42,38 @@ export const DashboardPage: React.FC = () => {
   const [lastBackup, setLastBackup] = useState<string | null>(null);
 
   useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+    let isMounted = true;
+
     const fetchBackup = async () => {
       const backup = await localforage.getItem<string>('lastBackupDate');
+
+      if (!isMounted) return;
+
       setLastBackup(backup);
+
       if (backup) {
-      // ⚡ Bolt Performance: Use Date.parse() instead of new Date().getTime()
-      const daysSinceBackup = (Date.now() - Date.parse(backup)) / (1000 * 3600 * 24);
-      if (daysSinceBackup > 7) {
-        // Use a timeout to ensure toasts render after initial mount
-        setTimeout(() => addToast("It's been over a week since your last backup! Go to Settings to export your data.", "info"), 1000);
-      }
+        // ⚡ Bolt Performance: Use Date.parse() instead of new Date().getTime()
+        const daysSinceBackup = (Date.now() - Date.parse(backup)) / (1000 * 3600 * 24);
+        if (daysSinceBackup > 7) {
+          // Use a timeout to ensure toasts render after initial mount
+          timeoutId = setTimeout(() => {
+            if (isMounted) addToast("It's been over a week since your last backup! Go to Settings to export your data.", "info");
+          }, 1000);
+        }
       } else if (students.length > 0) {
-        setTimeout(() => addToast("Remember to regularly export your data from Settings to keep it safe.", "info"), 1000);
+        timeoutId = setTimeout(() => {
+          if (isMounted) addToast("Remember to regularly export your data from Settings to keep it safe.", "info");
+        }, 1000);
       }
     };
+
     fetchBackup();
+
+    return () => {
+      isMounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, []); // Run only once on mount
 
   const overdueStudentMap = useMemo(() => {
