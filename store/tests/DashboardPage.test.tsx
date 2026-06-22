@@ -44,6 +44,7 @@ vi.mock('../../store', () => ({
       totalPaidThisMonth: 500,
       activeStudentsCount: 10,
       overduePayments: [],
+      predictedIncome: 800,
     })),
   },
 }));
