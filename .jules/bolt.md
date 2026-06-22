@@ -287,3 +287,7 @@
 ## 2026-06-21 - Verify missing exports
 **Learning:** Extracting an inline array mapping to an exported constant in another file via code modifications requires modifying that other file. Not exporting the new constant correctly will pass type-checking if not run correctly or result in a broken build and runtime.
 **Action:** When extracting a constant to another file, double check the export statement in that file using `cat` or `grep` to ensure it is correctly defined before running build checks.
+
+## 2026-06-21 - Replace any with imported framer-motion Variants type
+**Learning:** Using 'any' for framer-motion Variants props negatively impacts code health by bypassing TypeScript's static analysis, making components more fragile to refactoring and obscuring runtime expectations.
+**Action:** Always import and use the 'Variants' type from 'framer-motion' when defining prop interfaces that accept animation variants to maintain strict type safety and codebase readability.
