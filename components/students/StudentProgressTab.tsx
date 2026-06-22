@@ -35,15 +35,18 @@ export const StudentProgressTab: React.FC<StudentProgressTabProps> = ({
     setSessionConfidence(50);
   };
 
-  const memoizedLogEntries = useMemo(() => {
-    return progressTransactions.map((t) => {
+  const progressData = useMemo(() => {
+    const len = progressTransactions.length;
+    const result = new Array(len);
+    for (let i = 0; i < len; i++) {
+      const t = progressTransactions[i];
       const timestamp = formatDate(t.date);
       const gradeStr = t.grade ? ` [GRADE: ${t.grade}]` : '';
       const remarkStr = t.progressRemark ? ` // ${t.progressRemark}` : '';
       // Direct string concatenation
       const logLine = `[${timestamp}] ENTRY${gradeStr}${remarkStr}`;
 
-      return (
+      result[i] = (
         <motion.div
           key={t.id + '-prog'}
           initial={{ opacity: 0, y: 10 }}
@@ -54,7 +57,8 @@ export const StudentProgressTab: React.FC<StudentProgressTabProps> = ({
           {logLine}
         </motion.div>
       );
-    });
+    }
+    return result;
   }, [progressTransactions]);
 
   return (
@@ -160,7 +164,7 @@ export const StudentProgressTab: React.FC<StudentProgressTabProps> = ({
 
       {progressTransactions.length > 0 ? (
         <div className="max-h-[400px] overflow-y-auto pr-2 custom-scrollbar font-mono text-xs text-gray-800 dark:text-green-400 bg-transparent">
-          {memoizedLogEntries}
+          {progressData}
         </div>
       ) : (
         <div className="h-[400px] flex flex-col items-center justify-center text-center bg-gray-50 dark:bg-primary/30 rounded-2xl border border-dashed border-gray-200 dark:border-white/10 border-telemetry">
