@@ -22,18 +22,7 @@ export const DashboardPage: React.FC = () => {
   const clearActivityLog = useStore(s => s.clearActivityLog);
   const addToast = useStore(s => s.addToast);
   const getStudentById = useStore(s => s.getStudentById);
-  const { totalUnpaid, totalPaidThisMonth, activeStudentsCount, overduePayments } = useData.derived();
-  
-  const predictedIncome = useMemo(() => {
-    let sum = 0;
-    for (let i = 0; i < students.length; i++) {
-      const student = students[i];
-      let monthlyMultiplier = 4;
-      if (student.tuition.rateType === 'monthly') monthlyMultiplier = 1;
-      sum += (student.tuition.defaultRate * monthlyMultiplier);
-    }
-    return sum;
-  }, [students]);
+  const { totalUnpaid, totalPaidThisMonth, activeStudentsCount, overduePayments, predictedIncome } = useData.derived();
 
   const navigate = useNavigate();
   const [isConfirmingClearAll, setIsConfirmingClearAll] = useState(false);
