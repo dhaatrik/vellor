@@ -1,12 +1,12 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { Student } from '../../../types';
 import { Card, Icon } from '../../ui';
 import { formatPhoneNumber, generateWhatsAppLink } from '../../../helpers';
 
 interface ContactInfoCardProps {
   student: Student;
-  itemVariants: any;
+  itemVariants: Variants;
 }
 
 export const ContactInfoCard: React.FC<ContactInfoCardProps> = ({ student, itemVariants }) => {

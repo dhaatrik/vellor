@@ -85,18 +85,32 @@ describe('store.ts - storageEngine', () => {
       useStore.getState().setMasterKey(mockKey);
       vi.mocked(localforage.getItem).mockResolvedValueOnce('some-encrypted-data');
 
-      vi.mocked(decryptObject).mockRejectedValueOnce(new Error('Decryption Error'));
+      const mockError = new Error('Decryption Error');
+      vi.mocked(decryptObject).mockRejectedValueOnce(mockError);
+
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       await expect(storageEngine.getItem('test-key')).rejects.toThrow('Decryption Error');
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Decryption failed for key:', 'test-key', mockError);
+
+      consoleErrorSpy.mockRestore();
     });
 
     it('re-throws error when decryptObject fails during storageEngine decryption', async () => {
       useStore.getState().setMasterKey(mockKey);
       vi.mocked(localforage.getItem).mockResolvedValueOnce('mocked-raw-data');
 
-      vi.mocked(decryptObject).mockRejectedValueOnce(new Error('Decryption Error Path'));
+      const mockError = new Error('Decryption Error Path');
+      vi.mocked(decryptObject).mockRejectedValueOnce(mockError);
+
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       await expect(storageEngine.getItem('another-test-key')).rejects.toThrow('Decryption Error Path');
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Decryption failed for key:', 'another-test-key', mockError);
+
+      consoleErrorSpy.mockRestore();
     });
   });
 

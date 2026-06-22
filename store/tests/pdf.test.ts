@@ -243,13 +243,15 @@ describe('pdf.ts utilities', () => {
         expect(mockJsPDFInstance.save).toHaveBeenCalled();
     });
 
-    it('should ignore logo injection failure in bulk invoice', () => {
+    it('should ignore logo injection failure in bulk invoice when invalid base64 is provided', () => {
       // Mock addImage to throw an error
       mockJsPDFInstance.addImage.mockImplementationOnce(() => {
-        throw new Error('Logo injection failed');
+        throw new Error('Logo injection failed due to invalid base64');
       });
       const unpaidTransaction = { ...mockTransaction, amountPaid: 0, status: PaymentStatus.Due };
-      generateBulkInvoicePDF([mockStudent], [unpaidTransaction], mockSettings);
+      const invalidLogoSettings = { ...mockSettings, invoiceLogoBase64: 'invalid-base64-string' };
+      generateBulkInvoicePDF([mockStudent], [unpaidTransaction], invalidLogoSettings);
+      expect(mockJsPDFInstance.addImage).toHaveBeenCalledWith('invalid-base64-string', 'JPEG', 14, 10, 30, 30, undefined, 'FAST');
       expect(mockJsPDFInstance.save).toHaveBeenCalled();
     });
 
