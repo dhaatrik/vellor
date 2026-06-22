@@ -167,11 +167,8 @@ export const TransactionsPage: React.FC = () => {
       if (matches && dateRange.end && t.date > dateRange.end) matches = false;
 
       // Apply search filter
-      if (matches && query) {
-        const entry = studentsMap[t.studentId];
-        if (!entry || !entry.searchName.includes(query)) {
-           matches = false;
-        }
+      if (matches && query && (!studentsMap[t.studentId] || !studentsMap[t.studentId].searchName.includes(query))) {
+        matches = false;
       }
 
       if (matches) {
