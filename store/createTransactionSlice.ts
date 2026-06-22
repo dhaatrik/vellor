@@ -198,13 +198,12 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
     };
 
     set(state => {
-      // ⚡ Bolt Performance: Use an early-breaking for loop instead of .map() to avoid full array iterations when updating a single item
-      for (let i = 0, len = state.transactions.length; i < len; i++) {
-        if (state.transactions[i].id === transactionId) {
-          const newTransactions = [...state.transactions];
-          newTransactions[i] = updatedTransaction;
-          return { transactions: newTransactions };
-        }
+      // ⚡ Bolt Performance: Use native .findIndex() and .slice() instead of manual iteration and spread syntax to leverage optimized C++ V8 engine internals for faster updates
+      const index = state.transactions.findIndex(t => t.id === transactionId);
+      if (index !== -1) {
+        const newTransactions = state.transactions.slice();
+        newTransactions[index] = updatedTransaction;
+        return { transactions: newTransactions };
       }
       return state;
     });

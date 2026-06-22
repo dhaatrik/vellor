@@ -150,5 +150,21 @@ describe('csvParser', () => {
             expect(result.errors[0].error).toMatch(/Cannot read properties of null|null has no properties|Cannot read property/);
             expect(result.entities).toHaveLength(2);
         });
+
+        it('should handle non-Error exceptions gracefully', () => {
+            const badRow = {};
+            Object.defineProperty(badRow, 'First Name', {
+                get() { throw 'Custom string error'; }
+            });
+            const rows = [
+                { 'First Name': 'John', 'Email': 'john@example.com' },
+                badRow as Record<string, string>
+            ];
+            const result = bulkMapCSVRows(rows, mapping);
+            expect(result.successCount).toBe(1);
+            expect(result.errorCount).toBe(1);
+            expect(result.errors[0].row).toBe(3);
+            expect(result.errors[0].error).toBe('Custom string error');
+        });
     });
 });

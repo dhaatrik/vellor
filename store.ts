@@ -197,7 +197,20 @@ export const useDerivedData = () => {
   const transactions = useStore(state => state.transactions);
   const students = useStore(state => state.students);
   
-  const activeStudentsCount = useMemo(() => students.length, [students]);
+  const { activeStudentsCount, predictedIncome } = useMemo(() => {
+    let sum = 0;
+    for (let i = 0; i < students.length; i++) {
+      const student = students[i];
+      if (student.tuition.rateType === 'monthly') {
+        sum += student.tuition.defaultRate;
+      } else if (student.tuition.rateType === 'hourly') {
+        sum += (student.tuition.defaultRate * student.tuition.typicalLessonDuration) * 4;
+      } else {
+        sum += student.tuition.defaultRate * 4;
+      }
+    }
+    return { activeStudentsCount: students.length, predictedIncome: sum };
+  }, [students]);
 
   const { totalUnpaid, totalPaidThisMonth, overduePayments } = useMemo(() => {
     // ⚡ Bolt Performance: Hoist loop-invariant Date and extraction
@@ -251,7 +264,8 @@ export const useDerivedData = () => {
     totalUnpaid,
     totalPaidThisMonth,
     activeStudentsCount,
-    overduePayments
+    overduePayments,
+    predictedIncome
   };
 };
 

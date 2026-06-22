@@ -111,4 +111,24 @@ describe('TransactionsPage', () => {
      renderComponent();
      expect(screen.getByText('No Transactions Yet')).toBeInTheDocument();
   });
+
+  it('shows error toast when WhatsApp share fails', async () => {
+    // We are testing the async error path with navigator.share throwing an error.
+    // Ensure navigator exists.
+    Object.defineProperty(global, 'navigator', {
+      value: { share: vi.fn().mockRejectedValue(new Error('Share failed')) },
+      writable: true,
+      configurable: true
+    });
+
+    renderComponent();
+
+    // Trigger share
+    fireEvent.click(screen.getAllByRole('button', { name: 'Share via WhatsApp' })[0]);
+
+    // Wait for the asynchronous logic to execute and catch block to trigger
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    expect(storeState.addToast).toHaveBeenCalledWith('Failed to generate WhatsApp link.', 'error');
+  });
 });
