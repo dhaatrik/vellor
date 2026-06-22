@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { Student } from '../../../types';
 import { Button, Icon } from '../../ui';
 
@@ -10,7 +10,7 @@ interface StudentHeaderProps {
   onEdit: (student: Student) => void;
   onLogPayment: (studentId: string) => void;
   handleSharePortal: () => void;
-  itemVariants: any; // Using any for Framer Motion variants to keep it simple here, or import the exact type if needed
+  itemVariants: Variants;
 }
 
 export const StudentHeader: React.FC<StudentHeaderProps> = ({

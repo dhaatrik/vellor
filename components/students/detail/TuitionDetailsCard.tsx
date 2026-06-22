@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { Student } from '../../../types';
 import { Card, Icon } from '../../ui';
 import { formatCurrency } from '../../../helpers';
@@ -8,7 +8,7 @@ interface TuitionDetailsCardProps {
   student: Student;
   currencySymbol: string;
   renderedSubjects: React.ReactNode;
-  itemVariants: any;
+  itemVariants: Variants;
 }
 
 export const TuitionDetailsCard: React.FC<TuitionDetailsCardProps> = ({ student, currencySymbol, renderedSubjects, itemVariants }) => {
