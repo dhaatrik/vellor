@@ -145,6 +145,42 @@ const MappingStep: React.FC<MappingStepProps> = ({
     );
 };
 
+
+/**
+ * Helper to generate transactions for an imported entity
+ */
+const generateTransactionsForEntity = (studentId: string, entities: any): TransactionFormData[] => {
+    const transactions: TransactionFormData[] = [];
+
+    if (entities.payment) {
+        transactions.push({
+            studentId,
+            amountPaid: entities.payment.amount,
+            lessonFee: entities.payment.amount,
+            lessonDuration: 60, // Default duration if unknown
+            date: entities.payment.date,
+            status: PaymentStatus.Paid,
+            paymentMethod: 'Other',
+            notes: 'Imported via CSV'
+        });
+    }
+
+    if (entities.lesson && !entities.payment) {
+        transactions.push({
+            studentId,
+            amountPaid: 0,
+            lessonFee: entities.student.tuition?.defaultRate || 0,
+            lessonDuration: entities.lesson.duration || 60,
+            date: entities.lesson.date,
+            status: PaymentStatus.Due,
+            paymentMethod: '',
+            notes: 'Imported via CSV'
+        });
+    }
+
+    return transactions;
+};
+
 export const CSVImportWizard: React.FC<CSVImportWizardProps> = ({ isOpen, onClose }) => {
     const [step, setStep] = useState<number>(1);
     const [originalHeaders, setOriginalHeaders] = useState<string[]>([]);
@@ -233,30 +269,7 @@ export const CSVImportWizard: React.FC<CSVImportWizardProps> = ({ isOpen, onClos
             }
 
             if (studentId) {
-                if (entities.payment) {
-                    newTransactionsData.push({
-                        studentId,
-                        amountPaid: entities.payment.amount,
-                        lessonFee: entities.payment.amount,
-                        lessonDuration: 60, // Default duration if unknown
-                        date: entities.payment.date,
-                        status: PaymentStatus.Paid,
-                        paymentMethod: 'Other',
-                        notes: 'Imported via CSV'
-                    });
-                }
-                if (entities.lesson && !entities.payment) {
-                    newTransactionsData.push({
-                        studentId,
-                        amountPaid: 0,
-                        lessonFee: entities.student.tuition?.defaultRate || 0,
-                        lessonDuration: entities.lesson.duration || 60,
-                        date: entities.lesson.date,
-                        status: PaymentStatus.Due,
-                        paymentMethod: '',
-                        notes: 'Imported via CSV'
-                    });
-                }
+                newTransactionsData.push(...generateTransactionsForEntity(studentId, entities));
             }
         }
 
