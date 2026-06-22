@@ -113,8 +113,8 @@ export const TransactionsPage: React.FC = () => {
          const message = `Hello ${student.firstName}, your invoice for ${settings.currencySymbol}${transaction.lessonFee} is ready.`;
          window.open(generateWhatsAppLink(phoneToUse, message), '_blank');
       }
-    } catch {
-      // user likely cancelled sharing
+    } catch (error) {
+      addToast('Failed to generate WhatsApp link.', 'error');
     }
   };
 
@@ -167,11 +167,8 @@ export const TransactionsPage: React.FC = () => {
       if (matches && dateRange.end && t.date > dateRange.end) matches = false;
 
       // Apply search filter
-      if (matches && query) {
-        const entry = studentsMap[t.studentId];
-        if (!entry || !entry.searchName.includes(query)) {
-           matches = false;
-        }
+      if (matches && query && (!studentsMap[t.studentId] || !studentsMap[t.studentId].searchName.includes(query))) {
+        matches = false;
       }
 
       if (matches) {

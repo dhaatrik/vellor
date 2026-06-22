@@ -372,4 +372,20 @@ describe('deriveKey', () => {
 
     expect(new Uint8Array(exported1)).not.toEqual(new Uint8Array(exported2));
   });
+
+  it('successfully derives a key with a custom iteration count', async () => {
+    const password = 'test-password';
+    const salt = generateSalt();
+    const key = await deriveKey(password, salt, 10);
+    expect(key).toBeDefined();
+    expect(key.type).toBe('secret');
+  });
+
+  it('successfully derives a key with a very long password string', async () => {
+    const password = 'a'.repeat(10000);
+    const salt = generateSalt();
+    const key = await deriveKey(password, salt, 10); // Use low iterations for faster test
+    expect(key).toBeDefined();
+    expect(key.type).toBe('secret');
+  });
 });

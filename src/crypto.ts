@@ -2,7 +2,7 @@ export const generateSalt = (): Uint8Array => {
   return crypto.getRandomValues(new Uint8Array(16));
 };
 
-export const deriveKey = async (password: string, salt: Uint8Array): Promise<CryptoKey> => {
+export const deriveKey = async (password: string, salt: Uint8Array, iterations = 100000): Promise<CryptoKey> => {
   const enc = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
@@ -15,7 +15,7 @@ export const deriveKey = async (password: string, salt: Uint8Array): Promise<Cry
     {
       name: "PBKDF2",
       salt: salt as unknown as BufferSource,
-      iterations: 100000,
+      iterations,
       hash: "SHA-256"
     },
     keyMaterial,
