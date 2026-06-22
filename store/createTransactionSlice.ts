@@ -81,13 +81,9 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
     if(student && (status === PaymentStatus.Paid || status === PaymentStatus.Overpaid)){
         // ⚡ Bolt Performance: Consolidate multiple passes (.filter, .some, .reduce) over the transactions array
         // into a single O(N) for loop to reduce intermediate allocations and iteration overhead.
-        let totalDueForStudent = student.balance || 0;
-        let wasOverdue = totalDueForStudent > 0;
-
-        if(wasOverdue){
-            if (totalDueForStudent - newTransaction.amountPaid <= 0) {
-                get().addPoints(POINTS_ALLOCATION.CLEAR_OVERDUE, `Cleared overdue payment for ${student.firstName}`);
-            }
+        const totalDueForStudent = student.balance || 0;
+        if (totalDueForStudent > 0 && (totalDueForStudent - newTransaction.amountPaid <= 0)) {
+            get().addPoints(POINTS_ALLOCATION.CLEAR_OVERDUE, `Cleared overdue payment for ${student.firstName}`);
         }
     }
     
@@ -155,13 +151,11 @@ export const createTransactionSlice: StateCreator<AppState, [], [], TransactionS
             // Read either from the running total or the student record
             let currentBalance = studentBalances.has(student.id) ? studentBalances.get(student.id)! : (student.balance || 0);
 
-            if (newTransaction.status === PaymentStatus.Paid || newTransaction.status === PaymentStatus.Overpaid) {
-              let wasOverdue = currentBalance > 0;
-              if (wasOverdue) {
-                if (currentBalance - newTransaction.amountPaid <= 0) {
-                  studentsOverdueCleared++;
-                }
-              }
+            const isPaid = newTransaction.status === PaymentStatus.Paid || newTransaction.status === PaymentStatus.Overpaid;
+            const clearsOverdue = currentBalance > 0 && (currentBalance - newTransaction.amountPaid <= 0);
+
+            if (isPaid && clearsOverdue) {
+              studentsOverdueCleared++;
             }
 
             const transactionDue = calculateTransactionDue(newTransaction.status, newTransaction.lessonFee, newTransaction.amountPaid);
