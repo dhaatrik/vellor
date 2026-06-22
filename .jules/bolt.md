@@ -1,0 +1,1 @@
+Do not create a custom `vitest.config.ts` when running Vitest tests or collecting coverage. The existing `vite.config.ts` natively handles the Vitest configuration, and adding a standalone `vitest.config.ts` will override it and cause test discovery to fail (e.g., returning '0 test').
